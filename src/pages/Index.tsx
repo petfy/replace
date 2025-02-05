@@ -1,5 +1,7 @@
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
@@ -14,6 +16,9 @@ const Index = () => {
             <a href="#contact" className="text-gray-600 hover:text-primary transition-colors">
               Contacto
             </a>
+            <Link to="/auth">
+              <Button>Iniciar sesión</Button>
+            </Link>
           </div>
         </div>
       </nav>
