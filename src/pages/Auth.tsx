@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -19,21 +19,40 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              full_name: "",
+              avatar_url: "",
+            },
+          },
         });
-        if (error) throw error;
+        
+        if (signUpError) throw signUpError;
+        
         toast({
           title: "¡Registro exitoso!",
           description: "Por favor verifica tu correo electrónico para continuar.",
         });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
+
+        if (signInError) {
+          if (signInError.message === "Invalid login credentials") {
+            throw new Error("Email o contraseña incorrectos. Si no tienes una cuenta, regístrate primero.");
+          }
+          throw signInError;
+        }
+
+        toast({
+          title: "¡Bienvenido de vuelta!",
+          description: "Has iniciado sesión exitosamente.",
+        });
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -86,6 +105,7 @@ const Auth = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  minLength={6}
                 />
               </div>
             </div>
