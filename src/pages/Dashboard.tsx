@@ -213,12 +213,12 @@ const Dashboard = () => {
                     <Button
                       key={category}
                       variant={selectedCategory === category ? "default" : "outline"}
-                      className="flex flex-col items-center p-4 h-auto"
+                      className="flex items-center justify-start space-x-2 p-4 h-12 w-full"
                       onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
                     >
-                      <Icon className="w-6 h-6 mb-2" />
+                      <Icon className="w-4 h-4" />
                       <span className="text-sm">{categoryInfo?.label}</span>
-                      <span className="text-xs mt-1">({count})</span>
+                      <span className="text-xs ml-auto">({count})</span>
                     </Button>
                   );
                 })}

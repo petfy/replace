@@ -73,6 +73,24 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const [category, setCategory] = useState<typeof categories[number]["value"]>(initialData?.category || "otro");
   const [selectedCategory, setSelectedCategory] = useState(category);
 
+  useEffect(() => {
+    if (initialData) {
+      setFullName(initialData.full_name || "");
+      setIdentification(initialData.identification || "");
+      setEmail(initialData.email || "");
+      setPhone(initialData.phone || "");
+      setCountry(initialData.country || "CL");
+      setRegion(initialData.state || "");
+      setOtherState(initialData.state || "");
+      setCity(initialData.city || "");
+      setZipCode(initialData.zip_code || "");
+      setStreet(initialData.street || "");
+      setIsDefault(initialData.is_default || false);
+      setCategory(initialData.category || "otro");
+      setSelectedCategory(initialData.category || "otro");
+    }
+  }, [initialData]);
+
   const calculateProgress = () => {
     let fields = 0;
     let total = 7; // Required fields: fullName, street, city, country, category, and state/region
@@ -182,13 +200,13 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
                   key={cat.value}
                   type="button"
                   variant={selectedCategory === cat.value ? "default" : "outline"}
-                  className="flex flex-col items-center p-2 h-auto"
+                  className="flex items-center justify-start space-x-2 p-2 h-12"
                   onClick={() => {
                     setSelectedCategory(cat.value);
                     setCategory(cat.value);
                   }}
                 >
-                  <Icon className="w-5 h-5 mb-1" />
+                  <Icon className="w-4 h-4" />
                   <span className="text-xs">{cat.label}</span>
                 </Button>
               );
