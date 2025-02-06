@@ -5,6 +5,10 @@ import { Link } from "react-router-dom";
 export const Hero = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center animate-fadeIn">
+      <div className="text-2xl font-bold text-primary flex items-center gap-2 mb-6">
+        <Map className="w-6 h-6" />
+        Re<span className="text-primary-700">Place</span>
+      </div>
       <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary-700 to-primary-900">
         Tus direcciones de envío,
         <br />

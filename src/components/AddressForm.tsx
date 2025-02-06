@@ -182,6 +182,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
           title: "¡Dirección actualizada!",
           description: "La dirección se ha actualizado correctamente.",
         });
+        // Force page reload after successful update
+        window.location.reload();
       } else {
         const { error } = await supabase
           .from("addresses")
@@ -193,6 +195,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
           description: "La dirección se ha guardado correctamente.",
         });
         resetForm();
+        // Force page reload after successful insert
+        window.location.reload();
       }
 
       onSuccess();
