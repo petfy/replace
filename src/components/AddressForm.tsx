@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -20,7 +21,6 @@ interface AddressFormProps {
   onSuccess: () => void;
   initialData?: {
     id: string;
-    label: string;
     street: string;
     city: string;
     state: string;
@@ -69,10 +69,24 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const [city, setCity] = useState(initialData?.city || "");
   const [zipCode, setZipCode] = useState(initialData?.zip_code || "");
   const [street, setStreet] = useState(initialData?.street || "");
-  const [label, setLabel] = useState(initialData?.label || "");
   const [isDefault, setIsDefault] = useState(initialData?.is_default || false);
   const [category, setCategory] = useState<typeof categories[number]["value"]>(initialData?.category || "otro");
   const [selectedCategory, setSelectedCategory] = useState(category);
+
+  const calculateProgress = () => {
+    let fields = 0;
+    let total = 7; // Required fields: fullName, street, city, country, category, and state/region
+
+    if (fullName) fields++;
+    if (street) fields++;
+    if (city) fields++;
+    if (country) fields++;
+    if (category) fields++;
+    if (country === "CL" ? region : otherState) fields++;
+    if (identification) fields++;
+
+    return Math.round((fields / total) * 100);
+  };
 
   const handleIdentificationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9kK-]/g, '');
@@ -87,17 +101,18 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No se encontró usuario");
 
-      if (identification && !isValidRUT(identification)) {
+      const cleanRUT = identification?.replace(/\./g, '');
+      if (cleanRUT && !isValidRUT(cleanRUT)) {
         toast({
           title: "Error",
           description: "El RUT ingresado no es válido",
           variant: "destructive",
         });
+        setLoading(false);
         return;
       }
 
       const addressData = {
-        label,
         street,
         city,
         state: country === "CL" ? region : otherState,
@@ -108,7 +123,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         category,
         email,
         phone,
-        identification,
+        identification: cleanRUT,
         full_name: fullName,
       };
 
@@ -153,6 +168,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         <CardTitle>
           {initialData ? "Editar dirección" : "Nueva dirección"}
         </CardTitle>
+        <Progress value={calculateProgress()} className="w-full" />
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -264,14 +280,6 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
             value={zipCode}
             onChange={(e) => setZipCode(e.target.value)}
             placeholder="Código Postal (opcional)"
-          />
-
-          <Input
-            type="text"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="Etiqueta (ej: Casa, Trabajo)"
-            required
           />
 
           <div className="flex items-center space-x-2">
