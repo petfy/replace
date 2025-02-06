@@ -65,6 +65,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const [phone, setPhone] = useState(initialData?.phone || "");
   const [country, setCountry] = useState(initialData?.country || "CL");
   const [region, setRegion] = useState(initialData?.state || "");
+  const [otherState, setOtherState] = useState(initialData?.state || "");
   const [city, setCity] = useState(initialData?.city || "");
   const [zipCode, setZipCode] = useState(initialData?.zip_code || "");
   const [street, setStreet] = useState(initialData?.street || "");
@@ -99,7 +100,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         label,
         street,
         city,
-        state: country === "CL" ? region : state,
+        state: country === "CL" ? region : otherState,
         zip_code: zipCode,
         country,
         is_default: isDefault,
@@ -235,8 +236,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
           ) : (
             <Input
               type="text"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
+              value={otherState}
+              onChange={(e) => setOtherState(e.target.value)}
               placeholder="Estado/Provincia"
               required
             />
