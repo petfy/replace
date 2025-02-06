@@ -51,6 +51,7 @@ const countryNames: { [key: string]: string } = {
 
 export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
   const { toast } = useToast();
+  const [loading, setLoading] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
     try {
@@ -104,6 +105,61 @@ export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
       otro: "Otro",
     };
     return labels[category] || category;
+  };
+
+  const handleUseAddress = async (address: Address) => {
+    try {
+      setLoading(address.id);
+      
+      // Fetch field mappings from Supabase
+      const { data: mappings, error } = await supabase
+        .from('field_mappings')
+        .select('*');
+
+      if (error) throw error;
+
+      // Create a message to send to the Chrome extension
+      const message = {
+        type: 'FILL_CHECKOUT_FORM',
+        data: {
+          address,
+          mappings
+        }
+      };
+
+      // Send message to Chrome extension
+      if (window.chrome?.runtime?.sendMessage) {
+        window.chrome.runtime.sendMessage(message, (response) => {
+          if (response?.success) {
+            toast({
+              title: "¡Formulario completado!",
+              description: "Los campos han sido llenados automáticamente",
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "No se pudo completar el formulario automáticamente",
+              variant: "destructive",
+            });
+          }
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Esta función solo está disponible a través de la extensión de Chrome",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('Error using address:', error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
   };
 
   if (addresses.length === 0) {
@@ -186,9 +242,14 @@ export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
               )}
             </div>
             <div className="mt-4">
-              <Button className="w-full" size="lg">
+              <Button 
+                className="w-full" 
+                size="lg"
+                onClick={() => handleUseAddress(address)}
+                disabled={loading === address.id}
+              >
                 <MapPin className="w-5 h-5 mr-2" />
-                USAR ESTE REPLACE
+                {loading === address.id ? "Aplicando..." : "USAR ESTE REPLACE"}
               </Button>
             </div>
           </CardContent>

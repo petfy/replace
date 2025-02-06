@@ -74,6 +74,33 @@ export type Database = {
           },
         ]
       }
+      field_mappings: {
+        Row: {
+          created_at: string
+          id: string
+          platform: Database["public"]["Enums"]["ecommerce_platform"]
+          platform_field_id: string
+          replace_field: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: Database["public"]["Enums"]["ecommerce_platform"]
+          platform_field_id: string
+          replace_field: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: Database["public"]["Enums"]["ecommerce_platform"]
+          platform_field_id?: string
+          replace_field?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -114,6 +141,12 @@ export type Database = {
         | "familiares"
         | "conserje"
         | "otro"
+      ecommerce_platform:
+        | "shopify"
+        | "woocommerce"
+        | "wix"
+        | "tiendanube"
+        | "jumpseller"
     }
     CompositeTypes: {
       [_ in never]: never
