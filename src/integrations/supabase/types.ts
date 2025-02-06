@@ -11,16 +11,19 @@ export type Database = {
     Tables: {
       addresses: {
         Row: {
+          address_line_2: string | null
           category: Database["public"]["Enums"]["address_category"]
           city: string
           country: string
           created_at: string
           email: string | null
+          first_name: string | null
           full_name: string | null
           id: string
           identification: string | null
           is_default: boolean | null
           label: string
+          last_name: string | null
           phone: string | null
           state: string
           street: string
@@ -29,16 +32,19 @@ export type Database = {
           zip_code: string | null
         }
         Insert: {
+          address_line_2?: string | null
           category?: Database["public"]["Enums"]["address_category"]
           city: string
           country: string
           created_at?: string
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
           identification?: string | null
           is_default?: boolean | null
           label: string
+          last_name?: string | null
           phone?: string | null
           state: string
           street: string
@@ -47,16 +53,19 @@ export type Database = {
           zip_code?: string | null
         }
         Update: {
+          address_line_2?: string | null
           category?: Database["public"]["Enums"]["address_category"]
           city?: string
           country?: string
           created_at?: string
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
           identification?: string | null
           is_default?: boolean | null
           label?: string
+          last_name?: string | null
           phone?: string | null
           state?: string
           street?: string
