@@ -15,42 +15,51 @@ export type Database = {
           city: string
           country: string
           created_at: string
+          email: string | null
           id: string
+          identification: string | null
           is_default: boolean | null
           label: string
+          phone: string | null
           state: string
           street: string
           updated_at: string
           user_id: string
-          zip_code: string
+          zip_code: string | null
         }
         Insert: {
           category?: Database["public"]["Enums"]["address_category"]
           city: string
           country: string
           created_at?: string
+          email?: string | null
           id?: string
+          identification?: string | null
           is_default?: boolean | null
           label: string
+          phone?: string | null
           state: string
           street: string
           updated_at?: string
           user_id: string
-          zip_code: string
+          zip_code?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["address_category"]
           city?: string
           country?: string
           created_at?: string
+          email?: string | null
           id?: string
+          identification?: string | null
           is_default?: boolean | null
           label?: string
+          phone?: string | null
           state?: string
           street?: string
           updated_at?: string
           user_id?: string
-          zip_code?: string
+          zip_code?: string | null
         }
         Relationships: [
           {

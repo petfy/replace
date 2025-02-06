@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Briefcase, MapPin, Trash2, Edit, Users, User, Building2 } from "lucide-react";
+import { Home, Briefcase, MapPin, Trash2, Edit, Users, User, Building2, Mail, Phone, FileText } from "lucide-react";
 
 interface Address {
   id: string;
@@ -15,11 +15,25 @@ interface Address {
   country: string;
   is_default: boolean;
   category: string;
+  email?: string;
+  phone?: string;
+  identification?: string;
 }
 
 interface AddressListProps {
   onEdit: (address: Address) => void;
 }
+
+const countries: { [key: string]: { name: string; flag: string } } = {
+  CL: { name: "Chile", flag: "🇨🇱" },
+  AR: { name: "Argentina", flag: "🇦🇷" },
+  PE: { name: "Perú", flag: "🇵🇪" },
+  BR: { name: "Brasil", flag: "🇧🇷" },
+  CO: { name: "Colombia", flag: "🇨🇴" },
+  MX: { name: "México", flag: "🇲🇽" },
+  US: { name: "Estados Unidos", flag: "🇺🇸" },
+  ES: { name: "España", flag: "🇪🇸" },
+};
 
 export const AddressList = ({ onEdit }: AddressListProps) => {
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -156,12 +170,39 @@ export const AddressList = ({ onEdit }: AddressListProps) => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 space-y-2">
               <p>{address.street}</p>
               <p>
                 {address.city}, {address.state} {address.zip_code}
               </p>
-              <p>{address.country}</p>
+              <p>
+                <span className="mr-2">
+                  {countries[address.country]?.flag || "🌍"}
+                </span>
+                {countries[address.country]?.name || address.country}
+              </p>
+              {(address.email || address.phone || address.identification) && (
+                <div className="border-t pt-2 mt-2 space-y-1">
+                  {address.email && (
+                    <p className="flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      {address.email}
+                    </p>
+                  )}
+                  {address.phone && (
+                    <p className="flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      {address.phone}
+                    </p>
+                  )}
+                  {address.identification && (
+                    <p className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      {address.identification}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
