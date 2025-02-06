@@ -1,21 +1,15 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Home, Briefcase, MapPin, User, Users, Building2 } from "lucide-react";
 import { formatRUT, isValidRUT } from "@/lib/format-rut";
-import { chileRegions } from "@/lib/chile-regions";
-import "/node_modules/flag-icons/css/flag-icons.min.css";
+import { CategorySelector, categories } from "./address/CategorySelector";
+import { CountrySelect } from "./address/CountrySelect";
+import { RegionSelect } from "./address/RegionSelect";
+import { FormProgress } from "./address/FormProgress";
 
 interface AddressFormProps {
   onSuccess: () => void;
@@ -34,27 +28,6 @@ interface AddressFormProps {
     full_name?: string;
   };
 }
-
-const categories = [
-  { value: "casa" as const, label: "Casa", icon: Home },
-  { value: "trabajo" as const, label: "Trabajo", icon: Briefcase },
-  { value: "vecino" as const, label: "Vecino", icon: Users },
-  { value: "amigo" as const, label: "Amigo", icon: User },
-  { value: "familiares" as const, label: "Familiares", icon: Users },
-  { value: "conserje" as const, label: "Conserje", icon: Building2 },
-  { value: "otro" as const, label: "Otro", icon: MapPin },
-];
-
-const countries = [
-  { code: "CL", name: "Chile" },
-  { code: "AR", name: "Argentina" },
-  { code: "PE", name: "Perú" },
-  { code: "BR", name: "Brasil" },
-  { code: "CO", name: "Colombia" },
-  { code: "MX", name: "México" },
-  { code: "US", name: "Estados Unidos" },
-  { code: "ES", name: "España" },
-];
 
 export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const { toast } = useToast();
@@ -113,7 +86,6 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
     let fields = 0;
     let filledFields = 0;
 
-    // Required fields
     const requiredFields = {
       fullName,
       street,
@@ -182,7 +154,6 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
           title: "¡Dirección actualizada!",
           description: "La dirección se ha actualizado correctamente.",
         });
-        // Force page reload after successful update
         window.location.reload();
       } else {
         const { error } = await supabase
@@ -195,7 +166,6 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
           description: "La dirección se ha guardado correctamente.",
         });
         resetForm();
-        // Force page reload after successful insert
         window.location.reload();
       }
 
@@ -217,33 +187,17 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         <CardTitle>
           {initialData ? "Editar dirección" : "Nueva dirección"}
         </CardTitle>
-        <div className="flex items-center gap-2">
-          <Progress value={calculateProgress()} className="flex-grow" />
-          <span className="text-sm text-gray-500">{calculateProgress()}%</span>
-        </div>
+        <FormProgress value={calculateProgress()} />
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-4 gap-2">
-            {categories.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <Button
-                  key={cat.value}
-                  type="button"
-                  variant={selectedCategory === cat.value ? "default" : "outline"}
-                  className="flex items-center justify-start space-x-2 p-2 h-12"
-                  onClick={() => {
-                    setSelectedCategory(cat.value);
-                    setCategory(cat.value);
-                  }}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-xs">{cat.label}</span>
-                </Button>
-              );
-            })}
-          </div>
+          <CategorySelector
+            selectedCategory={selectedCategory}
+            onCategorySelect={(value) => {
+              setSelectedCategory(value);
+              setCategory(value);
+            }}
+          />
 
           <Input
             type="text"
@@ -274,33 +228,10 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
             placeholder="Teléfono"
           />
 
-          <Select value={country} onValueChange={setCountry}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecciona un país" />
-            </SelectTrigger>
-            <SelectContent>
-              {countries.map((country) => (
-                <SelectItem key={country.code} value={country.code}>
-                  <span className={`fi fi-${country.code.toLowerCase()} mr-2`}></span>
-                  {country.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <CountrySelect value={country} onValueChange={setCountry} />
 
           {country === "CL" ? (
-            <Select value={region} onValueChange={setRegion}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona una región" />
-              </SelectTrigger>
-              <SelectContent>
-                {chileRegions.map((region) => (
-                  <SelectItem key={region.value} value={region.value}>
-                    {region.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <RegionSelect value={region} onValueChange={setRegion} />
           ) : (
             <Input
               type="text"
