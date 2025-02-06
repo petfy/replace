@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Home, Briefcase, MapPin, User, Users, Building2 } from "lucide-react";
 import { formatRUT, isValidRUT } from "@/lib/format-rut";
+import { chileRegions } from "@/lib/chile-regions";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
 
 interface AddressFormProps {
@@ -58,18 +59,18 @@ const countries = [
 export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [label, setLabel] = useState(initialData?.label || "");
-  const [street, setStreet] = useState(initialData?.street || "");
-  const [city, setCity] = useState(initialData?.city || "");
-  const [state, setState] = useState(initialData?.state || "");
-  const [zipCode, setZipCode] = useState(initialData?.zip_code || "");
-  const [country, setCountry] = useState(initialData?.country || "CL");
-  const [isDefault, setIsDefault] = useState(initialData?.is_default || false);
-  const [category, setCategory] = useState<typeof categories[number]["value"]>(initialData?.category || "otro");
+  const [fullName, setFullName] = useState(initialData?.full_name || "");
+  const [identification, setIdentification] = useState(initialData?.identification || "");
   const [email, setEmail] = useState(initialData?.email || "");
   const [phone, setPhone] = useState(initialData?.phone || "");
-  const [identification, setIdentification] = useState(initialData?.identification || "");
-  const [fullName, setFullName] = useState(initialData?.full_name || "");
+  const [country, setCountry] = useState(initialData?.country || "CL");
+  const [region, setRegion] = useState(initialData?.state || "");
+  const [city, setCity] = useState(initialData?.city || "");
+  const [zipCode, setZipCode] = useState(initialData?.zip_code || "");
+  const [street, setStreet] = useState(initialData?.street || "");
+  const [label, setLabel] = useState(initialData?.label || "");
+  const [isDefault, setIsDefault] = useState(initialData?.is_default || false);
+  const [category, setCategory] = useState<typeof categories[number]["value"]>(initialData?.category || "otro");
   const [selectedCategory, setSelectedCategory] = useState(category);
 
   const handleIdentificationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +99,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         label,
         street,
         city,
-        state,
+        state: country === "CL" ? region : state,
         zip_code: zipCode,
         country,
         is_default: isDefault,
@@ -175,146 +176,102 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
             })}
           </div>
 
-          <div>
-            <label htmlFor="fullName" className="block text-sm font-medium mb-1">
-              Nombre y Apellido
-            </label>
+          <Input
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Nombre y Apellido"
+            required
+          />
+
+          <Input
+            type="text"
+            value={identification}
+            onChange={handleIdentificationChange}
+            placeholder="RUT"
+          />
+
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+          />
+
+          <Input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Teléfono"
+          />
+
+          <Select value={country} onValueChange={setCountry}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona un país" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries.map((country) => (
+                <SelectItem key={country.code} value={country.code}>
+                  <span className={`fi fi-${country.code.toLowerCase()} mr-2`}></span>
+                  {country.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {country === "CL" ? (
+            <Select value={region} onValueChange={setRegion}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona una región" />
+              </SelectTrigger>
+              <SelectContent>
+                {chileRegions.map((region) => (
+                  <SelectItem key={region.value} value={region.value}>
+                    {region.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
             <Input
-              id="fullName"
               type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Juan Pérez"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              placeholder="Estado/Provincia"
               required
             />
-          </div>
+          )}
 
-          <div>
-            <label htmlFor="label" className="block text-sm font-medium mb-1">
-              Etiqueta
-            </label>
-            <Input
-              id="label"
-              type="text"
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="Casa, Trabajo, etc."
-              required
-            />
-          </div>
+          <Input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="Ciudad"
+            required
+          />
 
-          <div>
-            <label htmlFor="street" className="block text-sm font-medium mb-1">
-              Calle y número
-            </label>
-            <Input
-              id="street"
-              type="text"
-              value={street}
-              onChange={(e) => setStreet(e.target.value)}
-              placeholder="Av. Siempreviva 742"
-              required
-            />
-          </div>
+          <Input
+            type="text"
+            value={street}
+            onChange={(e) => setStreet(e.target.value)}
+            placeholder="Calle y número"
+            required
+          />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="city" className="block text-sm font-medium mb-1">
-                Ciudad
-              </label>
-              <Input
-                id="city"
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="state" className="block text-sm font-medium mb-1">
-                Estado/Provincia
-              </label>
-              <Input
-                id="state"
-                type="text"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                required
-              />
-            </div>
-          </div>
+          <Input
+            type="text"
+            value={zipCode}
+            onChange={(e) => setZipCode(e.target.value)}
+            placeholder="Código Postal (opcional)"
+          />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="country" className="block text-sm font-medium mb-1">
-                País
-              </label>
-              <Select value={country} onValueChange={setCountry}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona un país" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country.code} value={country.code}>
-                      <span className={`fi fi-${country.code.toLowerCase()} mr-2`}></span>
-                      {country.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label htmlFor="zipCode" className="block text-sm font-medium mb-1">
-                Código Postal (opcional)
-              </label>
-              <Input
-                id="zipCode"
-                type="text"
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="ejemplo@correo.com"
-              />
-            </div>
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium mb-1">
-                Teléfono
-              </label>
-              <Input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+56 9 1234 5678"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="identification" className="block text-sm font-medium mb-1">
-              RUT o Pasaporte
-            </label>
-            <Input
-              id="identification"
-              type="text"
-              value={identification}
-              onChange={handleIdentificationChange}
-              placeholder="12.345.678-9"
-            />
-          </div>
+          <Input
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="Etiqueta (ej: Casa, Trabajo)"
+            required
+          />
 
           <div className="flex items-center space-x-2">
             <input

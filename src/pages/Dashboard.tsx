@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AddressForm } from "@/components/AddressForm";
 import { AddressList } from "@/components/AddressList";
-import { Plus, LogOut, MapPin } from "lucide-react";
+import { Plus, LogOut, MapPin, Home, Briefcase, User, Users, Building2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Address {
   id: string;
@@ -23,12 +24,31 @@ interface Address {
   full_name?: string;
 }
 
+interface CategoryCount {
+  category: Address["category"];
+  count: number;
+}
+
+const categories = [
+  { value: "casa" as const, label: "Casa", icon: Home },
+  { value: "trabajo" as const, label: "Trabajo", icon: Briefcase },
+  { value: "vecino" as const, label: "Vecino", icon: Users },
+  { value: "amigo" as const, label: "Amigo", icon: User },
+  { value: "familiares" as const, label: "Familiares", icon: Users },
+  { value: "conserje" as const, label: "Conserje", icon: Building2 },
+  { value: "otro" as const, label: "Otro", icon: MapPin },
+];
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [categoryCounts, setCategoryCounts] = useState<CategoryCount[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<Address["category"] | null>(null);
+  const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -50,6 +70,40 @@ const Dashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("addresses")
+          .select("*")
+          .order("is_default", { ascending: false });
+
+        if (error) throw error;
+
+        setAddresses(data || []);
+        
+        // Set default address
+        const defaultAddr = data?.find(addr => addr.is_default);
+        setDefaultAddress(defaultAddr || null);
+
+        // Calculate category counts
+        const counts = categories.map(cat => ({
+          category: cat.value,
+          count: data?.filter(addr => addr.category === cat.value).length || 0
+        }));
+        setCategoryCounts(counts);
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las direcciones",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchAddresses();
+  }, [toast]);
 
   const handleSignOut = async () => {
     try {
@@ -74,6 +128,10 @@ const Dashboard = () => {
     setEditingAddress(address);
     setShowAddForm(true);
   };
+
+  const filteredAddresses = selectedCategory
+    ? addresses.filter(addr => addr.category === selectedCategory)
+    : addresses;
 
   if (!user) return null;
 
@@ -131,7 +189,48 @@ const Dashboard = () => {
               </div>
             </div>
           ) : (
-            <AddressList onEdit={handleEdit} />
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                {categoryCounts.map(({ category, count }) => {
+                  const categoryInfo = categories.find(c => c.value === category);
+                  const Icon = categoryInfo?.icon || MapPin;
+                  return (
+                    <Button
+                      key={category}
+                      variant={selectedCategory === category ? "default" : "outline"}
+                      className="flex flex-col items-center p-4 h-auto"
+                      onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                    >
+                      <Icon className="w-6 h-6 mb-2" />
+                      <span className="text-sm">{categoryInfo?.label}</span>
+                      <span className="text-xs mt-1">({count})</span>
+                    </Button>
+                  );
+                })}
+              </div>
+
+              {defaultAddress && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold mb-4">Dirección predeterminada</h2>
+                  <AddressList
+                    onEdit={handleEdit}
+                    addresses={[defaultAddress]}
+                  />
+                </div>
+              )}
+
+              {selectedCategory && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-4">
+                    Direcciones en categoría: {categories.find(c => c.value === selectedCategory)?.label}
+                  </h2>
+                  <AddressList
+                    onEdit={handleEdit}
+                    addresses={filteredAddresses}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

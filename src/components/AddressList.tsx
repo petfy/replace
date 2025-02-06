@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -15,14 +15,16 @@ interface Address {
   zip_code: string;
   country: string;
   is_default: boolean;
-  category: string;
+  category: "casa" | "trabajo" | "vecino" | "amigo" | "familiares" | "conserje" | "otro";
   email?: string;
   phone?: string;
   identification?: string;
+  full_name?: string;
 }
 
 interface AddressListProps {
   onEdit: (address: Address) => void;
+  addresses: Address[];
 }
 
 const countryToCode: { [key: string]: string } = {
@@ -47,34 +49,8 @@ const countryNames: { [key: string]: string } = {
   ES: "España",
 };
 
-export const AddressList = ({ onEdit }: AddressListProps) => {
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [loading, setLoading] = useState(true);
+export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
   const { toast } = useToast();
-
-  const fetchAddresses = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("addresses")
-        .select("*")
-        .order("is_default", { ascending: false });
-
-      if (error) throw error;
-      setAddresses(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar las direcciones",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAddresses();
-  }, []);
 
   const handleDelete = async (id: string) => {
     try {
@@ -85,7 +61,6 @@ export const AddressList = ({ onEdit }: AddressListProps) => {
 
       if (error) throw error;
 
-      setAddresses(addresses.filter((address) => address.id !== id));
       toast({
         title: "Dirección eliminada",
         description: "La dirección se ha eliminado correctamente",
@@ -130,10 +105,6 @@ export const AddressList = ({ onEdit }: AddressListProps) => {
     };
     return labels[category] || category;
   };
-
-  if (loading) {
-    return <div>Cargando direcciones...</div>;
-  }
 
   if (addresses.length === 0) {
     return (
