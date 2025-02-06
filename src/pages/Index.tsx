@@ -10,7 +10,7 @@ const Index = () => {
       <nav className="py-4 px-6 border-b">
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-2xl font-bold text-primary flex items-center gap-2">
-                <MapPin className="h-6 w-6 text-primary mr-2" />
+                <Map className="h-6 w-6 text-primary mr-2" />
                 <span className="text-2xl font-bold text-primary">RePlace</span>
           </div>
           <div>
@@ -29,7 +29,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <MapPin className="h-6 w-6 text-primary mr-2" />
+                <Map className="h-6 w-6 text-primary mr-2" />
                 <span className="text-2xl font-bold text-primary">RePlace</span>
               </div>
               <p className="text-gray-600">
