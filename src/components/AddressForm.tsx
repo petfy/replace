@@ -91,6 +91,24 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
     }
   }, [initialData]);
 
+  const resetForm = () => {
+    if (!initialData) {
+      setFullName("");
+      setIdentification("");
+      setEmail("");
+      setPhone("");
+      setCountry("CL");
+      setRegion("");
+      setOtherState("");
+      setCity("");
+      setZipCode("");
+      setStreet("");
+      setIsDefault(false);
+      setCategory("otro");
+      setSelectedCategory("otro");
+    }
+  };
+
   const calculateProgress = () => {
     let fields = 0;
     let total = 7; // Required fields: fullName, street, city, country, category, and state/region
@@ -144,7 +162,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         phone,
         identification: cleanRUT,
         full_name: fullName,
-        label: categoryInfo ? categoryInfo.label : category // Add label based on category
+        label: categoryInfo ? categoryInfo.label : category
       };
 
       if (initialData) {
@@ -168,6 +186,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
           title: "¡Dirección guardada!",
           description: "La dirección se ha guardado correctamente.",
         });
+        resetForm();
       }
 
       onSuccess();
