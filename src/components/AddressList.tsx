@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Briefcase, MapPin, Trash2, Edit } from "lucide-react";
+import { Home, Briefcase, MapPin, Trash2, Edit, Users, User, Building2 } from "lucide-react";
 
 interface Address {
   id: string;
@@ -14,6 +14,7 @@ interface Address {
   zip_code: string;
   country: string;
   is_default: boolean;
+  category: string;
 }
 
 interface AddressListProps {
@@ -72,11 +73,36 @@ export const AddressList = ({ onEdit }: AddressListProps) => {
     }
   };
 
-  const getIcon = (label: string) => {
-    const lowerLabel = label.toLowerCase();
-    if (lowerLabel.includes("casa")) return <Home className="w-5 h-5" />;
-    if (lowerLabel.includes("trabajo")) return <Briefcase className="w-5 h-5" />;
-    return <MapPin className="w-5 h-5" />;
+  const getIcon = (category: string) => {
+    switch (category) {
+      case "casa":
+        return <Home className="w-5 h-5" />;
+      case "trabajo":
+        return <Briefcase className="w-5 h-5" />;
+      case "vecino":
+        return <Users className="w-5 h-5" />;
+      case "amigo":
+        return <User className="w-5 h-5" />;
+      case "familiares":
+        return <Users className="w-5 h-5" />;
+      case "conserje":
+        return <Building2 className="w-5 h-5" />;
+      default:
+        return <MapPin className="w-5 h-5" />;
+    }
+  };
+
+  const getCategoryLabel = (category: string) => {
+    const labels: { [key: string]: string } = {
+      casa: "Casa",
+      trabajo: "Trabajo",
+      vecino: "Vecino",
+      amigo: "Amigo",
+      familiares: "Familiares",
+      conserje: "Conserje",
+      otro: "Otro",
+    };
+    return labels[category] || category;
   };
 
   if (loading) {
@@ -101,10 +127,13 @@ export const AddressList = ({ onEdit }: AddressListProps) => {
         <Card key={address.id} className={address.is_default ? "border-primary" : ""}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xl font-semibold flex items-center gap-2">
-              {getIcon(address.label)}
-              {address.label}
+              {getIcon(address.category)}
+              <span>{address.label}</span>
+              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                {getCategoryLabel(address.category)}
+              </span>
               {address.is_default && (
-                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full ml-2">
                   Predeterminada
                 </span>
               )}

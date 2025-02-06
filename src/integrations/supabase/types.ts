@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       addresses: {
         Row: {
+          category: Database["public"]["Enums"]["address_category"]
           city: string
           country: string
           created_at: string
@@ -24,6 +25,7 @@ export type Database = {
           zip_code: string
         }
         Insert: {
+          category?: Database["public"]["Enums"]["address_category"]
           city: string
           country: string
           created_at?: string
@@ -37,6 +39,7 @@ export type Database = {
           zip_code: string
         }
         Update: {
+          category?: Database["public"]["Enums"]["address_category"]
           city?: string
           country?: string
           created_at?: string
@@ -91,7 +94,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      address_category:
+        | "casa"
+        | "trabajo"
+        | "vecino"
+        | "amigo"
+        | "familiares"
+        | "conserje"
+        | "otro"
     }
     CompositeTypes: {
       [_ in never]: never

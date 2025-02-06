@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AddressForm } from "@/components/AddressForm";
 import { AddressList } from "@/components/AddressList";
-import { Plus, LogOut } from "lucide-react";
+import { Plus, LogOut, MapPin } from "lucide-react";
 
 interface Address {
   id: string;
@@ -16,6 +16,7 @@ interface Address {
   zip_code: string;
   country: string;
   is_default: boolean;
+  category: string;
 }
 
 const Dashboard = () => {
@@ -79,7 +80,8 @@ const Dashboard = () => {
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <span className="text-2xl font-bold text-primary">Replace</span>
+                <MapPin className="h-6 w-6 text-primary mr-2" />
+                <span className="text-2xl font-bold text-primary">RePlace</span>
               </div>
             </div>
             <div className="flex items-center">

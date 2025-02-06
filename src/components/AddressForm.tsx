@@ -4,6 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AddressFormProps {
   onSuccess: () => void;
@@ -16,8 +23,19 @@ interface AddressFormProps {
     zip_code: string;
     country: string;
     is_default: boolean;
+    category: string;
   };
 }
+
+const categories = [
+  { value: "casa", label: "Casa" },
+  { value: "trabajo", label: "Trabajo" },
+  { value: "vecino", label: "Vecino" },
+  { value: "amigo", label: "Amigo" },
+  { value: "familiares", label: "Familiares" },
+  { value: "conserje", label: "Conserje" },
+  { value: "otro", label: "Otro" },
+];
 
 export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const { toast } = useToast();
@@ -29,6 +47,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const [zipCode, setZipCode] = useState(initialData?.zip_code || "");
   const [country, setCountry] = useState(initialData?.country || "");
   const [isDefault, setIsDefault] = useState(initialData?.is_default || false);
+  const [category, setCategory] = useState(initialData?.category || "otro");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +66,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         country,
         is_default: isDefault,
         user_id: user.id,
+        category,
       };
 
       if (initialData) {
@@ -93,6 +113,23 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium mb-1">
+              Categoría
+            </label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona una categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <label htmlFor="label" className="block text-sm font-medium mb-1">
               Etiqueta
