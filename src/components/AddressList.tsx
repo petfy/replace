@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Briefcase, MapPin, Trash2, Edit, Users, User, Building2, Mail, Phone, FileText } from "lucide-react";
+import { Home, Briefcase, MapPin, Trash2, Edit, Users, User, Building2, Mail, Phone, FileText, Copy } from "lucide-react";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
 
 interface Address {
@@ -107,9 +107,40 @@ export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
     return labels[category] || category;
   };
 
+  const copyToClipboard = (address: Address) => {
+    const addressText = `
+Nombre: ${address.full_name || ''}
+Dirección: ${address.street}
+Ciudad: ${address.city}
+Estado: ${address.state}
+Código Postal: ${address.zip_code}
+País: ${countryNames[address.country]}
+${address.email ? `Email: ${address.email}` : ''}
+${address.phone ? `Teléfono: ${address.phone}` : ''}
+${address.identification ? `Identificación: ${address.identification}` : ''}
+    `.trim();
+
+    navigator.clipboard.writeText(addressText).then(() => {
+      toast({
+        title: "¡Copiado!",
+        description: "Los datos han sido copiados al portapapeles",
+      });
+    }).catch((error) => {
+      console.error('Error al copiar:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo copiar al portapapeles",
+        variant: "destructive",
+      });
+    });
+  };
+
   const handleUseAddress = async (address: Address) => {
     try {
       setLoading(address.id);
+      
+      // Copiar al portapapeles primero
+      copyToClipboard(address);
       
       // Fetch field mappings from Supabase
       const { data: mappings, error } = await supabase
