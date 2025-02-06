@@ -112,6 +112,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         return;
       }
 
+      const categoryInfo = categories.find(c => c.value === category);
       const addressData = {
         street,
         city,
@@ -125,6 +126,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         phone,
         identification: cleanRUT,
         full_name: fullName,
+        label: categoryInfo ? categoryInfo.label : category // Add label based on category
       };
 
       if (initialData) {
