@@ -42,6 +42,7 @@ const categories = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -51,16 +52,30 @@ const Dashboard = () => {
   const [defaultAddress, setDefaultAddress] = useState<Address | null>(null);
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-      } else {
+    const checkUser = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        
+        if (!user) {
+          navigate("/auth");
+          return;
+        }
+        
         setUser(user);
+        setLoading(false);
+      } catch (error: any) {
+        console.error("Error checking auth status:", error.message);
+        toast({
+          title: "Error de autenticación",
+          description: "Por favor, inicia sesión nuevamente",
+          variant: "destructive",
+        });
+        navigate("/auth");
       }
     };
 
-    getUser();
+    checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
@@ -69,7 +84,7 @@ const Dashboard = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   useEffect(() => {
     const fetchAddresses = async () => {
