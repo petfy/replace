@@ -16,7 +16,11 @@ interface Address {
   zip_code: string;
   country: string;
   is_default: boolean;
-  category: string;
+  category: "casa" | "trabajo" | "vecino" | "amigo" | "familiares" | "conserje" | "otro";
+  email?: string;
+  phone?: string;
+  identification?: string;
+  full_name?: string;
 }
 
 const Dashboard = () => {
