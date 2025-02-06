@@ -111,17 +111,23 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
 
   const calculateProgress = () => {
     let fields = 0;
-    let total = 7; // Required fields: fullName, street, city, country, category, and state/region
+    let filledFields = 0;
 
-    if (fullName) fields++;
-    if (street) fields++;
-    if (city) fields++;
-    if (country) fields++;
-    if (category) fields++;
-    if (country === "CL" ? region : otherState) fields++;
-    if (identification) fields++;
+    // Required fields
+    const requiredFields = {
+      fullName,
+      street,
+      city,
+      country,
+      category,
+      state: country === "CL" ? region : otherState,
+      identification
+    };
 
-    return Math.round((fields / total) * 100);
+    fields = Object.keys(requiredFields).length;
+    filledFields = Object.values(requiredFields).filter(value => value && value.trim() !== '').length;
+
+    return Math.round((filledFields / fields) * 100);
   };
 
   const handleIdentificationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -207,7 +213,10 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         <CardTitle>
           {initialData ? "Editar dirección" : "Nueva dirección"}
         </CardTitle>
-        <Progress value={calculateProgress()} className="w-full" />
+        <div className="flex items-center gap-2">
+          <Progress value={calculateProgress()} className="flex-grow" />
+          <span className="text-sm text-gray-500">{calculateProgress()}%</span>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
