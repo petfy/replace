@@ -127,8 +127,8 @@ export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
         }
       };
 
-      // Send message to Chrome extension
-      if (window.chrome?.runtime?.sendMessage) {
+      // Check if Chrome extension API is available and send message
+      if (typeof window !== 'undefined' && window.chrome?.runtime?.sendMessage) {
         window.chrome.runtime.sendMessage(message, (response) => {
           if (response?.success) {
             toast({
