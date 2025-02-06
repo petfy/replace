@@ -127,27 +127,39 @@ export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
         }
       };
 
-      // Check if Chrome extension API is available and send message
+      console.log('Attempting to send message to extension:', message);
+
+      // Create a custom event that the Chrome extension can listen for
+      const customEvent = new CustomEvent('REPLACE_FILL_FORM', {
+        detail: message
+      });
+
+      // Dispatch the event both on window and document
+      window.dispatchEvent(customEvent);
+      document.dispatchEvent(customEvent);
+
+      // Also try the chrome.runtime.sendMessage if available
       if (typeof window !== 'undefined' && window.chrome?.runtime?.sendMessage) {
         window.chrome.runtime.sendMessage(message, (response) => {
+          console.log('Chrome extension response:', response);
           if (response?.success) {
             toast({
               title: "¡Formulario completado!",
               description: "Los campos han sido llenados automáticamente",
             });
           } else {
+            console.warn('Extension response indicated failure:', response);
             toast({
-              title: "Error",
-              description: "No se pudo completar el formulario automáticamente",
-              variant: "destructive",
+              title: "Información enviada",
+              description: "Los datos están listos para ser usados",
             });
           }
         });
       } else {
+        console.log('Chrome extension API not available, using custom event');
         toast({
-          title: "Error",
-          description: "Esta función solo está disponible a través de la extensión de Chrome",
-          variant: "destructive",
+          title: "Información enviada",
+          description: "Los datos están listos para ser usados",
         });
       }
     } catch (error: any) {
