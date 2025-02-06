@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, Briefcase, MapPin, Trash2, Edit, Users, User, Building2, Mail, Phone, FileText } from "lucide-react";
+import "/node_modules/flag-icons/css/flag-icons.min.css";
 
 interface Address {
   id: string;
@@ -24,15 +25,26 @@ interface AddressListProps {
   onEdit: (address: Address) => void;
 }
 
-const countries: { [key: string]: { name: string; flag: string } } = {
-  CL: { name: "Chile", flag: "🇨🇱" },
-  AR: { name: "Argentina", flag: "🇦🇷" },
-  PE: { name: "Perú", flag: "🇵🇪" },
-  BR: { name: "Brasil", flag: "🇧🇷" },
-  CO: { name: "Colombia", flag: "🇨🇴" },
-  MX: { name: "México", flag: "🇲🇽" },
-  US: { name: "Estados Unidos", flag: "🇺🇸" },
-  ES: { name: "España", flag: "🇪🇸" },
+const countryToCode: { [key: string]: string } = {
+  CL: "cl",
+  AR: "ar",
+  PE: "pe",
+  BR: "br",
+  CO: "co",
+  MX: "mx",
+  US: "us",
+  ES: "es",
+};
+
+const countryNames: { [key: string]: string } = {
+  CL: "Chile",
+  AR: "Argentina",
+  PE: "Perú",
+  BR: "Brasil",
+  CO: "Colombia",
+  MX: "México",
+  US: "Estados Unidos",
+  ES: "España",
 };
 
 export const AddressList = ({ onEdit }: AddressListProps) => {
@@ -175,11 +187,9 @@ export const AddressList = ({ onEdit }: AddressListProps) => {
               <p>
                 {address.city}, {address.state} {address.zip_code}
               </p>
-              <p>
-                <span className="mr-2">
-                  {countries[address.country]?.flag || "🌍"}
-                </span>
-                {countries[address.country]?.name || address.country}
+              <p className="flex items-center gap-2">
+                <span className={`fi fi-${countryToCode[address.country]}`}></span>
+                {countryNames[address.country]}
               </p>
               {(address.email || address.phone || address.identification) && (
                 <div className="border-t pt-2 mt-2 space-y-1">
@@ -203,6 +213,12 @@ export const AddressList = ({ onEdit }: AddressListProps) => {
                   )}
                 </div>
               )}
+            </div>
+            <div className="mt-4">
+              <Button className="w-full" size="lg">
+                <MapPin className="w-5 h-5 mr-2" />
+                USAR ESTE REPLACE
+              </Button>
             </div>
           </CardContent>
         </Card>

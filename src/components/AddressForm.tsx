@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Home, Briefcase, MapPin, User, Users, Building2 } from "lucide-react";
 import { formatRUT, isValidRUT } from "@/lib/format-rut";
+import "/node_modules/flag-icons/css/flag-icons.min.css";
 
 interface AddressFormProps {
   onSuccess: () => void;
@@ -25,32 +26,33 @@ interface AddressFormProps {
     zip_code: string;
     country: string;
     is_default: boolean;
-    category: string;
+    category: "casa" | "trabajo" | "vecino" | "amigo" | "familiares" | "conserje" | "otro";
     email?: string;
     phone?: string;
     identification?: string;
+    full_name?: string;
   };
 }
 
 const categories = [
-  { value: "casa", label: "Casa", icon: Home },
-  { value: "trabajo", label: "Trabajo", icon: Briefcase },
-  { value: "vecino", label: "Vecino", icon: Users },
-  { value: "amigo", label: "Amigo", icon: User },
-  { value: "familiares", label: "Familiares", icon: Users },
-  { value: "conserje", label: "Conserje", icon: Building2 },
-  { value: "otro", label: "Otro", icon: MapPin },
+  { value: "casa" as const, label: "Casa", icon: Home },
+  { value: "trabajo" as const, label: "Trabajo", icon: Briefcase },
+  { value: "vecino" as const, label: "Vecino", icon: Users },
+  { value: "amigo" as const, label: "Amigo", icon: User },
+  { value: "familiares" as const, label: "Familiares", icon: Users },
+  { value: "conserje" as const, label: "Conserje", icon: Building2 },
+  { value: "otro" as const, label: "Otro", icon: MapPin },
 ];
 
 const countries = [
-  { code: "CL", name: "Chile", flag: "🇨🇱" },
-  { code: "AR", name: "Argentina", flag: "🇦🇷" },
-  { code: "PE", name: "Perú", flag: "🇵🇪" },
-  { code: "BR", name: "Brasil", flag: "🇧🇷" },
-  { code: "CO", name: "Colombia", flag: "🇨🇴" },
-  { code: "MX", name: "México", flag: "🇲🇽" },
-  { code: "US", name: "Estados Unidos", flag: "🇺🇸" },
-  { code: "ES", name: "España", flag: "🇪🇸" },
+  { code: "CL", name: "Chile" },
+  { code: "AR", name: "Argentina" },
+  { code: "PE", name: "Perú" },
+  { code: "BR", name: "Brasil" },
+  { code: "CO", name: "Colombia" },
+  { code: "MX", name: "México" },
+  { code: "US", name: "Estados Unidos" },
+  { code: "ES", name: "España" },
 ];
 
 export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
@@ -63,10 +65,11 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const [zipCode, setZipCode] = useState(initialData?.zip_code || "");
   const [country, setCountry] = useState(initialData?.country || "CL");
   const [isDefault, setIsDefault] = useState(initialData?.is_default || false);
-  const [category, setCategory] = useState(initialData?.category || "otro");
+  const [category, setCategory] = useState<typeof categories[number]["value"]>(initialData?.category || "otro");
   const [email, setEmail] = useState(initialData?.email || "");
   const [phone, setPhone] = useState(initialData?.phone || "");
   const [identification, setIdentification] = useState(initialData?.identification || "");
+  const [fullName, setFullName] = useState(initialData?.full_name || "");
   const [selectedCategory, setSelectedCategory] = useState(category);
 
   const handleIdentificationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,6 +107,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         email,
         phone,
         identification,
+        full_name: fullName,
       };
 
       if (initialData) {
@@ -169,6 +173,20 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
                 </Button>
               );
             })}
+          </div>
+
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium mb-1">
+              Nombre y Apellido
+            </label>
+            <Input
+              id="fullName"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Juan Pérez"
+              required
+            />
           </div>
 
           <div>
@@ -238,7 +256,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
                 <SelectContent>
                   {countries.map((country) => (
                     <SelectItem key={country.code} value={country.code}>
-                      <span className="mr-2">{country.flag}</span>
+                      <span className={`fi fi-${country.code.toLowerCase()} mr-2`}></span>
                       {country.name}
                     </SelectItem>
                   ))}
