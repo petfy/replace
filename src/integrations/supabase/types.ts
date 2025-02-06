@@ -16,6 +16,7 @@ export type Database = {
           country: string
           created_at: string
           email: string | null
+          full_name: string | null
           id: string
           identification: string | null
           is_default: boolean | null
@@ -33,6 +34,7 @@ export type Database = {
           country: string
           created_at?: string
           email?: string | null
+          full_name?: string | null
           id?: string
           identification?: string | null
           is_default?: boolean | null
@@ -50,6 +52,7 @@ export type Database = {
           country?: string
           created_at?: string
           email?: string | null
+          full_name?: string | null
           id?: string
           identification?: string | null
           is_default?: boolean | null
