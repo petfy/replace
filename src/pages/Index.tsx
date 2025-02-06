@@ -10,8 +10,8 @@ const Index = () => {
       <nav className="py-4 px-6 border-b">
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-2xl font-bold text-primary flex items-center gap-2">
-            <Map className="w-6 h-6" />
-            Re<span className="text-primary-700">Place</span>
+                <MapPin className="h-6 w-6 text-primary mr-2" />
+                <span className="text-2xl font-bold text-primary">RePlace</span>
           </div>
           <div>
             <Link to="/auth">
@@ -29,8 +29,8 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Map className="w-6 h-6 text-primary" />
-                <span className="text-2xl font-bold text-primary">Re<span className="text-primary-700">Place</span></span>
+                <MapPin className="h-6 w-6 text-primary mr-2" />
+                <span className="text-2xl font-bold text-primary">RePlace</span>
               </div>
               <p className="text-gray-600">
                 Gestiona todas tus direcciones de envío en una plataforma y ahorra tiempo en tus compras online.
@@ -38,9 +38,8 @@ const Index = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Contacto</h3>
-              <p className="text-gray-600">Email: contacto@replace.com</p>
-              <p className="text-gray-600">Teléfono: +56 2 2123 4567</p>
-              <p className="text-gray-600">Dirección: Av. Apoquindo 4400, Las Condes, Santiago</p>
+              <p className="text-gray-600">Email: jony@jonytips.com</p>
+              <p className="text-gray-600">Teléfono: +56 9 76614125</p>
             </div>
           </div>
           <div className="border-t mt-8 pt-8 text-center text-gray-600">
