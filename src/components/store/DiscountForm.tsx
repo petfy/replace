@@ -37,7 +37,16 @@ export const DiscountForm = ({
 
   const handleDiscountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!storeId) return;
+    
+    // Add validation to ensure storeId exists and is not empty
+    if (!storeId || storeId.trim() === '') {
+      toast({
+        title: "Error",
+        description: "No se encontró una tienda válida. Por favor, asegúrate de tener una tienda configurada.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -169,7 +178,7 @@ export const DiscountForm = ({
         </div>
       </div>
 
-      <Button type="submit" disabled={loading}>
+      <Button type="submit" disabled={loading || !storeId}>
         {loading ? "Creando..." : "Crear Descuento"}
       </Button>
     </form>
