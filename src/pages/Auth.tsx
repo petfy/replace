@@ -5,13 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Chrome } from "lucide-react";
+import { Chrome, Store } from "lucide-react";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isStore, setIsStore] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -47,6 +48,7 @@ const Auth = () => {
             data: {
               full_name: "",
               avatar_url: "",
+              is_store: isStore,
             },
           },
         });
@@ -116,10 +118,37 @@ const Auth = () => {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           {isSignUp ? "Crear una cuenta" : "Iniciar sesión"}
         </h2>
+        {isSignUp && (
+          <p className="mt-2 text-center text-sm text-gray-600">
+            {isStore ? "Registro para tiendas" : "Registro personal"}
+          </p>
+        )}
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {isSignUp && (
+            <div className="flex gap-2 mb-6">
+              <Button
+                type="button"
+                variant={!isStore ? "default" : "outline"}
+                className="w-1/2"
+                onClick={() => setIsStore(false)}
+              >
+                Personal
+              </Button>
+              <Button
+                type="button"
+                variant={isStore ? "default" : "outline"}
+                className="w-1/2 flex items-center gap-2"
+                onClick={() => setIsStore(true)}
+              >
+                <Store className="h-4 w-4" />
+                Tienda
+              </Button>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleAuth}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -190,7 +219,10 @@ const Auth = () => {
             <Button
               variant="ghost"
               className="w-full"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setIsStore(false);
+              }}
             >
               {isSignUp
                 ? "¿Ya tienes una cuenta? Inicia sesión"
