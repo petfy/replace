@@ -134,6 +134,95 @@ export type Database = {
         }
         Relationships: []
       }
+      store_discounts: {
+        Row: {
+          code: string
+          created_at: string
+          discount_type: string
+          id: string
+          store_id: string
+          type: string
+          updated_at: string
+          valid_from: string
+          valid_until: string
+          value: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_type: string
+          id?: string
+          store_id: string
+          type: string
+          updated_at?: string
+          valid_from: string
+          valid_until: string
+          value: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_type?: string
+          id?: string
+          store_id?: string
+          type?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_discounts_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stores: {
+        Row: {
+          category: string | null
+          created_at: string
+          email: string | null
+          id: string
+          keywords: string[] | null
+          logo_url: string | null
+          name: string
+          platform: Database["public"]["Enums"]["ecommerce_platform"] | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          keywords?: string[] | null
+          logo_url?: string | null
+          name: string
+          platform?: Database["public"]["Enums"]["ecommerce_platform"] | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          keywords?: string[] | null
+          logo_url?: string | null
+          name?: string
+          platform?: Database["public"]["Enums"]["ecommerce_platform"] | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
