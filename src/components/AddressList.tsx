@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +21,7 @@ interface Address {
   identification?: string;
   first_name?: string;
   last_name?: string;
+  address_line_2?: string;
 }
 
 interface AddressListProps {
@@ -127,6 +127,7 @@ export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
 <NOMBRE>${address.first_name || ''}</NOMBRE>
 <APELLIDO>${address.last_name || ''}</APELLIDO>
 <DIRECCION>${address.street}</DIRECCION>
+${address.address_line_2 ? `<DIRECCION2>${address.address_line_2}</DIRECCION2>` : ''}
 <CIUDAD>${address.city}</CIUDAD>
 <ESTADO>${address.state}</ESTADO>
 <CODIGO_POSTAL>${address.zip_code}</CODIGO_POSTAL>
