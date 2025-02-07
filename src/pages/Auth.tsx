@@ -60,21 +60,7 @@ const Auth = () => {
           description: "Por favor verifica tu correo electrónico para continuar.",
         });
       } else {
-        const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers({
-          filters: {
-            email: email,
-          },
-        });
-
-        if (getUserError) throw getUserError;
-
-        const user = users?.find(u => u.user_metadata?.is_store === isStore);
-        
-        if (!user) {
-          throw new Error(`No existe una cuenta ${isStore ? 'de tienda' : 'personal'} con este email.`);
-        }
-
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -84,6 +70,13 @@ const Auth = () => {
             throw new Error("Email o contraseña incorrectos. Si no tienes una cuenta, regístrate primero.");
           }
           throw signInError;
+        }
+
+        // Check if the account type matches
+        if (data.user?.user_metadata?.is_store !== isStore) {
+          // Sign out immediately since the account type doesn't match
+          await supabase.auth.signOut();
+          throw new Error(`No existe una cuenta ${isStore ? 'de tienda' : 'personal'} con este email.`);
         }
 
         toast({
