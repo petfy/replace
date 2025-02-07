@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,8 +53,24 @@ const Dashboard = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error) throw error;
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw sessionError;
+        }
+
+        if (!session) {
+          navigate("/auth");
+          return;
+        }
+
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error("User error:", userError);
+          throw userError;
+        }
         
         if (!user) {
           navigate("/auth");
@@ -65,10 +80,13 @@ const Dashboard = () => {
         setUser(user);
         setLoading(false);
       } catch (error: any) {
-        console.error("Error checking auth status:", error.message);
+        console.error("Auth error:", error);
+        
+        await supabase.auth.signOut();
+        
         toast({
-          title: "Error de autenticación",
-          description: "Por favor, inicia sesión nuevamente",
+          title: "Error de sesión",
+          description: "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
           variant: "destructive",
         });
         navigate("/auth");
@@ -77,9 +95,12 @@ const Dashboard = () => {
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
         navigate("/auth");
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
       }
     });
 
@@ -98,11 +119,9 @@ const Dashboard = () => {
 
         setAddresses(data || []);
         
-        // Set default address
         const defaultAddr = data?.find(addr => addr.is_default);
         setDefaultAddress(defaultAddr || null);
 
-        // Calculate category counts
         const counts = categories.map(cat => ({
           category: cat.value,
           count: data?.filter(addr => addr.category === cat.value).length || 0
@@ -119,7 +138,6 @@ const Dashboard = () => {
 
     fetchAddresses();
 
-    // Subscribe to changes
     const channel = supabase
       .channel('address-changes')
       .on(
@@ -167,6 +185,12 @@ const Dashboard = () => {
   const filteredAddresses = selectedCategory
     ? addresses.filter(addr => addr.category === selectedCategory)
     : [defaultAddress].filter(Boolean) as Address[];
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <p>Cargando...</p>
+    </div>;
+  }
 
   if (!user) return null;
 
