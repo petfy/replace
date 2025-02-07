@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,10 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Store, Image as ImageIcon } from "lucide-react";
+import { LogOut, Store, Image as ImageIcon, Check, X, Clock } from "lucide-react";
 
 interface StoreData {
-  id?: string;  // Make id optional since it will be generated for new stores
+  id?: string;
   name: string;
   email: string;
   category: string;
@@ -28,6 +27,7 @@ interface Discount {
   value: number;
   valid_from: string;
   valid_until: string;
+  status: 'active' | 'inactive' | 'expired';
 }
 
 const DEFAULT_STORE_DATA: Omit<StoreData, 'id'> = {
@@ -58,6 +58,7 @@ const StoreDashboard = () => {
     value: 0,
     valid_from: '',
     valid_until: '',
+    status: 'active',
   });
 
   useEffect(() => {
@@ -95,7 +96,8 @@ const StoreDashboard = () => {
             const typedDiscounts = (discountsData || []).map(d => ({
               ...d,
               type: d.type as 'order' | 'shipping',
-              discount_type: d.discount_type as 'percentage' | 'fixed'
+              discount_type: d.discount_type as 'percentage' | 'fixed',
+              status: d.status as 'active' | 'inactive' | 'expired'
             }));
             
             setDiscounts(typedDiscounts);
@@ -209,7 +211,8 @@ const StoreDashboard = () => {
       setDiscounts(discountsData?.map(d => ({
         ...d,
         type: d.type as 'order' | 'shipping',
-        discount_type: d.discount_type as 'percentage' | 'fixed'
+        discount_type: d.discount_type as 'percentage' | 'fixed',
+        status: d.status as 'active' | 'inactive' | 'expired'
       })) || []);
 
       // Reset form
@@ -221,6 +224,7 @@ const StoreDashboard = () => {
         value: 0,
         valid_from: '',
         valid_until: '',
+        status: 'active',
       });
 
       toast({
@@ -235,6 +239,47 @@ const StoreDashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (discountId: string, newStatus: 'active' | 'inactive' | 'expired') => {
+    try {
+      const { error } = await supabase
+        .from('store_discounts')
+        .update({ status: newStatus })
+        .eq('id', discountId);
+
+      if (error) throw error;
+
+      setDiscounts(prevDiscounts =>
+        prevDiscounts.map(d =>
+          d.id === discountId ? { ...d, status: newStatus } : d
+        )
+      );
+
+      toast({
+        title: "¡Éxito!",
+        description: "Estado del descuento actualizado correctamente.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Check className="w-5 h-5 text-green-500" />;
+      case 'inactive':
+        return <X className="w-5 h-5 text-red-500" />;
+      case 'expired':
+        return <Clock className="w-5 h-5 text-gray-500" />;
+      default:
+        return null;
     }
   };
 
@@ -471,6 +516,21 @@ const StoreDashboard = () => {
                       required
                     />
                   </div>
+
+                  <div>
+                    <Label htmlFor="status">Estado</Label>
+                    <select
+                      id="status"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2"
+                      value={newDiscount.status}
+                      onChange={(e) => setNewDiscount(prev => ({ ...prev, status: e.target.value as 'active' | 'inactive' | 'expired' }))}
+                      required
+                    >
+                      <option value="active">Activo</option>
+                      <option value="inactive">Inactivo</option>
+                      <option value="expired">Vencido</option>
+                    </select>
+                  </div>
                 </div>
 
                 <Button type="submit" disabled={loading}>
@@ -479,12 +539,13 @@ const StoreDashboard = () => {
               </form>
 
               <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-lg font-medium mb-4">Descuentos Activos</h3>
+                <h3 className="text-lg font-medium mb-4">Descuentos</h3>
                 <div className="space-y-4">
                   {discounts.map((discount) => (
                     <div key={discount.id} className="border rounded-lg p-4">
                       <div className="grid grid-cols-2 gap-4">
-                        <div>
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(discount.status)}
                           <span className="font-medium">Código:</span> {discount.code}
                         </div>
                         <div>
@@ -499,11 +560,23 @@ const StoreDashboard = () => {
                           <span className="font-medium">Vigencia:</span>{' '}
                           {new Date(discount.valid_from).toLocaleDateString()} - {new Date(discount.valid_until).toLocaleDateString()}
                         </div>
+                        <div className="col-span-2">
+                          <span className="font-medium">Estado:</span>
+                          <select
+                            className="ml-2 rounded-md border border-input bg-background px-2 py-1"
+                            value={discount.status}
+                            onChange={(e) => handleStatusChange(discount.id, e.target.value as 'active' | 'inactive' | 'expired')}
+                          >
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
+                            <option value="expired">Vencido</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                   ))}
                   {discounts.length === 0 && (
-                    <p className="text-gray-500">No hay descuentos activos</p>
+                    <p className="text-gray-500">No hay descuentos</p>
                   )}
                 </div>
               </div>

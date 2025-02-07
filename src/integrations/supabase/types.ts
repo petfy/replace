@@ -140,6 +140,7 @@ export type Database = {
           created_at: string
           discount_type: string
           id: string
+          status: string
           store_id: string
           type: string
           updated_at: string
@@ -152,6 +153,7 @@ export type Database = {
           created_at?: string
           discount_type: string
           id?: string
+          status?: string
           store_id: string
           type: string
           updated_at?: string
@@ -164,6 +166,7 @@ export type Database = {
           created_at?: string
           discount_type?: string
           id?: string
+          status?: string
           store_id?: string
           type?: string
           updated_at?: string
