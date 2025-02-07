@@ -38,7 +38,6 @@ const PublicDiscounts = () => {
           .from('public_discount_links')
           .select('store_id')
           .eq('url_slug', urlSlug)
-          .eq('is_active', true)
           .maybeSingle();
 
         if (linkError) {
@@ -52,17 +51,12 @@ const PublicDiscounts = () => {
 
         console.log('Found store_id:', linkData.store_id);
 
-        const now = new Date().toISOString();
-        console.log('Current time:', now);
-
         // Then fetch active discounts for that store
         const { data: discountsData, error: discountsError } = await supabase
           .from('store_discounts')
           .select('*')
           .eq('store_id', linkData.store_id)
-          .eq('status', 'active')
-          .lte('valid_from', now)
-          .gte('valid_until', now);
+          .eq('status', 'active');
 
         if (discountsError) {
           console.error('Discounts error:', discountsError);
