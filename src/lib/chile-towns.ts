@@ -20,3 +20,4 @@ export const chileTowns = {
 
 export type ChileRegionCode = keyof typeof chileTowns;
 export type ChileTown = typeof chileTowns[ChileRegionCode][number];
+
