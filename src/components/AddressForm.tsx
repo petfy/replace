@@ -25,14 +25,16 @@ interface AddressFormProps {
     email?: string;
     phone?: string;
     identification?: string;
-    full_name?: string;
+    first_name?: string;
+    last_name?: string;
   };
 }
 
 export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [fullName, setFullName] = useState(initialData?.full_name || "");
+  const [firstName, setFirstName] = useState(initialData?.first_name || "");
+  const [lastName, setLastName] = useState(initialData?.last_name || "");
   const [identification, setIdentification] = useState(initialData?.identification || "");
   const [email, setEmail] = useState(initialData?.email || "");
   const [phone, setPhone] = useState(initialData?.phone || "");
@@ -48,7 +50,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
 
   useEffect(() => {
     if (initialData) {
-      setFullName(initialData.full_name || "");
+      setFirstName(initialData.first_name || "");
+      setLastName(initialData.last_name || "");
       setIdentification(initialData.identification || "");
       setEmail(initialData.email || "");
       setPhone(initialData.phone || "");
@@ -66,7 +69,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
 
   const resetForm = () => {
     if (!initialData) {
-      setFullName("");
+      setFirstName("");
+      setLastName("");
       setIdentification("");
       setEmail("");
       setPhone("");
@@ -87,7 +91,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
     let filledFields = 0;
 
     const requiredFields = {
-      fullName,
+      firstName,
+      lastName,
       street,
       city,
       country,
@@ -139,7 +144,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
         email,
         phone,
         identification: cleanRUT,
-        full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
         label: categoryInfo ? categoryInfo.label : category
       };
 
@@ -199,13 +205,23 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
             }}
           />
 
-          <Input
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Nombre y Apellido"
-            required
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Nombre"
+              required
+            />
+
+            <Input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Apellido"
+              required
+            />
+          </div>
 
           <Input
             type="text"
@@ -288,3 +304,4 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
     </Card>
   );
 };
+
