@@ -31,11 +31,13 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
 
       if (error) throw error;
 
-      setDiscounts(prevDiscounts =>
-        prevDiscounts.map(d =>
-          d.id === discountId ? { ...d, status: newStatus } : d
-        )
+      // Create a new array with the updated discount
+      const updatedDiscounts = discounts.map(discount =>
+        discount.id === discountId ? { ...discount, status: newStatus } : discount
       );
+
+      // Set the new array directly
+      setDiscounts(updatedDiscounts);
 
       toast({
         title: "¡Éxito!",
@@ -108,3 +110,4 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
     </div>
   );
 };
+
