@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import { AddressForm } from "@/components/AddressForm";
 import { AddressList } from "@/components/AddressList";
 import { Plus, LogOut, MapPin, Home, Briefcase, User, Users, Building2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 
 interface Address {
   id: string;
@@ -148,6 +147,12 @@ const Dashboard = () => {
     ? addresses.filter(addr => addr.category === selectedCategory)
     : addresses;
 
+  const shouldShowDefaultAddress = !selectedCategory && defaultAddress;
+  
+  const categoryAddresses = selectedCategory
+    ? filteredAddresses.filter(addr => !addr.is_default)
+    : filteredAddresses;
+
   if (!user) return null;
 
   return (
@@ -224,7 +229,7 @@ const Dashboard = () => {
                 })}
               </div>
 
-              {!selectedCategory && defaultAddress && (
+              {shouldShowDefaultAddress && (
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold mb-4">Dirección predeterminada</h2>
                   <AddressList
@@ -234,7 +239,7 @@ const Dashboard = () => {
                 </div>
               )}
 
-              {filteredAddresses.length > 0 && (
+              {categoryAddresses.length > 0 && (
                 <div>
                   <h2 className="text-lg font-semibold mb-4">
                     {selectedCategory 
@@ -243,7 +248,7 @@ const Dashboard = () => {
                   </h2>
                   <AddressList
                     onEdit={handleEdit}
-                    addresses={filteredAddresses}
+                    addresses={categoryAddresses}
                   />
                 </div>
               )}
