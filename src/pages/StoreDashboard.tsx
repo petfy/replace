@@ -89,19 +89,20 @@ const StoreDashboard = () => {
         }
 
         if (user.id) {
-          const { data: storeData, error: storeError } = await supabase
+          // Changed from maybeSingle() to select() to handle multiple stores
+          const { data: storesData, error: storeError } = await supabase
             .from('stores')
             .select('*')
             .eq('user_id', user.id)
-            .maybeSingle();
+            .limit(1); // Get just the first store for now
 
           if (storeError) {
             throw storeError;
           }
 
-          if (storeData) {
-            setStoreData(storeData);
-            await fetchDiscounts(storeData.id);
+          if (storesData && storesData.length > 0) {
+            setStoreData(storesData[0]);
+            await fetchDiscounts(storesData[0].id);
           }
         }
 
