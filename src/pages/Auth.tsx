@@ -60,6 +60,20 @@ const Auth = () => {
           description: "Por favor verifica tu correo electrónico para continuar.",
         });
       } else {
+        const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers({
+          filters: {
+            email: email,
+          },
+        });
+
+        if (getUserError) throw getUserError;
+
+        const user = users?.find(u => u.user_metadata?.is_store === isStore);
+        
+        if (!user) {
+          throw new Error(`No existe una cuenta ${isStore ? 'de tienda' : 'personal'} con este email.`);
+        }
+
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -118,36 +132,32 @@ const Auth = () => {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           {isSignUp ? "Crear una cuenta" : "Iniciar sesión"}
         </h2>
-        {isSignUp && (
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {isStore ? "Registro para tiendas" : "Registro personal"}
-          </p>
-        )}
+        <p className="mt-2 text-center text-sm text-gray-600">
+          {isStore ? "Cuenta de tienda" : "Cuenta personal"}
+        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {isSignUp && (
-            <div className="flex gap-2 mb-6">
-              <Button
-                type="button"
-                variant={!isStore ? "default" : "outline"}
-                className="w-1/2"
-                onClick={() => setIsStore(false)}
-              >
-                Personal
-              </Button>
-              <Button
-                type="button"
-                variant={isStore ? "default" : "outline"}
-                className="w-1/2 flex items-center gap-2"
-                onClick={() => setIsStore(true)}
-              >
-                <Store className="h-4 w-4" />
-                Tienda
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-2 mb-6">
+            <Button
+              type="button"
+              variant={!isStore ? "default" : "outline"}
+              className="w-1/2"
+              onClick={() => setIsStore(false)}
+            >
+              Personal
+            </Button>
+            <Button
+              type="button"
+              variant={isStore ? "default" : "outline"}
+              className="w-1/2 flex items-center gap-2"
+              onClick={() => setIsStore(true)}
+            >
+              <Store className="h-4 w-4" />
+              Tienda
+            </Button>
+          </div>
 
           <form className="space-y-6" onSubmit={handleAuth}>
             <div>
