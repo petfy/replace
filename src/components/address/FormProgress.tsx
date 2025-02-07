@@ -13,3 +13,4 @@ export const FormProgress = ({ value }: FormProgressProps) => {
     </div>
   );
 };
+

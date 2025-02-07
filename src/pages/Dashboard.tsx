@@ -217,14 +217,14 @@ const Dashboard = () => {
                       onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
                     >
                       <Icon className="w-4 h-4" />
-                      <span className="text-sm">{categoryInfo?.label}</span>
+                      <span className="text-sm truncate">{categoryInfo?.label}</span>
                       <span className="text-xs ml-auto">({count})</span>
                     </Button>
                   );
                 })}
               </div>
 
-              {defaultAddress && (
+              {!selectedCategory && defaultAddress && (
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold mb-4">Dirección predeterminada</h2>
                   <AddressList
@@ -234,10 +234,12 @@ const Dashboard = () => {
                 </div>
               )}
 
-              {selectedCategory && (
+              {filteredAddresses.length > 0 && (
                 <div>
                   <h2 className="text-lg font-semibold mb-4">
-                    Direcciones en categoría: {categories.find(c => c.value === selectedCategory)?.label}
+                    {selectedCategory 
+                      ? `Direcciones en categoría: ${categories.find(c => c.value === selectedCategory)?.label}`
+                      : "Todas las direcciones"}
                   </h2>
                   <AddressList
                     onEdit={handleEdit}

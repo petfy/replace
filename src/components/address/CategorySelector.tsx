@@ -30,14 +30,15 @@ export const CategorySelector = ({
             key={cat.value}
             type="button"
             variant={selectedCategory === cat.value ? "default" : "outline"}
-            className="flex items-center justify-start space-x-2 p-2 h-12"
+            className="flex items-center justify-start space-x-2 p-2 h-12 w-full truncate"
             onClick={() => onCategorySelect(cat.value)}
           >
-            <Icon className="w-4 h-4" />
-            <span className="text-xs">{cat.label}</span>
+            <Icon className="w-4 h-4 flex-shrink-0" />
+            <span className="text-xs truncate">{cat.label}</span>
           </Button>
         );
       })}
     </div>
   );
 };
+
