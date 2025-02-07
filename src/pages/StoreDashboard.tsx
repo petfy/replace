@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, Store, Image as ImageIcon } from "lucide-react";
@@ -31,11 +30,22 @@ interface Discount {
   valid_until: string;
 }
 
+const DEFAULT_STORE_DATA: StoreData = {
+  id: '',
+  name: '',
+  email: '',
+  category: '',
+  keywords: [],
+  website: '',
+  platform: 'shopify',
+  logo_url: '',
+};
+
 const StoreDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [storeData, setStoreData] = useState<StoreData | null>(null);
+  const [storeData, setStoreData] = useState<StoreData>(DEFAULT_STORE_DATA);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -64,15 +74,15 @@ const StoreDashboard = () => {
           .from('stores')
           .select('*')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (storeError && storeError.code !== 'PGRST116') {
+        if (storeError) {
           throw storeError;
         }
 
         if (storeData) {
           setStoreData(storeData);
-          // Fetch discounts
+          // Fetch discounts only if store exists
           const { data: discountsData, error: discountsError } = await supabase
             .from('store_discounts')
             .select('*')
@@ -80,11 +90,15 @@ const StoreDashboard = () => {
             .order('created_at', { ascending: false });
 
           if (discountsError) throw discountsError;
-          setDiscounts(discountsData?.map(d => ({
+          
+          // Ensure the type casting is correct when setting discounts
+          const typedDiscounts = (discountsData || []).map(d => ({
             ...d,
             type: d.type as 'order' | 'shipping',
             discount_type: d.discount_type as 'percentage' | 'fixed'
-          })) || []);
+          }));
+          
+          setDiscounts(typedDiscounts);
         }
 
         setLoading(false);
@@ -139,11 +153,10 @@ const StoreDashboard = () => {
         keywords: storeData?.keywords?.join(',').split(',').map(k => k.trim()) || [],
       };
 
+      // Use upsert to handle both insert and update cases
       const { error: storeError } = await supabase
         .from('stores')
-        .upsert(storePayload)
-        .select()
-        .single();
+        .upsert(storePayload);
 
       if (storeError) throw storeError;
 
