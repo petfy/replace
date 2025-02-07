@@ -44,14 +44,16 @@ const PublicDiscounts = () => {
           throw new Error('Link no encontrado o inactivo');
         }
 
+        const now = new Date().toISOString();
+
         // Then fetch active discounts for that store
         const { data: discountsData, error: discountsError } = await supabase
           .from('store_discounts')
           .select('*')
           .eq('store_id', linkData.store_id)
           .eq('status', 'active')
-          .gte('valid_until', new Date().toISOString())
-          .lte('valid_from', new Date().toISOString());
+          .lte('valid_from', now)
+          .gte('valid_until', now);
 
         if (discountsError) throw discountsError;
         

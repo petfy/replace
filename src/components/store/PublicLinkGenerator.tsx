@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,50 +12,80 @@ interface PublicLinkGeneratorProps {
 }
 
 export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
-  const [urlSlug, setUrlSlug] = useState("");
   const [loading, setLoading] = useState(false);
   const [publicUrl, setPublicUrl] = useState("");
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!urlSlug.trim()) {
-      toast({
-        title: "Error",
-        description: "Por favor ingresa un identificador para la URL.",
-        variant: "destructive",
-      });
-      return;
-    }
+  useEffect(() => {
+    const generateSlug = async () => {
+      try {
+        // Get store website
+        const { data: storeData, error: storeError } = await supabase
+          .from('stores')
+          .select('website')
+          .eq('id', storeId)
+          .single();
 
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('public_discount_links')
-        .insert({
-          store_id: storeId,
-          url_slug: urlSlug.trim(),
+        if (storeError) throw storeError;
+        if (!storeData?.website) {
+          toast({
+            title: "Aviso",
+            description: "Por favor, primero configura el sitio web de tu tienda.",
+            variant: "default",
+          });
+          return;
+        }
+
+        // Extract domain from website URL
+        const url = new URL(storeData.website.startsWith('http') ? storeData.website : `https://${storeData.website}`);
+        const domain = url.hostname.replace('www.', '');
+        
+        // Check if a link already exists
+        const { data: existingLink, error: linkError } = await supabase
+          .from('public_discount_links')
+          .select('url_slug')
+          .eq('store_id', storeId)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (linkError) throw linkError;
+
+        if (existingLink) {
+          setPublicUrl(`${window.location.origin}/discounts/${existingLink.url_slug}`);
+          return;
+        }
+
+        // Create new link with domain as slug
+        const { error: insertError } = await supabase
+          .from('public_discount_links')
+          .insert({
+            store_id: storeId,
+            url_slug: domain,
+            is_active: true,
+          });
+
+        if (insertError) throw insertError;
+
+        setPublicUrl(`${window.location.origin}/discounts/${domain}`);
+        
+        toast({
+          title: "¡Éxito!",
+          description: "URL pública generada automáticamente.",
         });
+      } catch (error: any) {
+        console.error('Error:', error);
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    };
 
-      if (error) throw error;
-
-      const newPublicUrl = `${window.location.origin}/discounts/${urlSlug}`;
-      setPublicUrl(newPublicUrl);
-      
-      toast({
-        title: "¡Éxito!",
-        description: "URL pública generada correctamente.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    if (storeId) {
+      generateSlug();
     }
-  };
+  }, [storeId, toast]);
 
   const copyToClipboard = async () => {
     try {
@@ -75,25 +105,8 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
 
   return (
     <div className="space-y-6 bg-white shadow rounded-lg p-6">
-      <h3 className="text-lg font-medium">Generar URL Pública de Descuentos</h3>
+      <h3 className="text-lg font-medium">URL Pública de Descuentos</h3>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="url-slug">Identificador para la URL</Label>
-          <Input
-            id="url-slug"
-            value={urlSlug}
-            onChange={(e) => setUrlSlug(e.target.value)}
-            placeholder="mi-tienda-descuentos"
-            required
-          />
-        </div>
-
-        <Button type="submit" disabled={loading}>
-          {loading ? "Generando..." : "Generar URL Pública"}
-        </Button>
-      </form>
-
       {publicUrl && (
         <div className="mt-4 p-4 bg-muted rounded-lg">
           <Label>URL Pública</Label>
