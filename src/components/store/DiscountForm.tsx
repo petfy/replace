@@ -50,10 +50,13 @@ export const DiscountForm = ({
 
     setLoading(true);
     try {
+      // Remove id from the data being sent since it's auto-generated
+      const { id, ...discountData } = newDiscount;
+      
       const { error } = await supabase
         .from('store_discounts')
         .insert({
-          ...newDiscount,
+          ...discountData,
           store_id: storeId,
         });
 
