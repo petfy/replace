@@ -31,6 +31,8 @@ const PublicDiscounts = () => {
           throw new Error('URL inválida');
         }
 
+        console.log('Fetching discounts for slug:', urlSlug);
+
         // First get the store_id from the public_discount_links table
         const { data: linkData, error: linkError } = await supabase
           .from('public_discount_links')
@@ -44,7 +46,10 @@ const PublicDiscounts = () => {
           throw new Error('Link no encontrado o inactivo');
         }
 
+        console.log('Found store_id:', linkData.store_id);
+
         const now = new Date().toISOString();
+        console.log('Current time:', now);
 
         // Then fetch active discounts for that store
         const { data: discountsData, error: discountsError } = await supabase
@@ -52,10 +57,15 @@ const PublicDiscounts = () => {
           .select('*')
           .eq('store_id', linkData.store_id)
           .eq('status', 'active')
-          .lte('valid_from', now)
-          .gte('valid_until', now);
+          .lt('valid_from', now)
+          .gt('valid_until', now);
 
-        if (discountsError) throw discountsError;
+        if (discountsError) {
+          console.error('Discounts error:', discountsError);
+          throw discountsError;
+        }
+
+        console.log('Found discounts:', discountsData);
         
         // Type cast the data to ensure it matches our Discount interface
         const typedDiscounts = (discountsData || []).map(discount => ({

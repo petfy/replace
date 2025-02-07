@@ -15,6 +15,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
   const [loading, setLoading] = useState(false);
   const [publicUrl, setPublicUrl] = useState("");
   const { toast } = useToast();
+  const BASE_URL = "https://re-place.site";
 
   useEffect(() => {
     const generateSlug = async () => {
@@ -51,7 +52,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
         if (linkError) throw linkError;
 
         if (existingLink) {
-          setPublicUrl(`${window.location.origin}/discounts/${existingLink.url_slug}`);
+          setPublicUrl(`${BASE_URL}/discounts/${existingLink.url_slug}`);
           return;
         }
 
@@ -66,7 +67,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
 
         if (insertError) throw insertError;
 
-        setPublicUrl(`${window.location.origin}/discounts/${domain}`);
+        setPublicUrl(`${BASE_URL}/discounts/${domain}`);
         
         toast({
           title: "¡Éxito!",
