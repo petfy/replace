@@ -16,7 +16,10 @@ interface TownSelectProps {
 }
 
 export const TownSelect = ({ value, onValueChange, regionCode, disabled }: TownSelectProps) => {
-  const towns = regionCode ? chileTowns[regionCode as ChileRegionCode] : [];
+  // Ensure regionCode is valid and exists in chileTowns before accessing
+  const towns = regionCode && regionCode in chileTowns 
+    ? chileTowns[regionCode as ChileRegionCode] 
+    : [];
 
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled || !regionCode}>
@@ -33,3 +36,4 @@ export const TownSelect = ({ value, onValueChange, regionCode, disabled }: TownS
     </Select>
   );
 };
+
