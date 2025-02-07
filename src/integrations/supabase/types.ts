@@ -134,6 +134,41 @@ export type Database = {
         }
         Relationships: []
       }
+      public_discount_links: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          store_id: string
+          updated_at: string
+          url_slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          store_id: string
+          updated_at?: string
+          url_slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          store_id?: string
+          updated_at?: string
+          url_slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_discount_links_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_discounts: {
         Row: {
           code: string

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +7,7 @@ import { StoreNav } from "@/components/store/StoreNav";
 import { StoreForm } from "@/components/store/StoreForm";
 import { DiscountForm } from "@/components/store/DiscountForm";
 import { DiscountList } from "@/components/store/DiscountList";
+import { PublicLinkGenerator } from "@/components/store/PublicLinkGenerator";
 
 interface StoreData {
   id?: string;
@@ -61,7 +61,6 @@ const StoreDashboard = () => {
   const [newDiscount, setNewDiscount] = useState<Discount>(DEFAULT_DISCOUNT);
 
   const fetchDiscounts = async (storeId: string) => {
-    // Add validation to ensure storeId is not empty
     if (!storeId) {
       console.warn('Attempted to fetch discounts without a valid store ID');
       return;
@@ -95,12 +94,11 @@ const StoreDashboard = () => {
         }
 
         if (user.id) {
-          // Changed from maybeSingle() to select() to handle multiple stores
           const { data: storesData, error: storeError } = await supabase
             .from('stores')
             .select('*')
             .eq('user_id', user.id)
-            .limit(1); // Get just the first store for now
+            .limit(1);
 
           if (storeError) {
             throw storeError;
@@ -141,6 +139,7 @@ const StoreDashboard = () => {
             <TabsList>
               <TabsTrigger value="store">Datos de la Tienda</TabsTrigger>
               <TabsTrigger value="discounts">Descuentos</TabsTrigger>
+              <TabsTrigger value="public-link">URL Pública</TabsTrigger>
             </TabsList>
 
             <TabsContent value="store" className="space-y-6">
@@ -165,6 +164,10 @@ const StoreDashboard = () => {
                 discounts={discounts}
                 setDiscounts={setDiscounts}
               />
+            </TabsContent>
+
+            <TabsContent value="public-link" className="space-y-6">
+              <PublicLinkGenerator storeId={storeData.id || ''} />
             </TabsContent>
           </Tabs>
         </div>
