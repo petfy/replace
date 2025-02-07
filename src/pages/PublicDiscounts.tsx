@@ -49,7 +49,15 @@ const PublicDiscounts = () => {
 
         if (discountsError) throw discountsError;
         
-        setDiscounts(discountsData || []);
+        // Type cast the data to ensure it matches our Discount interface
+        const typedDiscounts = (discountsData || []).map(discount => ({
+          ...discount,
+          type: discount.type as 'order' | 'shipping',
+          discount_type: discount.discount_type as 'percentage' | 'fixed',
+          status: discount.status as 'active' | 'inactive' | 'expired'
+        }));
+        
+        setDiscounts(typedDiscounts);
       } catch (error: any) {
         console.error('Error:', error);
         toast({
