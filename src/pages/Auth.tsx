@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,16 +73,24 @@ const Auth = () => {
         }
 
         // Check if the account type matches
-        if (data.user?.user_metadata?.is_store !== isStore) {
+        const userIsStore = data.user?.user_metadata?.is_store === true;
+        
+        if (userIsStore !== isStore) {
           // Sign out immediately since the account type doesn't match
           await supabase.auth.signOut();
-          throw new Error(`No existe una cuenta ${isStore ? 'de tienda' : 'personal'} con este email.`);
+          throw new Error(
+            isStore 
+              ? "Esta cuenta no es una cuenta de tienda. Por favor inicia sesión como cuenta personal." 
+              : "Esta cuenta es una cuenta de tienda. Por favor inicia sesión como cuenta de tienda."
+          );
         }
 
         toast({
           title: "¡Bienvenido de vuelta!",
           description: "Has iniciado sesión exitosamente.",
         });
+        
+        // Navigate based on account type
         navigate(isStore ? "/store-dashboard" : "/dashboard");
       }
     } catch (error: any) {
