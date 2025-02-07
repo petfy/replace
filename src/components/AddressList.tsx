@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -120,11 +121,11 @@ export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
   };
 
   const copyToClipboard = (address: Address) => {
-    const fullName = [address.first_name, address.last_name].filter(Boolean).join(' ');
     const formattedPhone = address.phone ? `${countryToPhoneCode[address.country] || ''}${address.phone}` : '';
 
     const addressText = `
-<NOMBRE>${fullName}</NOMBRE>
+<NOMBRE>${address.first_name || ''}</NOMBRE>
+<APELLIDO>${address.last_name || ''}</APELLIDO>
 <DIRECCION>${address.street}</DIRECCION>
 <CIUDAD>${address.city}</CIUDAD>
 <ESTADO>${address.state}</ESTADO>
