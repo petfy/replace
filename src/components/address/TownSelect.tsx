@@ -16,15 +16,13 @@ interface TownSelectProps {
 }
 
 export const TownSelect = ({ value, onValueChange, regionCode, disabled }: TownSelectProps) => {
-  // Ensure regionCode is valid and exists in chileTowns before accessing
-  const towns = regionCode && regionCode in chileTowns 
-    ? chileTowns[regionCode as ChileRegionCode] 
-    : [];
+  // Get the towns for the selected region
+  const towns = regionCode ? chileTowns[regionCode as ChileRegionCode] || [] : [];
 
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled || !regionCode}>
       <SelectTrigger>
-        <SelectValue placeholder="Selecciona una comuna" />
+        <SelectValue placeholder="Comuna" />
       </SelectTrigger>
       <SelectContent>
         {towns.map((town) => (
@@ -36,4 +34,3 @@ export const TownSelect = ({ value, onValueChange, regionCode, disabled }: TownS
     </Select>
   );
 };
-
