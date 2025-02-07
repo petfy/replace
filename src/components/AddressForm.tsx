@@ -39,6 +39,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
     setZipCode,
     street,
     setStreet,
+    addressLine2,
+    setAddressLine2,
     isDefault,
     setIsDefault,
     category,
@@ -95,6 +97,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
             setStreet={setStreet}
             zipCode={zipCode}
             setZipCode={setZipCode}
+            addressLine2={addressLine2}
+            setAddressLine2={setAddressLine2}
           />
 
           <div className="flex items-center space-x-2">
