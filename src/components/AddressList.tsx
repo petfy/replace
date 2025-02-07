@@ -19,7 +19,8 @@ interface Address {
   email?: string;
   phone?: string;
   identification?: string;
-  full_name?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 interface AddressListProps {
@@ -36,6 +37,17 @@ const countryToCode: { [key: string]: string } = {
   MX: "mx",
   US: "us",
   ES: "es",
+};
+
+const countryToPhoneCode: { [key: string]: string } = {
+  CL: "+56",
+  AR: "+54",
+  PE: "+51",
+  BR: "+55",
+  CO: "+57",
+  MX: "+52",
+  US: "+1",
+  ES: "+34",
 };
 
 const countryNames: { [key: string]: string } = {
@@ -108,16 +120,19 @@ export const AddressList = ({ onEdit, addresses }: AddressListProps) => {
   };
 
   const copyToClipboard = (address: Address) => {
+    const fullName = [address.first_name, address.last_name].filter(Boolean).join(' ');
+    const formattedPhone = address.phone ? `${countryToPhoneCode[address.country] || ''}${address.phone}` : '';
+
     const addressText = `
-Nombre: ${address.full_name || ''}
-Dirección: ${address.street}
-Ciudad: ${address.city}
-Estado: ${address.state}
-Código Postal: ${address.zip_code}
-País: ${countryNames[address.country]}
-${address.email ? `Email: ${address.email}` : ''}
-${address.phone ? `Teléfono: ${address.phone}` : ''}
-${address.identification ? `Identificación: ${address.identification}` : ''}
+<NOMBRE>${fullName}</NOMBRE>
+<DIRECCION>${address.street}</DIRECCION>
+<CIUDAD>${address.city}</CIUDAD>
+<ESTADO>${address.state}</ESTADO>
+<CODIGO_POSTAL>${address.zip_code}</CODIGO_POSTAL>
+<PAIS>${countryNames[address.country]}</PAIS>
+${address.email ? `<EMAIL>${address.email}</EMAIL>` : ''}
+${formattedPhone ? `<TELEFONO>${formattedPhone}</TELEFONO>` : ''}
+${address.identification ? `<IDENTIFICACION>${address.identification}</IDENTIFICACION>` : ''}
     `.trim();
 
     navigator.clipboard.writeText(addressText).then(() => {
