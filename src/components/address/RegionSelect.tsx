@@ -36,7 +36,7 @@ export const RegionSelect = ({ value, onValueChange }: RegionSelectProps) => {
   return (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger>
-        <SelectValue placeholder="Selecciona una región" />
+        <SelectValue placeholder="Selecciona tu Región" />
       </SelectTrigger>
       <SelectContent>
         {chileRegions.map((region) => (
@@ -48,3 +48,4 @@ export const RegionSelect = ({ value, onValueChange }: RegionSelectProps) => {
     </Select>
   );
 };
+

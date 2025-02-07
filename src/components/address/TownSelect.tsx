@@ -22,7 +22,7 @@ export const TownSelect = ({ value, onValueChange, regionCode, disabled }: TownS
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled || !regionCode}>
       <SelectTrigger>
-        <SelectValue placeholder="Comuna" />
+        <SelectValue placeholder="Selecciona tu Comuna" />
       </SelectTrigger>
       <SelectContent>
         {towns.map((town) => (
@@ -34,3 +34,4 @@ export const TownSelect = ({ value, onValueChange, regionCode, disabled }: TownS
     </Select>
   );
 };
+
