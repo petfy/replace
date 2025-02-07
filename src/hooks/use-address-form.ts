@@ -8,6 +8,7 @@ import type { ChileRegionCode } from "@/lib/chile-towns";
 export interface AddressFormData {
   id?: string;
   street: string;
+  address_line_2?: string;
   city: string;
   state: string;
   zip_code: string;
@@ -36,6 +37,7 @@ export const useAddressForm = (initialData?: AddressFormData, onSuccess?: () => 
   const [otherCity, setOtherCity] = useState(initialData?.city || "");
   const [zipCode, setZipCode] = useState(initialData?.zip_code || "");
   const [street, setStreet] = useState(initialData?.street || "");
+  const [addressLine2, setAddressLine2] = useState(initialData?.address_line_2 || "");
   const [isDefault, setIsDefault] = useState(initialData?.is_default || false);
   const [category, setCategory] = useState<AddressFormData["category"]>(initialData?.category || "otro");
   const [selectedCategory, setSelectedCategory] = useState(category);
@@ -87,6 +89,7 @@ export const useAddressForm = (initialData?: AddressFormData, onSuccess?: () => 
 
       const addressData = {
         street,
+        address_line_2: addressLine2,
         city: country === "CL" ? town : otherCity,
         state: country === "CL" ? region : otherState,
         zip_code: zipCode,
@@ -165,6 +168,8 @@ export const useAddressForm = (initialData?: AddressFormData, onSuccess?: () => 
     setZipCode,
     street,
     setStreet,
+    addressLine2,
+    setAddressLine2,
     isDefault,
     setIsDefault,
     category,

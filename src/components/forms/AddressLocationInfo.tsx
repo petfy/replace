@@ -20,6 +20,8 @@ interface AddressLocationInfoProps {
   setStreet: (value: string) => void;
   zipCode: string;
   setZipCode: (value: string) => void;
+  addressLine2: string;
+  setAddressLine2: (value: string) => void;
 }
 
 export const AddressLocationInfo = ({
@@ -36,7 +38,9 @@ export const AddressLocationInfo = ({
   street,
   setStreet,
   zipCode,
-  setZipCode
+  setZipCode,
+  addressLine2,
+  setAddressLine2
 }: AddressLocationInfoProps) => {
   return (
     <div className="space-y-4">
@@ -76,6 +80,13 @@ export const AddressLocationInfo = ({
         onChange={(e) => setStreet(e.target.value)}
         placeholder="Calle y número"
         required
+      />
+
+      <Input
+        type="text"
+        value={addressLine2}
+        onChange={(e) => setAddressLine2(e.target.value)}
+        placeholder="Casa, apartamento, etc. (opcional)"
       />
 
       <Input

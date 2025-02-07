@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +12,7 @@ interface Address {
   id: string;
   label: string;
   street: string;
+  address_line_2?: string;
   city: string;
   state: string;
   zip_code: string;
