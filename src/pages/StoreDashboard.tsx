@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LogOut, Store, Image as ImageIcon } from "lucide-react";
 
 interface StoreData {
-  id: string;
+  id?: string;  // Make id optional since it will be generated for new stores
   name: string;
   email: string;
   category: string;
@@ -30,8 +30,7 @@ interface Discount {
   valid_until: string;
 }
 
-const DEFAULT_STORE_DATA: StoreData = {
-  id: '',
+const DEFAULT_STORE_DATA: Omit<StoreData, 'id'> = {
   name: '',
   email: '',
   category: '',
@@ -93,7 +92,6 @@ const StoreDashboard = () => {
 
             if (discountsError) throw discountsError;
             
-            // Ensure the type casting is correct when setting discounts
             const typedDiscounts = (discountsData || []).map(d => ({
               ...d,
               type: d.type as 'order' | 'shipping',
@@ -154,17 +152,19 @@ const StoreDashboard = () => {
         throw new Error("Invalid user ID");
       }
 
+      // Prepare the payload, omitting id for new stores
+      const { id, ...storeWithoutId } = storeData;
       const storePayload = {
-        user_id: user.id, // Make sure user_id is explicitly set
-        ...storeData,
+        ...storeWithoutId,
+        user_id: user.id,
         logo_url: logoUrl,
         keywords: storeData?.keywords?.join(',').split(',').map(k => k.trim()) || [],
       };
 
-      // Use upsert to handle both insert and update cases
+      // Use upsert with id if it exists, otherwise just insert
       const { error: storeError } = await supabase
         .from('stores')
-        .upsert(storePayload);
+        .upsert(id ? { id, ...storePayload } : storePayload);
 
       if (storeError) throw storeError;
 
