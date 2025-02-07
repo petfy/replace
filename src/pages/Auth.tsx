@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,14 +20,14 @@ const Auth = () => {
     // Check if we're already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/dashboard");
+        navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
       }
     });
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        navigate("/dashboard");
+        navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
       }
     });
 
@@ -83,7 +82,7 @@ const Auth = () => {
           title: "¡Bienvenido de vuelta!",
           description: "Has iniciado sesión exitosamente.",
         });
-        navigate("/dashboard");
+        navigate(isStore ? "/store-dashboard" : "/dashboard");
       }
     } catch (error: any) {
       toast({
