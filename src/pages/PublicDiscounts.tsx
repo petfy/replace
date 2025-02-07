@@ -33,7 +33,7 @@ const PublicDiscounts = () => {
 
         console.log('Fetching discounts for slug:', urlSlug);
 
-        // First get the store_id from the public_discount_links table
+        // Use the anon key client which doesn't require authentication
         const { data: linkData, error: linkError } = await supabase
           .from('public_discount_links')
           .select('store_id')
@@ -41,8 +41,12 @@ const PublicDiscounts = () => {
           .eq('is_active', true)
           .maybeSingle();
 
-        if (linkError) throw linkError;
+        if (linkError) {
+          console.error('Link error:', linkError);
+          throw linkError;
+        }
         if (!linkData) {
+          console.error('No link data found');
           throw new Error('Link no encontrado o inactivo');
         }
 
