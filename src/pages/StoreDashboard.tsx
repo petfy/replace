@@ -64,41 +64,44 @@ const StoreDashboard = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
           navigate("/auth");
           return;
         }
 
-        const { data: storeData, error: storeError } = await supabase
-          .from('stores')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (storeError) {
-          throw storeError;
-        }
-
-        if (storeData) {
-          setStoreData(storeData);
-          // Fetch discounts only if store exists
-          const { data: discountsData, error: discountsError } = await supabase
-            .from('store_discounts')
+        // Only proceed with store fetch if we have a valid user ID
+        if (user.id) {
+          const { data: storeData, error: storeError } = await supabase
+            .from('stores')
             .select('*')
-            .eq('store_id', storeData.id)
-            .order('created_at', { ascending: false });
+            .eq('user_id', user.id)
+            .maybeSingle();
 
-          if (discountsError) throw discountsError;
-          
-          // Ensure the type casting is correct when setting discounts
-          const typedDiscounts = (discountsData || []).map(d => ({
-            ...d,
-            type: d.type as 'order' | 'shipping',
-            discount_type: d.discount_type as 'percentage' | 'fixed'
-          }));
-          
-          setDiscounts(typedDiscounts);
+          if (storeError) {
+            throw storeError;
+          }
+
+          if (storeData) {
+            setStoreData(storeData);
+            // Fetch discounts only if store exists
+            const { data: discountsData, error: discountsError } = await supabase
+              .from('store_discounts')
+              .select('*')
+              .eq('store_id', storeData.id)
+              .order('created_at', { ascending: false });
+
+            if (discountsError) throw discountsError;
+            
+            // Ensure the type casting is correct when setting discounts
+            const typedDiscounts = (discountsData || []).map(d => ({
+              ...d,
+              type: d.type as 'order' | 'shipping',
+              discount_type: d.discount_type as 'percentage' | 'fixed'
+            }));
+            
+            setDiscounts(typedDiscounts);
+          }
         }
 
         setLoading(false);
@@ -121,7 +124,7 @@ const StoreDashboard = () => {
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
       let logoUrl = storeData?.logo_url;
@@ -146,8 +149,13 @@ const StoreDashboard = () => {
         logoUrl = publicUrl;
       }
 
+      // Ensure we have a valid user ID before attempting to insert/update
+      if (!user.id) {
+        throw new Error("Invalid user ID");
+      }
+
       const storePayload = {
-        user_id: user.id,
+        user_id: user.id, // Make sure user_id is explicitly set
         ...storeData,
         logo_url: logoUrl,
         keywords: storeData?.keywords?.join(',').split(',').map(k => k.trim()) || [],
