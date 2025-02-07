@@ -57,8 +57,8 @@ const PublicDiscounts = () => {
           .select('*')
           .eq('store_id', linkData.store_id)
           .eq('status', 'active')
-          .lt('valid_from', now)
-          .gt('valid_until', now);
+          .lte('valid_from', now)
+          .gte('valid_until', now);
 
         if (discountsError) {
           console.error('Discounts error:', discountsError);
