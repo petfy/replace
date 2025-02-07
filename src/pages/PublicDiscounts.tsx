@@ -23,16 +23,22 @@ const PublicDiscounts = () => {
   const { urlSlug } = useParams();
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [redeemedDiscounts, setRedeemedDiscounts] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchDiscounts = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         if (!urlSlug) {
-          throw new Error('URL inválida');
+          setError('URL inválida');
+          return;
         }
 
+        // First, get the store_id from the public_discount_links table
         const { data: linkData, error: linkError } = await supabase
           .from('public_discount_links')
           .select('store_id')
@@ -40,9 +46,18 @@ const PublicDiscounts = () => {
           .eq('is_active', true)
           .maybeSingle();
 
-        if (linkError) throw linkError;
-        if (!linkData) throw new Error('Link no encontrado o inactivo');
+        if (linkError) {
+          console.error('Error fetching link:', linkError);
+          setError('Error al cargar los descuentos');
+          return;
+        }
 
+        if (!linkData) {
+          setError('Link no encontrado o inactivo');
+          return;
+        }
+
+        // Then, get the active discounts for this store
         const now = new Date().toISOString();
         const { data: discountsData, error: discountsError } = await supabase
           .from('store_discounts')
@@ -52,7 +67,11 @@ const PublicDiscounts = () => {
           .lte('valid_from', now)
           .gte('valid_until', now);
 
-        if (discountsError) throw discountsError;
+        if (discountsError) {
+          console.error('Error fetching discounts:', discountsError);
+          setError('Error al cargar los descuentos');
+          return;
+        }
         
         const typedDiscounts = (discountsData || []).map(discount => ({
           ...discount,
@@ -64,6 +83,7 @@ const PublicDiscounts = () => {
         setDiscounts(typedDiscounts);
       } catch (error: any) {
         console.error('Error:', error);
+        setError('Error al cargar los descuentos');
       } finally {
         setLoading(false);
       }
@@ -93,16 +113,39 @@ const PublicDiscounts = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        Cargando descuentos...
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <img 
+          src="/lovable-uploads/8135bb2c-9d94-4a47-8471-88383f309453.png"
+          alt="RePlace Logo"
+          className="h-16 mb-8"
+        />
+        <p className="text-lg text-gray-600">Cargando descuentos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <img 
+          src="/lovable-uploads/8135bb2c-9d94-4a47-8471-88383f309453.png"
+          alt="RePlace Logo"
+          className="h-16 mb-8"
+        />
+        <p className="text-lg text-red-600">{error}</p>
       </div>
     );
   }
 
   if (discounts.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        No hay descuentos activos en este momento.
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <img 
+          src="/lovable-uploads/8135bb2c-9d94-4a47-8471-88383f309453.png"
+          alt="RePlace Logo"
+          className="h-16 mb-8"
+        />
+        <p className="text-lg text-gray-600">No hay descuentos activos en este momento.</p>
       </div>
     );
   }
