@@ -245,6 +245,9 @@ export type Database = {
         | "wix"
         | "tiendanube"
         | "jumpseller"
+        | "vtex"
+        | "magento"
+        | "otro"
     }
     CompositeTypes: {
       [_ in never]: never

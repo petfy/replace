@@ -17,7 +17,7 @@ interface StoreData {
   category: string;
   keywords: string[];
   website: string;
-  platform: 'shopify' | 'vtex' | 'jumpseller' | 'wix' | 'woocommerce' | 'magento' | 'tiendanube' | 'otro';
+  platform: 'shopify' | 'woocommerce' | 'wix' | 'tiendanube' | 'jumpseller' | 'vtex' | 'magento' | 'otro';
   logo_url?: string;
 }
 
@@ -41,7 +41,8 @@ const StoreDashboard = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // New discount form state
-  const [newDiscount, setNewDiscount] = useState({
+  const [newDiscount, setNewDiscount] = useState<Discount>({
+    id: '',
     type: 'order',
     code: '',
     discount_type: 'percentage',
@@ -79,7 +80,11 @@ const StoreDashboard = () => {
             .order('created_at', { ascending: false });
 
           if (discountsError) throw discountsError;
-          setDiscounts(discountsData || []);
+          setDiscounts(discountsData?.map(d => ({
+            ...d,
+            type: d.type as 'order' | 'shipping',
+            discount_type: d.discount_type as 'percentage' | 'fixed'
+          })) || []);
         }
 
         setLoading(false);
@@ -180,10 +185,15 @@ const StoreDashboard = () => {
         .order('created_at', { ascending: false });
 
       if (discountsError) throw discountsError;
-      setDiscounts(discountsData || []);
+      setDiscounts(discountsData?.map(d => ({
+        ...d,
+        type: d.type as 'order' | 'shipping',
+        discount_type: d.discount_type as 'percentage' | 'fixed'
+      })) || []);
 
       // Reset form
       setNewDiscount({
+        id: '',
         type: 'order',
         code: '',
         discount_type: 'percentage',
