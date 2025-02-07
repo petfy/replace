@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -117,6 +118,26 @@ const Dashboard = () => {
     };
 
     fetchAddresses();
+
+    // Subscribe to changes
+    const channel = supabase
+      .channel('address-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'addresses'
+        },
+        () => {
+          fetchAddresses();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [toast]);
 
   const handleSignOut = async () => {
@@ -146,12 +167,6 @@ const Dashboard = () => {
   const filteredAddresses = selectedCategory
     ? addresses.filter(addr => addr.category === selectedCategory)
     : [defaultAddress].filter(Boolean) as Address[];
-
-  const shouldShowDefaultAddress = !selectedCategory && defaultAddress;
-  
-  const categoryAddresses = selectedCategory
-    ? filteredAddresses.filter(addr => !addr.is_default)
-    : filteredAddresses;
 
   if (!user) return null;
 
