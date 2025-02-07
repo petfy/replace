@@ -61,6 +61,12 @@ const StoreDashboard = () => {
   const [newDiscount, setNewDiscount] = useState<Discount>(DEFAULT_DISCOUNT);
 
   const fetchDiscounts = async (storeId: string) => {
+    // Add validation to ensure storeId is not empty
+    if (!storeId) {
+      console.warn('Attempted to fetch discounts without a valid store ID');
+      return;
+    }
+
     const { data: discountsData, error: discountsError } = await supabase
       .from('store_discounts')
       .select('*')
@@ -153,7 +159,7 @@ const StoreDashboard = () => {
                 setNewDiscount={setNewDiscount}
                 loading={loading}
                 setLoading={setLoading}
-                refreshDiscounts={() => fetchDiscounts(storeData.id || '')}
+                refreshDiscounts={() => storeData.id ? fetchDiscounts(storeData.id) : undefined}
               />
               <DiscountList
                 discounts={discounts}
