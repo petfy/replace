@@ -9,7 +9,9 @@ import { formatRUT, isValidRUT } from "@/lib/format-rut";
 import { CategorySelector, categories } from "./address/CategorySelector";
 import { CountrySelect } from "./address/CountrySelect";
 import { RegionSelect } from "./address/RegionSelect";
+import { TownSelect } from "./address/TownSelect";
 import { FormProgress } from "./address/FormProgress";
+import type { ChileRegionCode } from "@/lib/chile-towns";
 
 interface AddressFormProps {
   onSuccess: () => void;
@@ -40,8 +42,9 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
   const [phone, setPhone] = useState(initialData?.phone || "");
   const [country, setCountry] = useState(initialData?.country || "CL");
   const [region, setRegion] = useState(initialData?.state || "");
+  const [town, setTown] = useState(initialData?.city || "");
   const [otherState, setOtherState] = useState(initialData?.state || "");
-  const [city, setCity] = useState(initialData?.city || "");
+  const [otherCity, setOtherCity] = useState(initialData?.city || "");
   const [zipCode, setZipCode] = useState(initialData?.zip_code || "");
   const [street, setStreet] = useState(initialData?.street || "");
   const [isDefault, setIsDefault] = useState(initialData?.is_default || false);
@@ -58,7 +61,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
       setCountry(initialData.country || "CL");
       setRegion(initialData.state || "");
       setOtherState(initialData.state || "");
-      setCity(initialData.city || "");
+      setTown(initialData.city || "");
+      setOtherCity(initialData.city || "");
       setZipCode(initialData.zip_code || "");
       setStreet(initialData.street || "");
       setIsDefault(initialData.is_default || false);
@@ -77,7 +81,8 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
       setCountry("CL");
       setRegion("");
       setOtherState("");
-      setCity("");
+      setTown("");
+      setOtherCity("");
       setZipCode("");
       setStreet("");
       setIsDefault(false);
@@ -94,7 +99,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
       firstName,
       lastName,
       street,
-      city,
+      city: country === "CL" ? town : otherCity,
       country,
       category,
       state: country === "CL" ? region : otherState,
@@ -134,7 +139,7 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
       const categoryInfo = categories.find(c => c.value === category);
       const addressData = {
         street,
-        city,
+        city: country === "CL" ? town : otherCity,
         state: country === "CL" ? region : otherState,
         zip_code: zipCode,
         country,
@@ -247,24 +252,32 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
           <CountrySelect value={country} onValueChange={setCountry} />
 
           {country === "CL" ? (
-            <RegionSelect value={region} onValueChange={setRegion} />
+            <>
+              <RegionSelect value={region} onValueChange={setRegion} />
+              <TownSelect
+                value={town}
+                onValueChange={setTown}
+                regionCode={region as ChileRegionCode}
+              />
+            </>
           ) : (
-            <Input
-              type="text"
-              value={otherState}
-              onChange={(e) => setOtherState(e.target.value)}
-              placeholder="Estado/Provincia"
-              required
-            />
+            <>
+              <Input
+                type="text"
+                value={otherState}
+                onChange={(e) => setOtherState(e.target.value)}
+                placeholder="Estado/Provincia"
+                required
+              />
+              <Input
+                type="text"
+                value={otherCity}
+                onChange={(e) => setOtherCity(e.target.value)}
+                placeholder="Ciudad"
+                required
+              />
+            </>
           )}
-
-          <Input
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Ciudad"
-            required
-          />
 
           <Input
             type="text"
@@ -304,4 +317,3 @@ export const AddressForm = ({ onSuccess, initialData }: AddressFormProps) => {
     </Card>
   );
 };
-
