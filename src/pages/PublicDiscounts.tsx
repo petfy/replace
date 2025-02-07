@@ -33,11 +33,12 @@ const PublicDiscounts = () => {
 
         console.log('Fetching discounts for slug:', urlSlug);
 
-        // Use the anon key client which doesn't require authentication
+        // First get the store_id from public_discount_links
         const { data: linkData, error: linkError } = await supabase
           .from('public_discount_links')
           .select('store_id')
           .eq('url_slug', urlSlug)
+          .eq('is_active', true)
           .maybeSingle();
 
         if (linkError) {
@@ -45,18 +46,22 @@ const PublicDiscounts = () => {
           throw linkError;
         }
         if (!linkData) {
-          console.error('No link data found');
+          console.error('No active link found for slug:', urlSlug);
           throw new Error('Link no encontrado o inactivo');
         }
 
         console.log('Found store_id:', linkData.store_id);
+
+        const now = new Date().toISOString();
 
         // Then fetch active discounts for that store
         const { data: discountsData, error: discountsError } = await supabase
           .from('store_discounts')
           .select('*')
           .eq('store_id', linkData.store_id)
-          .eq('status', 'active');
+          .eq('status', 'active')
+          .lte('valid_from', now)
+          .gte('valid_until', now);
 
         if (discountsError) {
           console.error('Discounts error:', discountsError);
@@ -64,6 +69,10 @@ const PublicDiscounts = () => {
         }
 
         console.log('Found discounts:', discountsData);
+        
+        if (!discountsData || discountsData.length === 0) {
+          console.log('No active discounts found for store:', linkData.store_id);
+        }
         
         // Type cast the data to ensure it matches our Discount interface
         const typedDiscounts = (discountsData || []).map(discount => ({
