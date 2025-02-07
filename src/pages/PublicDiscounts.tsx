@@ -27,16 +27,22 @@ const PublicDiscounts = () => {
   useEffect(() => {
     const fetchDiscounts = async () => {
       try {
+        if (!urlSlug) {
+          throw new Error('URL inválida');
+        }
+
         // First get the store_id from the public_discount_links table
         const { data: linkData, error: linkError } = await supabase
           .from('public_discount_links')
           .select('store_id')
           .eq('url_slug', urlSlug)
           .eq('is_active', true)
-          .single();
+          .maybeSingle();
 
         if (linkError) throw linkError;
-        if (!linkData) throw new Error('Link not found or inactive');
+        if (!linkData) {
+          throw new Error('Link no encontrado o inactivo');
+        }
 
         // Then fetch active discounts for that store
         const { data: discountsData, error: discountsError } = await supabase
@@ -62,7 +68,7 @@ const PublicDiscounts = () => {
         console.error('Error:', error);
         toast({
           title: "Error",
-          description: "No se pudieron cargar los descuentos.",
+          description: error.message || "No se pudieron cargar los descuentos.",
           variant: "destructive",
         });
       } finally {
