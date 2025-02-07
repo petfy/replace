@@ -145,7 +145,7 @@ const Dashboard = () => {
 
   const filteredAddresses = selectedCategory
     ? addresses.filter(addr => addr.category === selectedCategory)
-    : addresses;
+    : [defaultAddress].filter(Boolean) as Address[];
 
   const shouldShowDefaultAddress = !selectedCategory && defaultAddress;
   
@@ -229,26 +229,16 @@ const Dashboard = () => {
                 })}
               </div>
 
-              {shouldShowDefaultAddress && (
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold mb-4">Dirección predeterminada</h2>
-                  <AddressList
-                    onEdit={handleEdit}
-                    addresses={[defaultAddress]}
-                  />
-                </div>
-              )}
-
-              {categoryAddresses.length > 0 && (
+              {filteredAddresses.length > 0 && (
                 <div>
                   <h2 className="text-lg font-semibold mb-4">
                     {selectedCategory 
                       ? `Direcciones en categoría: ${categories.find(c => c.value === selectedCategory)?.label}`
-                      : "Todas las direcciones"}
+                      : "Dirección predeterminada"}
                   </h2>
                   <AddressList
                     onEdit={handleEdit}
-                    addresses={categoryAddresses}
+                    addresses={filteredAddresses}
                   />
                 </div>
               )}
