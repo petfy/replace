@@ -5,7 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy } from "lucide-react";
+import { Truck } from "lucide-react";
+import confetti from 'canvas-confetti';
 
 interface Discount {
   id: string;
@@ -22,6 +23,7 @@ const PublicDiscounts = () => {
   const { urlSlug } = useParams();
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [redeemedDiscounts, setRedeemedDiscounts] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -31,9 +33,6 @@ const PublicDiscounts = () => {
           throw new Error('URL inválida');
         }
 
-        console.log('Fetching discounts for slug:', urlSlug);
-
-        // First get the store_id from public_discount_links
         const { data: linkData, error: linkError } = await supabase
           .from('public_discount_links')
           .select('store_id')
@@ -41,20 +40,10 @@ const PublicDiscounts = () => {
           .eq('is_active', true)
           .maybeSingle();
 
-        if (linkError) {
-          console.error('Link error:', linkError);
-          throw linkError;
-        }
-        if (!linkData) {
-          console.error('No active link found for slug:', urlSlug);
-          throw new Error('Link no encontrado o inactivo');
-        }
-
-        console.log('Found store_id:', linkData.store_id);
+        if (linkError) throw linkError;
+        if (!linkData) throw new Error('Link no encontrado o inactivo');
 
         const now = new Date().toISOString();
-
-        // Then fetch active discounts for that store
         const { data: discountsData, error: discountsError } = await supabase
           .from('store_discounts')
           .select('*')
@@ -63,18 +52,8 @@ const PublicDiscounts = () => {
           .lte('valid_from', now)
           .gte('valid_until', now);
 
-        if (discountsError) {
-          console.error('Discounts error:', discountsError);
-          throw discountsError;
-        }
-
-        console.log('Found discounts:', discountsData);
+        if (discountsError) throw discountsError;
         
-        if (!discountsData || discountsData.length === 0) {
-          console.log('No active discounts found for store:', linkData.store_id);
-        }
-        
-        // Type cast the data to ensure it matches our Discount interface
         const typedDiscounts = (discountsData || []).map(discount => ({
           ...discount,
           type: discount.type as 'order' | 'shipping',
@@ -85,32 +64,30 @@ const PublicDiscounts = () => {
         setDiscounts(typedDiscounts);
       } catch (error: any) {
         console.error('Error:', error);
-        toast({
-          title: "Error",
-          description: error.message || "No se pudieron cargar los descuentos.",
-          variant: "destructive",
-        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchDiscounts();
-  }, [urlSlug, toast]);
+  }, [urlSlug]);
 
-  const copyToClipboard = async (code: string) => {
+  const launchConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#FFB6C1', '#87CEEB', '#98FB98', '#DDA0DD', '#F0E68C']
+    });
+  };
+
+  const handleRedeemDiscount = async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
-      toast({
-        title: "¡Código copiado!",
-        description: "El código de descuento ha sido copiado al portapapeles.",
-      });
+      setRedeemedDiscounts(prev => [...prev, code]);
+      launchConfetti();
     } catch (err) {
-      toast({
-        title: "Error",
-        description: "No se pudo copiar el código. Por favor, inténtalo de nuevo.",
-        variant: "destructive",
-      });
+      console.error('Error al copiar el código:', err);
     }
   };
 
@@ -131,33 +108,52 @@ const PublicDiscounts = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Descuentos Disponibles</h1>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="text-center mb-8">
+        <img 
+          src="/lovable-uploads/8135bb2c-9d94-4a47-8471-88383f309453.png"
+          alt="RePlace Logo"
+          className="h-16 mx-auto mb-4"
+        />
+        <h1 className="text-3xl font-bold text-primary-800">Descuentos Disponibles</h1>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
         {discounts.map((discount) => (
-          <Card key={discount.id}>
+          <Card key={discount.id} className="w-full mx-auto bg-white shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader>
-              <CardTitle className="text-xl">
-                {discount.type === 'shipping' ? 'Envío Gratis' : 'Descuento en Compra'}
+              <CardTitle className="text-xl flex items-center justify-center gap-2">
+                {discount.type === 'shipping' ? (
+                  <>
+                    <Truck className="h-6 w-6 text-primary-600" />
+                    <span>Envío Gratis</span>
+                  </>
+                ) : (
+                  'Descuento en el Pedido'
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <p className="text-lg font-semibold">
+              <div className="space-y-4 text-center">
+                <p className="text-2xl font-bold text-primary-700">
                   {discount.discount_type === 'percentage' 
                     ? `${discount.value}% de descuento`
                     : `$${discount.value} de descuento`}
                 </p>
-                <div className="flex items-center justify-between gap-2">
-                  <code className="bg-muted px-2 py-1 rounded">{discount.code}</code>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => copyToClipboard(discount.code)}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copiar
-                  </Button>
+                <div className="space-y-3">
+                  <code className="block w-full bg-gray-100 px-4 py-2 rounded-md text-lg font-mono">
+                    {discount.code}
+                  </code>
+                  {redeemedDiscounts.includes(discount.code) ? (
+                    <p className="text-green-600 font-medium">¡Descuento canjeado!</p>
+                  ) : (
+                    <Button
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
+                      onClick={() => handleRedeemDiscount(discount.code)}
+                    >
+                      CANJEAR DESCUENTO
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
