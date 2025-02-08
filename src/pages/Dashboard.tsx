@@ -270,7 +270,21 @@ const Dashboard = () => {
                 })}
               </div>
 
-              {filteredAddresses.length > 0 && (
+              {addresses.length === 0 ? (
+                <div className="text-center py-8 bg-white rounded-lg shadow">
+                  <MapPin className="mx-auto h-12 w-12 text-primary/60" />
+                  <h3 className="mt-2 text-lg font-medium text-gray-900">¡Crea tu primer perfil de dirección!</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Comienza agregando una dirección para agilizar tus compras en línea
+                  </p>
+                  <div className="mt-6">
+                    <Button onClick={() => setShowAddForm(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Agregar dirección
+                    </Button>
+                  </div>
+                </div>
+              ) : filteredAddresses.length > 0 && (
                 <div>
                   <h2 className="text-lg font-semibold mb-4">
                     {selectedCategory 
