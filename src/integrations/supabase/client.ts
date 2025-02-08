@@ -10,10 +10,11 @@ export const supabase = createClient<Database>(
   SUPABASE_ANON_KEY,
   {
     auth: {
-      persistSession: true,
-      detectSessionInUrl: false,
       autoRefreshToken: true,
-      storage: localStorage
+      persistSession: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce'
     }
   }
 );
+
