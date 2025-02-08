@@ -106,18 +106,47 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          }
+          },
+          redirectTo: `${window.location.origin}/auth`,
+          skipBrowserRedirect: true // Esto evita la redirección automática
         }
       });
 
       if (error) throw error;
+
+      // Abrir popup con la URL de autorización
+      if (data?.url) {
+        const popup = window.open(
+          data.url,
+          'Login with Google',
+          'width=600,height=800,left=' + 
+          (window.innerWidth / 2 - 300) + 
+          ',top=' + (window.innerHeight / 2 - 400)
+        );
+
+        // Monitorear el cierre del popup
+        const checkPopup = setInterval(() => {
+          if (!popup || popup.closed) {
+            clearInterval(checkPopup);
+            // La ventana se cerró, verificar si el usuario se autenticó
+            supabase.auth.getSession().then(({ data: { session }}) => {
+              if (session) {
+                toast({
+                  title: "¡Bienvenido!",
+                  description: "Has iniciado sesión con Google exitosamente.",
+                });
+                navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+              }
+            });
+          }
+        }, 500);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
