@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,14 +17,12 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we're already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
       }
     });
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
@@ -72,11 +69,9 @@ const Auth = () => {
           throw signInError;
         }
 
-        // Check if the account type matches
         const userIsStore = data.user?.user_metadata?.is_store === true;
         
         if (userIsStore !== isStore) {
-          // Sign out immediately since the account type doesn't match
           await supabase.auth.signOut();
           throw new Error(
             isStore 
@@ -90,7 +85,6 @@ const Auth = () => {
           description: "Has iniciado sesión exitosamente.",
         });
         
-        // Navigate based on account type
         navigate(isStore ? "/store-dashboard" : "/dashboard");
       }
     } catch (error: any) {
@@ -120,7 +114,6 @@ const Auth = () => {
 
       if (error) throw error;
 
-      // Abrir popup con la URL de autorización
       if (data?.url) {
         const popup = window.open(
           data.url,
@@ -130,11 +123,12 @@ const Auth = () => {
           ',top=' + (window.innerHeight / 2 - 400)
         );
 
-        // Monitorear el cierre del popup
         const checkPopup = setInterval(() => {
           if (!popup || popup.closed) {
             clearInterval(checkPopup);
-            // La ventana se cerró, verificar si el usuario se autenticó
+            if (popup && !popup.closed) {
+              popup.close();
+            }
             supabase.auth.getSession().then(({ data: { session }}) => {
               if (session) {
                 toast({
