@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Chrome, Store } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -16,6 +16,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -109,51 +110,54 @@ const Auth = () => {
             prompt: 'consent',
           },
           redirectTo: `${window.location.origin}/auth`,
-          skipBrowserRedirect: true
+          skipBrowserRedirect: !isMobile
         }
       });
 
       if (error) throw error;
 
       if (data?.url) {
-        const width = 600;
-        const height = 800;
-        const left = window.innerWidth / 2 - width / 2;
-        const top = window.innerHeight / 2 - height / 2;
-        
-        const popup = window.open(
-          data.url,
-          'Login with Google',
-          `width=${width},height=${height},left=${left},top=${top}`
-        );
+        if (isMobile) {
+          window.location.href = data.url;
+        } else {
+          const width = 600;
+          const height = 800;
+          const left = window.innerWidth / 2 - width / 2;
+          const top = window.innerHeight / 2 - height / 2;
+          
+          const popup = window.open(
+            data.url,
+            'Login with Google',
+            `width=${width},height=${height},left=${left},top=${top}`
+          );
 
-        const checkPopup = setInterval(() => {
-          if (!popup || popup.closed) {
-            clearInterval(checkPopup);
-            supabase.auth.getSession().then(({ data: { session }}) => {
-              if (session) {
-                toast({
-                  title: "¡Bienvenido!",
-                  description: "Has iniciado sesión con Google exitosamente.",
-                });
-                navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-              }
-            });
-          } else {
-            // Check if authenticated while popup is still open
-            supabase.auth.getSession().then(({ data: { session }}) => {
-              if (session) {
-                popup.close();
-                clearInterval(checkPopup);
-                toast({
-                  title: "¡Bienvenido!",
-                  description: "Has iniciado sesión con Google exitosamente.",
-                });
-                navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-              }
-            });
-          }
-        }, 500);
+          const checkPopup = setInterval(() => {
+            if (!popup || popup.closed) {
+              clearInterval(checkPopup);
+              supabase.auth.getSession().then(({ data: { session }}) => {
+                if (session) {
+                  toast({
+                    title: "¡Bienvenido!",
+                    description: "Has iniciado sesión con Google exitosamente.",
+                  });
+                  navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+                }
+              });
+            } else {
+              supabase.auth.getSession().then(({ data: { session }}) => {
+                if (session) {
+                  popup.close();
+                  clearInterval(checkPopup);
+                  toast({
+                    title: "¡Bienvenido!",
+                    description: "Has iniciado sesión con Google exitosamente.",
+                  });
+                  navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+                }
+              });
+            }
+          }, 500);
+        }
       }
     } catch (error: any) {
       toast({
