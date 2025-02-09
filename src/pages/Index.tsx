@@ -1,6 +1,7 @@
 
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
+import { PlatformsCarousel } from "@/components/PlatformsCarousel";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Map } from "lucide-react";
@@ -24,6 +25,7 @@ const Index = () => {
       <main>
         <Hero />
         <Features />
+        <PlatformsCarousel />
       </main>
       <footer className="bg-gray-50 py-12 mt-16">
         <div className="container mx-auto px-4">
