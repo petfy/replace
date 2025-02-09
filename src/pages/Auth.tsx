@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -111,60 +110,54 @@ const Auth = () => {
             prompt: 'consent',
           },
           redirectTo: `${window.location.origin}/auth`,
-          skipBrowserRedirect: !isMobile // Only skip redirect on desktop to use popup
+          skipBrowserRedirect: !isMobile
         }
       });
 
       if (error) throw error;
 
-      // Only handle popup on desktop
-      if (!isMobile && data?.url) {
-        const width = 600;
-        const height = 800;
-        const left = window.innerWidth / 2 - width / 2;
-        const top = window.innerHeight / 2 - height / 2;
-        
-        const popup = window.open(
-          data.url,
-          'Login with Google',
-          `width=${width},height=${height},left=${left},top=${top}`
-        );
+      if (data?.url) {
+        if (isMobile) {
+          window.location.href = data.url;
+        } else {
+          const width = 600;
+          const height = 800;
+          const left = window.innerWidth / 2 - width / 2;
+          const top = window.innerHeight / 2 - height / 2;
+          
+          const popup = window.open(
+            data.url,
+            'Login with Google',
+            `width=${width},height=${height},left=${left},top=${top}`
+          );
 
-        if (!popup) {
-          throw new Error("No se pudo abrir la ventana de autenticación. Por favor, habilita las ventanas emergentes.");
-        }
-
-        // Check popup and session status
-        const checkPopup = setInterval(async () => {
-          try {
+          const checkPopup = setInterval(() => {
             if (!popup || popup.closed) {
               clearInterval(checkPopup);
-              const { data: { session } } = await supabase.auth.getSession();
-              if (session) {
-                toast({
-                  title: "¡Bienvenido!",
-                  description: "Has iniciado sesión con Google exitosamente.",
-                });
-                navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-              }
+              supabase.auth.getSession().then(({ data: { session }}) => {
+                if (session) {
+                  toast({
+                    title: "¡Bienvenido!",
+                    description: "Has iniciado sesión con Google exitosamente.",
+                  });
+                  navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+                }
+              });
             } else {
-              // Check if authenticated while popup is still open
-              const { data: { session } } = await supabase.auth.getSession();
-              if (session) {
-                popup.close();
-                clearInterval(checkPopup);
-                toast({
-                  title: "¡Bienvenido!",
-                  description: "Has iniciado sesión con Google exitosamente.",
-                });
-                navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-              }
+              supabase.auth.getSession().then(({ data: { session }}) => {
+                if (session) {
+                  popup.close();
+                  clearInterval(checkPopup);
+                  toast({
+                    title: "¡Bienvenido!",
+                    description: "Has iniciado sesión con Google exitosamente.",
+                  });
+                  navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+                }
+              });
             }
-          } catch (error) {
-            clearInterval(checkPopup);
-            console.error("Error checking session:", error);
-          }
-        }, 500);
+          }, 500);
+        }
       }
     } catch (error: any) {
       toast({
