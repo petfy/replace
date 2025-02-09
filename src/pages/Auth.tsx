@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -109,42 +108,29 @@ const Auth = () => {
             prompt: 'consent',
           },
           redirectTo: `${window.location.origin}/auth`,
-          skipBrowserRedirect: true
+          skipBrowserRedirect: true // Esto evita la redirección automática
         }
       });
 
       if (error) throw error;
 
       if (data?.url) {
-        const width = 600;
-        const height = 800;
-        const left = window.innerWidth / 2 - width / 2;
-        const top = window.innerHeight / 2 - height / 2;
-        
         const popup = window.open(
           data.url,
           'Login with Google',
-          `width=${width},height=${height},left=${left},top=${top}`
+          'width=600,height=800,left=' + 
+          (window.innerWidth / 2 - 300) + 
+          ',top=' + (window.innerHeight / 2 - 400)
         );
 
         const checkPopup = setInterval(() => {
           if (!popup || popup.closed) {
             clearInterval(checkPopup);
+            if (popup && !popup.closed) {
+              popup.close();
+            }
             supabase.auth.getSession().then(({ data: { session }}) => {
               if (session) {
-                toast({
-                  title: "¡Bienvenido!",
-                  description: "Has iniciado sesión con Google exitosamente.",
-                });
-                navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-              }
-            });
-          } else {
-            // Check if authenticated while popup is still open
-            supabase.auth.getSession().then(({ data: { session }}) => {
-              if (session) {
-                popup.close();
-                clearInterval(checkPopup);
                 toast({
                   title: "¡Bienvenido!",
                   description: "Has iniciado sesión con Google exitosamente.",
