@@ -1,3 +1,4 @@
+
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { Button } from "@/components/ui/button";
@@ -42,8 +43,15 @@ const Index = () => {
               <p className="text-gray-600">Teléfono: +56 9 76614125</p>
             </div>
           </div>
-          <div className="border-t mt-8 pt-8 text-center text-gray-600">
-            <p>© 2024 RePlace. Todos los derechos reservados.</p>
+          <div className="border-t mt-8 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-gray-600">© 2024 RePlace. Todos los derechos reservados.</p>
+              <div className="flex items-center gap-4">
+                <Link to="/privacy" className="text-gray-600 hover:text-primary transition-colors">
+                  Política de Privacidad
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
