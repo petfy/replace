@@ -17,6 +17,7 @@ const Auth = () => {
   const location = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const isExtension = window.chrome?.runtime?.id !== undefined;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -110,14 +111,14 @@ const Auth = () => {
             prompt: 'consent',
           },
           redirectTo: `${window.location.origin}/auth`,
-          skipBrowserRedirect: !isMobile
+          skipBrowserRedirect: !(isMobile || isExtension)
         }
       });
 
       if (error) throw error;
 
       if (data?.url) {
-        if (isMobile) {
+        if (isMobile || isExtension) {
           window.location.href = data.url;
         } else {
           const width = 600;
