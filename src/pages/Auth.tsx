@@ -130,10 +130,16 @@ const Auth = () => {
           `width=${width},height=${height},left=${left},top=${top}`
         );
 
-        const checkPopup = setInterval(() => {
-          if (!popup || popup.closed) {
-            clearInterval(checkPopup);
-            supabase.auth.getSession().then(({ data: { session }}) => {
+        if (!popup) {
+          throw new Error("No se pudo abrir la ventana de autenticación. Por favor, habilita las ventanas emergentes.");
+        }
+
+        // Check popup and session status
+        const checkPopup = setInterval(async () => {
+          try {
+            if (!popup || popup.closed) {
+              clearInterval(checkPopup);
+              const { data: { session } } = await supabase.auth.getSession();
               if (session) {
                 toast({
                   title: "¡Bienvenido!",
@@ -141,10 +147,9 @@ const Auth = () => {
                 });
                 navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
               }
-            });
-          } else {
-            // Check if authenticated while popup is still open
-            supabase.auth.getSession().then(({ data: { session }}) => {
+            } else {
+              // Check if authenticated while popup is still open
+              const { data: { session } } = await supabase.auth.getSession();
               if (session) {
                 popup.close();
                 clearInterval(checkPopup);
@@ -154,7 +159,10 @@ const Auth = () => {
                 });
                 navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
               }
-            });
+            }
+          } catch (error) {
+            clearInterval(checkPopup);
+            console.error("Error checking session:", error);
           }
         }, 500);
       }
