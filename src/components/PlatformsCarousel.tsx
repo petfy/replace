@@ -75,7 +75,7 @@ export const PlatformsCarousel = () => {
                   <div className="flex flex-col items-center justify-center p-4">
                     <div
                       className={cn(
-                        "w-24 h-24 flex items-center justify-center rounded-lg bg-gray-100 mb-2",
+                        "flex items-center justify-center mb-2",
                         !platform.active && "grayscale opacity-50"
                       )}
                     >
@@ -83,7 +83,7 @@ export const PlatformsCarousel = () => {
                         <img 
                           src={platform.logo} 
                           alt={platform.name} 
-                          className="w-16 h-16 object-contain"
+                          className="w-32 h-20 object-contain"
                         />
                       ) : (
                         <span className={cn(
@@ -95,7 +95,7 @@ export const PlatformsCarousel = () => {
                       )}
                     </div>
                     {!platform.active && (
-                      <span className="text-sm text-gray-500 mt-2">¡Muy Pronto!</span>
+                      <span className="text-sm text-gray-500">¡Muy Pronto!</span>
                     )}
                   </div>
                 </CarouselItem>
@@ -107,3 +107,4 @@ export const PlatformsCarousel = () => {
     </div>
   );
 };
+
