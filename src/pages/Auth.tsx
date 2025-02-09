@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Chrome, Store } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -109,13 +111,14 @@ const Auth = () => {
             prompt: 'consent',
           },
           redirectTo: `${window.location.origin}/auth`,
-          skipBrowserRedirect: true
+          skipBrowserRedirect: !isMobile // Only skip redirect on desktop to use popup
         }
       });
 
       if (error) throw error;
 
-      if (data?.url) {
+      // Only handle popup on desktop
+      if (!isMobile && data?.url) {
         const width = 600;
         const height = 800;
         const left = window.innerWidth / 2 - width / 2;
