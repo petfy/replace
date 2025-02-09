@@ -17,17 +17,20 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-      }
-    });
+    checkSession();
 
     return () => subscription.unsubscribe();
   }, [navigate]);
@@ -108,7 +111,6 @@ const Auth = () => {
             prompt: 'consent',
           },
           redirectTo: `${window.location.origin}/auth`,
-          skipBrowserRedirect: true // Esto evita la redirección automática
         }
       });
 
@@ -123,23 +125,24 @@ const Auth = () => {
           ',top=' + (window.innerHeight / 2 - 400)
         );
 
-        const checkPopup = setInterval(() => {
-          if (!popup || popup.closed) {
-            clearInterval(checkPopup);
-            if (popup && !popup.closed) {
-              popup.close();
+        if (popup) {
+          const checkPopup = setInterval(() => {
+            if (popup.closed) {
+              clearInterval(checkPopup);
+              
+              // Verificar la sesión después de que se cierre el popup
+              supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session) {
+                  toast({
+                    title: "¡Bienvenido!",
+                    description: "Has iniciado sesión con Google exitosamente.",
+                  });
+                  navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+                }
+              });
             }
-            supabase.auth.getSession().then(({ data: { session }}) => {
-              if (session) {
-                toast({
-                  title: "¡Bienvenido!",
-                  description: "Has iniciado sesión con Google exitosamente.",
-                });
-                navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-              }
-            });
-          }
-        }, 500);
+          }, 1000);
+        }
       }
     } catch (error: any) {
       toast({
