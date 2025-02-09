@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,7 @@ const Auth = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const isExtension = window.chrome?.runtime?.id !== undefined;
+  const isIframe = window !== window.top;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -111,14 +113,14 @@ const Auth = () => {
             prompt: 'consent',
           },
           redirectTo: `${window.location.origin}/auth`,
-          skipBrowserRedirect: !(isMobile || isExtension)
+          skipBrowserRedirect: !(isMobile || (isExtension && !isIframe))
         }
       });
 
       if (error) throw error;
 
       if (data?.url) {
-        if (isMobile || isExtension) {
+        if (isMobile || (isExtension && !isIframe)) {
           window.location.href = data.url;
         } else {
           const width = 600;
