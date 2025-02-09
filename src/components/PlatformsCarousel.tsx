@@ -1,4 +1,3 @@
-
 import {
   Carousel,
   CarouselContent,
@@ -48,7 +47,7 @@ const platforms = [
 
 export const PlatformsCarousel = () => {
   const plugin = useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true })
+    Autoplay({ delay: 2000, stopOnInteraction: false })
   );
 
   return (
@@ -58,10 +57,10 @@ export const PlatformsCarousel = () => {
         <div className="mx-auto max-w-5xl">
           <Carousel
             opts={{
-              align: "start",
+              align: "center",
               loop: true,
               dragFree: true,
-              containScroll: false,
+              containScroll: "trimSnaps",
             }}
             plugins={[plugin.current]}
             className="w-full"
@@ -107,4 +106,3 @@ export const PlatformsCarousel = () => {
     </div>
   );
 };
-
