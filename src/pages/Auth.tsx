@@ -104,6 +104,8 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     try {
+      const isInChromeExtension = window.chrome?.runtime && chrome.runtime.id;
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -123,41 +125,62 @@ const Auth = () => {
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
 
-        const popup = window.open(
-          data.url,
-          'Login with Google',
-          `width=${width},height=${height},left=${left},top=${top},popup=1`
-        );
-
-        if (popup) {
-          // Manejar el cierre del popup y la autenticación
-          const checkPopup = setInterval(async () => {
-            try {
-              if (popup.closed) {
-                clearInterval(checkPopup);
-                
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                  toast({
-                    title: "¡Bienvenido!",
-                    description: "Has iniciado sesión con Google exitosamente.",
-                  });
-                  navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-                }
+        let popup: Window | null;
+        
+        if (isInChromeExtension) {
+          // Usar chrome.runtime.sendMessage para manejar la autenticación en la extensión
+          chrome.runtime.sendMessage({ type: 'OPEN_AUTH_WINDOW', url: data.url }, async (response) => {
+            if (response?.success) {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session) {
+                toast({
+                  title: "¡Bienvenido!",
+                  description: "Has iniciado sesión con Google exitosamente.",
+                });
+                navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
               }
-            } catch (e) {
-              // Si hay un error al verificar el popup (ej: acceso denegado en iframe),
-              // seguimos verificando sin lanzar errores
-              console.log("Error checking popup status:", e);
+            } else {
+              toast({
+                title: "Error",
+                description: "Hubo un problema al iniciar sesión con Google.",
+                variant: "destructive",
+              });
             }
-          }, 1000);
-        } else {
-          // Si el popup fue bloqueado, informar al usuario
-          toast({
-            title: "Error",
-            description: "Por favor permite las ventanas emergentes para iniciar sesión con Google.",
-            variant: "destructive",
           });
+        } else {
+          // Flujo normal para aplicación web
+          popup = window.open(
+            data.url,
+            'Login with Google',
+            `width=${width},height=${height},left=${left},top=${top},popup=1`
+          );
+
+          if (popup) {
+            const checkPopup = setInterval(async () => {
+              try {
+                if (popup?.closed) {
+                  clearInterval(checkPopup);
+                  
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (session) {
+                    toast({
+                      title: "¡Bienvenido!",
+                      description: "Has iniciado sesión con Google exitosamente.",
+                    });
+                    navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+                  }
+                }
+              } catch (e) {
+                console.log("Error checking popup status:", e);
+              }
+            }, 1000);
+          } else {
+            toast({
+              title: "Error",
+              description: "Por favor permite las ventanas emergentes para iniciar sesión con Google.",
+              variant: "destructive",
+            });
+          }
         }
       }
     } catch (error: any) {
