@@ -1,3 +1,4 @@
+
 import {
   Carousel,
   CarouselContent,
@@ -11,37 +12,37 @@ const platforms = [
   { 
     name: "Shopify", 
     active: true,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/shopify.svg?v=1739113267"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/shopify.svg"
   },
   { 
     name: "Vtex", 
     active: false,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/vtex.png?v=1739113267"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/vtex.png"
   },
   { 
     name: "Wix", 
     active: false,
-    logo: ""
+    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/wix.png?v=1739145766"
   },
   { 
     name: "Woocommerce", 
     active: false,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/woocommerce.webp?v=1739113267"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/woocommerce.webp"
   },
   { 
     name: "TiendaNube", 
     active: false,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/tiendanube.svg?v=1739113267"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/tiendanube.svg"
   },
   { 
     name: "Jumpseller", 
     active: false,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/jumpseller.png?v=1739113267"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/jumpseller.png"
   },
   { 
     name: "Prestashop", 
     active: false,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/prestashop.png?v=1739113267"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/prestashop.png"
   },
 ];
 

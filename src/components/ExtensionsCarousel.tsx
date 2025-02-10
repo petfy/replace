@@ -12,27 +12,27 @@ const extensions = [
   { 
     name: "Chrome", 
     active: true,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/chrome.svg?v=1739114262"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/chrome.svg"
   },
   { 
     name: "Firefox", 
     active: false,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/Firefox.png?v=1739114263"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/Firefox.png"
   },
   { 
     name: "Safari", 
     active: false,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/safari.jpg?v=1739114263"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/safari.jpg"
   },
   { 
     name: "App Store iOS", 
     active: false,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/ios.png?v=1739114263"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/ios.png"
   },
   { 
     name: "Play Store Android", 
     active: false,
-    logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/android.png?v=1739114263"
+    logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/android.png"
   },
 ];
 
