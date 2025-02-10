@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Chrome, Store } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -13,6 +14,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [isStore, setIsStore] = useState(false);
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -107,7 +109,7 @@ const Auth = () => {
       const isInChromeExtension = window.chrome?.runtime && chrome.runtime.id;
 
       if (isInChromeExtension) {
-        // For Chrome extension, open in a new tab instead of a popup
+        // For Chrome extension, handle auth in a new tab
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -115,7 +117,7 @@ const Auth = () => {
               access_type: 'offline',
               prompt: 'consent',
             },
-            skipBrowserRedirect: true // Prevent automatic redirect
+            skipBrowserRedirect: true
           }
         });
 
@@ -147,7 +149,7 @@ const Auth = () => {
           });
         }
       } else {
-        // Regular web app flow with popup
+        // Regular web app flow
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -155,49 +157,54 @@ const Auth = () => {
               access_type: 'offline',
               prompt: 'consent',
             },
+            ...(isMobile ? {} : { skipBrowserRedirect: true })
           }
         });
 
         if (error) throw error;
 
         if (data?.url) {
-          // Calculate popup dimensions and position
-          const width = 600;
-          const height = 800;
-          const left = window.screenX + (window.outerWidth - width) / 2;
-          const top = window.screenY + (window.outerHeight - height) / 2;
-
-          const popup = window.open(
-            data.url,
-            'Login with Google',
-            `width=${width},height=${height},left=${left},top=${top},popup=1`
-          );
-
-          if (popup) {
-            const checkPopup = setInterval(async () => {
-              try {
-                if (popup?.closed) {
-                  clearInterval(checkPopup);
-                  
-                  const { data: { session } } = await supabase.auth.getSession();
-                  if (session) {
-                    toast({
-                      title: "¡Bienvenido!",
-                      description: "Has iniciado sesión con Google exitosamente.",
-                    });
-                    navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-                  }
-                }
-              } catch (e) {
-                console.log("Error checking popup status:", e);
-              }
-            }, 1000);
+          if (isMobile) {
+            // On mobile, redirect directly
+            window.location.href = data.url;
           } else {
-            toast({
-              title: "Error",
-              description: "Por favor permite las ventanas emergentes para iniciar sesión con Google.",
-              variant: "destructive",
-            });
+            // On desktop, use popup
+            const width = 600;
+            const height = 800;
+            const left = window.screenX + (window.outerWidth - width) / 2;
+            const top = window.screenY + (window.outerHeight - height) / 2;
+
+            const popup = window.open(
+              data.url,
+              'Login with Google',
+              `width=${width},height=${height},left=${left},top=${top},popup=1`
+            );
+
+            if (popup) {
+              const checkPopup = setInterval(async () => {
+                try {
+                  if (popup?.closed) {
+                    clearInterval(checkPopup);
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                      toast({
+                        title: "¡Bienvenido!",
+                        description: "Has iniciado sesión con Google exitosamente.",
+                      });
+                      navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+                    }
+                  }
+                } catch (e) {
+                  console.error("Error checking popup status:", e);
+                }
+              }, 1000);
+            } else {
+              toast({
+                title: "Error",
+                description: "Por favor permite las ventanas emergentes para iniciar sesión con Google.",
+                variant: "destructive",
+              });
+            }
           }
         }
       }
