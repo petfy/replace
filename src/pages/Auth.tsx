@@ -181,10 +181,33 @@ const Auth = () => {
             );
 
             if (popup) {
-              const checkPopup = setInterval(async () => {
-                try {
-                  if (popup?.closed) {
-                    clearInterval(checkPopup);
+              // Set up message listener for the OAuth callback
+              const messageListener = async (event: MessageEvent) => {
+                if (event.data?.type === 'SUPABASE_AUTH_CALLBACK') {
+                  window.removeEventListener('message', messageListener);
+                  popup.close();
+                  
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (session) {
+                    toast({
+                      title: "¡Bienvenido!",
+                      description: "Has iniciado sesión con Google exitosamente.",
+                    });
+                    navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+                  }
+                }
+              };
+
+              window.addEventListener('message', messageListener);
+
+              // Fallback check in case the message event doesn't fire
+              const checkPopup = setInterval(() => {
+                if (popup.closed) {
+                  clearInterval(checkPopup);
+                  window.removeEventListener('message', messageListener);
+                  
+                  // Double check session after a small delay
+                  setTimeout(async () => {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (session) {
                       toast({
@@ -193,9 +216,7 @@ const Auth = () => {
                       });
                       navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
                     }
-                  }
-                } catch (e) {
-                  console.error("Error checking popup status:", e);
+                  }, 500);
                 }
               }, 1000);
             } else {
