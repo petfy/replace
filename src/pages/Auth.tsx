@@ -105,31 +105,29 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     try {
       const isInChromeExtension = window.chrome?.runtime && chrome.runtime.id;
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        }
-      });
 
-      if (error) throw error;
+      if (isInChromeExtension) {
+        // For Chrome extension, open in a new tab instead of a popup
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            },
+            skipBrowserRedirect: true // Prevent automatic redirect
+          }
+        });
 
-      if (data?.url) {
-        // Calcular las dimensiones y posición del popup
-        const width = 600;
-        const height = 800;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
+        if (error) throw error;
 
-        let popup: Window | null;
-        
-        if (isInChromeExtension) {
-          // Usar chrome.runtime.sendMessage para manejar la autenticación en la extensión
-          chrome.runtime.sendMessage({ type: 'OPEN_AUTH_WINDOW', url: data.url }, async (response) => {
+        if (data?.url) {
+          // Send message to background script to handle the auth flow
+          chrome.runtime.sendMessage({ 
+            type: 'OPEN_AUTH_WINDOW', 
+            url: data.url,
+            flowType: 'google'
+          }, async (response) => {
             if (response?.success) {
               const { data: { session } } = await supabase.auth.getSession();
               if (session) {
@@ -147,40 +145,23 @@ const Auth = () => {
               });
             }
           });
-        } else {
-          // Flujo normal para aplicación web
-          popup = window.open(
-            data.url,
-            'Login with Google',
-            `width=${width},height=${height},left=${left},top=${top},popup=1`
-          );
-
-          if (popup) {
-            const checkPopup = setInterval(async () => {
-              try {
-                if (popup?.closed) {
-                  clearInterval(checkPopup);
-                  
-                  const { data: { session } } = await supabase.auth.getSession();
-                  if (session) {
-                    toast({
-                      title: "¡Bienvenido!",
-                      description: "Has iniciado sesión con Google exitosamente.",
-                    });
-                    navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-                  }
-                }
-              } catch (e) {
-                console.log("Error checking popup status:", e);
-              }
-            }, 1000);
-          } else {
-            toast({
-              title: "Error",
-              description: "Por favor permite las ventanas emergentes para iniciar sesión con Google.",
-              variant: "destructive",
-            });
+        }
+      } else {
+        // Regular web app flow
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            },
           }
+        });
+
+        if (error) throw error;
+
+        if (data?.url) {
+          window.location.href = data.url; // Redirect to Google auth page directly
         }
       }
     } catch (error: any) {
