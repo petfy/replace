@@ -5,6 +5,7 @@ interface Chrome {
       message: any,
       callback?: (response: any) => void
     ) => void;
+    id?: string;  // Adding the id property as optional
   };
 }
 
