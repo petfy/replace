@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,44 +107,17 @@ const Auth = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
+          redirectTo: window.location.origin + '/auth',
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
           },
-          redirectTo: `${window.location.origin}/auth`,
         }
       });
 
       if (error) throw error;
 
-      if (data?.url) {
-        const popup = window.open(
-          data.url,
-          'Login with Google',
-          'width=600,height=800,left=' + 
-          (window.innerWidth / 2 - 300) + 
-          ',top=' + (window.innerHeight / 2 - 400)
-        );
-
-        if (popup) {
-          const checkPopup = setInterval(() => {
-            if (popup.closed) {
-              clearInterval(checkPopup);
-              
-              // Verificar la sesión después de que se cierre el popup
-              supabase.auth.getSession().then(({ data: { session } }) => {
-                if (session) {
-                  toast({
-                    title: "¡Bienvenido!",
-                    description: "Has iniciado sesión con Google exitosamente.",
-                  });
-                  navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-                }
-              });
-            }
-          }, 1000);
-        }
-      }
+      // No need to handle the popup manually - Supabase will handle the redirect
     } catch (error: any) {
       toast({
         title: "Error",
