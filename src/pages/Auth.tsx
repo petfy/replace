@@ -147,7 +147,7 @@ const Auth = () => {
           });
         }
       } else {
-        // Regular web app flow
+        // Regular web app flow with popup
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -161,7 +161,44 @@ const Auth = () => {
         if (error) throw error;
 
         if (data?.url) {
-          window.location.href = data.url; // Redirect to Google auth page directly
+          // Calculate popup dimensions and position
+          const width = 600;
+          const height = 800;
+          const left = window.screenX + (window.outerWidth - width) / 2;
+          const top = window.screenY + (window.outerHeight - height) / 2;
+
+          const popup = window.open(
+            data.url,
+            'Login with Google',
+            `width=${width},height=${height},left=${left},top=${top},popup=1`
+          );
+
+          if (popup) {
+            const checkPopup = setInterval(async () => {
+              try {
+                if (popup?.closed) {
+                  clearInterval(checkPopup);
+                  
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (session) {
+                    toast({
+                      title: "¡Bienvenido!",
+                      description: "Has iniciado sesión con Google exitosamente.",
+                    });
+                    navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+                  }
+                }
+              } catch (e) {
+                console.log("Error checking popup status:", e);
+              }
+            }, 1000);
+          } else {
+            toast({
+              title: "Error",
+              description: "Por favor permite las ventanas emergentes para iniciar sesión con Google.",
+              variant: "destructive",
+            });
+          }
         }
       }
     } catch (error: any) {
