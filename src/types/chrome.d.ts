@@ -8,6 +8,9 @@ interface Chrome {
   };
 }
 
+declare const chrome: Chrome;
+
 interface Window {
   chrome?: Chrome;
 }
+
