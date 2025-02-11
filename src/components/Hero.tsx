@@ -13,7 +13,7 @@ export const Hero = () => {
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
           <div className="text-2xl font-bold text-primary flex items-center gap-2 mb-6">
             <img src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/replace-logo.png" alt="Replace Logo" className="w-6 h-6" />
-            <span className="text-primary-700">Place</span>
+            Re<span className="text-primary-700">Place</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary-700 to-primary-900">
             Tus direcciones de envío,
