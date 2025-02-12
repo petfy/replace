@@ -34,6 +34,8 @@ const Index = () => {
             <div>
               <div className="flex items-center gap-2 mb-4">
               </div>
+                              <img src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/replace-logo.png" alt="Replace Logo" className="h-6 w-6 text-primary mr-2" />
+                <span className="text-2xl font-bold text-primary">RePlace</span>
               <p className="text-gray-600">
                 Gestiona todas tus direcciones de envío en una plataforma y ahorra tiempo en tus compras online.
               </p>
