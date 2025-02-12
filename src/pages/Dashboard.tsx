@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AddressForm } from "@/components/AddressForm";
 import { AddressList } from "@/components/AddressList";
-import { Plus, LogOut, MapPin, Home, Briefcase, User, Users, Building2 } from "lucide-react";
+import { Plus, LogOut, MapPin, Home, Briefcase, User, Users, Building2, Tag } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiscountsTab } from "@/components/address/DiscountsTab";
 
@@ -222,9 +222,21 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 sm:px-0">
           <Tabs defaultValue="addresses" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="addresses">Mis Direcciones</TabsTrigger>
-              <TabsTrigger value="discounts">Descuentos</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 max-w-[400px] mx-auto">
+              <TabsTrigger 
+                value="addresses"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-300 ease-in-out"
+              >
+                <MapPin className="w-4 h-4 mr-2 transition-transform duration-300 ease-in-out group-data-[state=active]:scale-110" />
+                Mis Direcciones
+              </TabsTrigger>
+              <TabsTrigger 
+                value="discounts"
+                className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-300 ease-in-out"
+              >
+                <Tag className="w-4 h-4 mr-2 transition-transform duration-300 ease-in-out group-data-[state=active]:scale-110" />
+                Descuentos
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="addresses">
