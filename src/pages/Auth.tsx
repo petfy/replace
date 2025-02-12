@@ -190,7 +190,15 @@ const Auth = () => {
                   popup.close();
                   
                   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                  if (sessionError) throw sessionError;
+                  if (sessionError) {
+                    toast({
+                      title: "Error",
+                      description: "Hubo un problema al iniciar sesión con Google.",
+                      variant: "destructive",
+                    });
+                    popup.close();
+                    return;
+                  }
                   
                   if (session) {
                     toast({
@@ -211,7 +219,14 @@ const Auth = () => {
                   
                   setTimeout(async () => {
                     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                    if (sessionError) throw sessionError;
+                    if (sessionError) {
+                      toast({
+                        title: "Error",
+                        description: "Hubo un problema al iniciar sesión con Google.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                     
                     if (session) {
                       toast({
