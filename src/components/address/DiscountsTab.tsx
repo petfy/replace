@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
+import { ExtensionsCarousel } from "@/components/ExtensionsCarousel";
 
 interface StoreDiscount {
   id: string;
@@ -96,11 +97,19 @@ export const DiscountsTab = () => {
 
   if (!currentDomain) {
     return (
-      <div className="text-center py-4">
-        No se detectó ninguna página de checkout activa.
-        <p className="text-sm text-gray-500 mt-2">
-          Abre una página de checkout en otra pestaña para ver los descuentos disponibles.
-        </p>
+      <div className="space-y-8">
+        <div className="text-center py-4">
+          <p>No se detectó ninguna página de checkout activa.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Abre una página de checkout en otra pestaña para ver los descuentos disponibles.
+          </p>
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-center">
+            Instala una de estas extensiones para ver los descuentos disponibles:
+          </h3>
+          <ExtensionsCarousel />
+        </div>
       </div>
     );
   }
