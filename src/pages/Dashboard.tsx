@@ -203,7 +203,7 @@ const Dashboard = () => {
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <MapPin className="h-6 w-6 text-primary mr-2" />
+                                <img src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/replace-logo.png" alt="Replace Logo" className="h-6 w-6 text-primary mr-2" />
                 <span className="text-2xl font-bold text-primary">RePlace</span>
               </div>
             </div>
