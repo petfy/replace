@@ -21,21 +21,20 @@ const Auth = () => {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (session?.user) {
+          const destination = session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard";
+          navigate(destination);
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-      }
-    });
-
     checkSession();
-
-    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -44,7 +43,7 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -58,10 +57,12 @@ const Auth = () => {
         
         if (signUpError) throw signUpError;
         
-        toast({
-          title: "¡Registro exitoso!",
-          description: "Por favor verifica tu correo electrónico para continuar.",
-        });
+        if (data?.user) {
+          toast({
+            title: "¡Registro exitoso!",
+            description: "Por favor verifica tu correo electrónico para continuar.",
+          });
+        }
       } else {
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -73,6 +74,10 @@ const Auth = () => {
             throw new Error("Email o contraseña incorrectos. Si no tienes una cuenta, regístrate primero.");
           }
           throw signInError;
+        }
+
+        if (!data?.user) {
+          throw new Error("No se pudo iniciar sesión. Por favor intenta de nuevo.");
         }
 
         const userIsStore = data.user?.user_metadata?.is_store === true;
@@ -99,6 +104,11 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
+      
+      // If there's an auth error, ensure we're signed out
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) console.error('Error signing out:', signOutError);
+      
     } finally {
       setLoading(false);
     }
@@ -109,7 +119,6 @@ const Auth = () => {
       const isInChromeExtension = window.chrome?.runtime && chrome.runtime.id;
 
       if (isInChromeExtension) {
-        // For Chrome extension, handle auth in a new tab
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -124,14 +133,15 @@ const Auth = () => {
         if (error) throw error;
 
         if (data?.url) {
-          // Send message to background script to handle the auth flow
           chrome.runtime.sendMessage({ 
             type: 'OPEN_AUTH_WINDOW', 
             url: data.url,
             flowType: 'google'
           }, async (response) => {
             if (response?.success) {
-              const { data: { session } } = await supabase.auth.getSession();
+              const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+              if (sessionError) throw sessionError;
+              
               if (session) {
                 toast({
                   title: "¡Bienvenido!",
@@ -140,16 +150,11 @@ const Auth = () => {
                 navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
               }
             } else {
-              toast({
-                title: "Error",
-                description: "Hubo un problema al iniciar sesión con Google.",
-                variant: "destructive",
-              });
+              throw new Error("Hubo un problema al iniciar sesión con Google.");
             }
           });
         }
       } else {
-        // Regular web app flow
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -165,10 +170,8 @@ const Auth = () => {
 
         if (data?.url) {
           if (isMobile) {
-            // On mobile, redirect directly
             window.location.href = data.url;
           } else {
-            // On desktop, use popup
             const width = 600;
             const height = 800;
             const left = window.screenX + (window.outerWidth - width) / 2;
@@ -181,13 +184,14 @@ const Auth = () => {
             );
 
             if (popup) {
-              // Set up message listener for the OAuth callback
               const messageListener = async (event: MessageEvent) => {
                 if (event.data?.type === 'SUPABASE_AUTH_CALLBACK') {
                   window.removeEventListener('message', messageListener);
                   popup.close();
                   
-                  const { data: { session } } = await supabase.auth.getSession();
+                  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                  if (sessionError) throw sessionError;
+                  
                   if (session) {
                     toast({
                       title: "¡Bienvenido!",
@@ -200,15 +204,15 @@ const Auth = () => {
 
               window.addEventListener('message', messageListener);
 
-              // Fallback check in case the message event doesn't fire
               const checkPopup = setInterval(() => {
                 if (popup.closed) {
                   clearInterval(checkPopup);
                   window.removeEventListener('message', messageListener);
                   
-                  // Double check session after a small delay
                   setTimeout(async () => {
-                    const { data: { session } } = await supabase.auth.getSession();
+                    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                    if (sessionError) throw sessionError;
+                    
                     if (session) {
                       toast({
                         title: "¡Bienvenido!",
@@ -220,19 +224,16 @@ const Auth = () => {
                 }
               }, 1000);
             } else {
-              toast({
-                title: "Error",
-                description: "Por favor permite las ventanas emergentes para iniciar sesión con Google.",
-                variant: "destructive",
-              });
+              throw new Error("Por favor permite las ventanas emergentes para iniciar sesión con Google.");
             }
           }
         }
       }
     } catch (error: any) {
+      console.error('Google sign in error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Hubo un problema al iniciar sesión con Google.",
         variant: "destructive",
       });
     }
