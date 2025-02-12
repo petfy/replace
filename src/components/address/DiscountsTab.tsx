@@ -4,19 +4,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 
-interface ActiveDiscount {
+interface StoreDiscount {
   id: string;
-  type: 'order' | 'shipping';
+  type: string;
   code: string;
-  discount_type: 'percentage' | 'fixed';
+  discount_type: string;
   value: number;
   minimum_purchase_amount: number;
   valid_from: string;
   valid_until: string;
+  status: string;
+  store_id: string;
 }
 
 export const DiscountsTab = () => {
-  const [activeDiscounts, setActiveDiscounts] = useState<ActiveDiscount[]>([]);
+  const [activeDiscounts, setActiveDiscounts] = useState<StoreDiscount[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDomain, setCurrentDomain] = useState<string | null>(null);
   const { toast } = useToast();
@@ -81,7 +83,7 @@ export const DiscountsTab = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const getDiscountValue = (discount: ActiveDiscount) => {
+  const getDiscountValue = (discount: StoreDiscount) => {
     if (discount.type === 'shipping') {
       return `Envío gratis por compras superiores a $${discount.minimum_purchase_amount}`;
     }
