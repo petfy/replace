@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +13,7 @@ interface Discount {
   code: string;
   discount_type: 'percentage' | 'fixed';
   value: number;
+  minimum_purchase_amount: number;
   valid_from: string;
   valid_until: string;
   status: 'active' | 'inactive' | 'expired';
@@ -179,9 +179,11 @@ const PublicDiscounts = () => {
             <CardContent>
               <div className="space-y-4 text-center">
                 <p className="text-2xl font-bold text-primary-700">
-                  {discount.discount_type === 'percentage' 
-                    ? `${discount.value}% de descuento`
-                    : `$${discount.value} de descuento`}
+                  {discount.type === 'shipping' 
+                    ? `Envío Gratis en compras mayores a $${discount.minimum_purchase_amount}`
+                    : discount.discount_type === 'percentage' 
+                      ? `${discount.value}% de descuento`
+                      : `$${discount.value} de descuento`}
                 </p>
                 <div className="space-y-3">
                   <code className="block w-full bg-gray-100 px-4 py-2 rounded-md text-lg font-mono">

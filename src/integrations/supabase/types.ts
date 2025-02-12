@@ -175,6 +175,7 @@ export type Database = {
           created_at: string
           discount_type: string
           id: string
+          minimum_purchase_amount: number | null
           status: string
           store_id: string
           type: string
@@ -188,6 +189,7 @@ export type Database = {
           created_at?: string
           discount_type: string
           id?: string
+          minimum_purchase_amount?: number | null
           status?: string
           store_id: string
           type: string
@@ -201,6 +203,7 @@ export type Database = {
           created_at?: string
           discount_type?: string
           id?: string
+          minimum_purchase_amount?: number | null
           status?: string
           store_id?: string
           type?: string

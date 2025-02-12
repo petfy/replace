@@ -20,6 +20,7 @@ interface Discount {
   code: string;
   discount_type: 'percentage' | 'fixed';
   value: number;
+  minimum_purchase_amount: number;
   valid_from: string;
   valid_until: string;
   status: 'active' | 'inactive' | 'expired';
@@ -38,7 +39,6 @@ export const DiscountForm = ({
   const handleDiscountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Add validation to ensure storeId exists and is not empty
     if (!storeId || storeId.trim() === '') {
       toast({
         title: "Error",
@@ -50,7 +50,6 @@ export const DiscountForm = ({
 
     setLoading(true);
     try {
-      // Remove id from the data being sent since it's auto-generated
       const { id, ...discountData } = newDiscount;
       
       const { error } = await supabase
@@ -70,6 +69,7 @@ export const DiscountForm = ({
         code: '',
         discount_type: 'percentage',
         value: 0,
+        minimum_purchase_amount: 0,
         valid_from: '',
         valid_until: '',
         status: 'active',
@@ -117,31 +117,49 @@ export const DiscountForm = ({
           />
         </div>
 
-        <div>
-          <Label htmlFor="discount-value-type">Tipo de Valor</Label>
-          <select
-            id="discount-value-type"
-            className="w-full rounded-md border border-input bg-background px-3 py-2"
-            value={newDiscount.discount_type}
-            onChange={(e) => setNewDiscount({ ...newDiscount, discount_type: e.target.value as 'percentage' | 'fixed' })}
-            required
-          >
-            <option value="percentage">Porcentaje (%)</option>
-            <option value="fixed">Monto Fijo ($)</option>
-          </select>
-        </div>
+        {newDiscount.type === 'order' && (
+          <>
+            <div>
+              <Label htmlFor="discount-value-type">Tipo de Valor</Label>
+              <select
+                id="discount-value-type"
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                value={newDiscount.discount_type}
+                onChange={(e) => setNewDiscount({ ...newDiscount, discount_type: e.target.value as 'percentage' | 'fixed' })}
+                required
+              >
+                <option value="percentage">Porcentaje (%)</option>
+                <option value="fixed">Monto Fijo ($)</option>
+              </select>
+            </div>
 
-        <div>
-          <Label htmlFor="discount-value">Valor</Label>
-          <Input
-            id="discount-value"
-            type="number"
-            min="0"
-            value={newDiscount.value}
-            onChange={(e) => setNewDiscount({ ...newDiscount, value: parseFloat(e.target.value) })}
-            required
-          />
-        </div>
+            <div>
+              <Label htmlFor="discount-value">Valor</Label>
+              <Input
+                id="discount-value"
+                type="number"
+                min="0"
+                value={newDiscount.value}
+                onChange={(e) => setNewDiscount({ ...newDiscount, value: parseFloat(e.target.value) })}
+                required
+              />
+            </div>
+          </>
+        )}
+
+        {newDiscount.type === 'shipping' && (
+          <div className="md:col-span-2">
+            <Label htmlFor="minimum-purchase">Compra Mínima para Envío Gratis</Label>
+            <Input
+              id="minimum-purchase"
+              type="number"
+              min="0"
+              value={newDiscount.minimum_purchase_amount}
+              onChange={(e) => setNewDiscount({ ...newDiscount, minimum_purchase_amount: parseFloat(e.target.value) })}
+              required
+            />
+          </div>
+        )}
 
         <div>
           <Label htmlFor="valid-from">Válido Desde</Label>

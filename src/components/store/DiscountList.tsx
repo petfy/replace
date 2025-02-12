@@ -14,6 +14,7 @@ interface Discount {
   code: string;
   discount_type: 'percentage' | 'fixed';
   value: number;
+  minimum_purchase_amount: number;
   valid_from: string;
   valid_until: string;
   status: 'active' | 'inactive' | 'expired';
@@ -31,12 +32,10 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
 
       if (error) throw error;
 
-      // Create a new array with the updated discount
       const updatedDiscounts = discounts.map(discount =>
         discount.id === discountId ? { ...discount, status: newStatus } : discount
       );
 
-      // Set the new array directly
       setDiscounts(updatedDiscounts);
 
       toast({
@@ -68,10 +67,10 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h3 className="text-lg font-medium mb-4">Descuentos</h3>
-      <div className="space-y-4">
+      <div className={`grid gap-4 ${discounts.length === 1 ? 'grid-cols-1 max-w-xl mx-auto' : 'md:grid-cols-2'}`}>
         {discounts.map((discount) => (
           <div key={discount.id} className="border rounded-lg p-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
                 {getStatusIcon(discount.status)}
                 <span className="font-medium">Código:</span> {discount.code}
@@ -80,15 +79,23 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
                 <span className="font-medium">Tipo:</span>{' '}
                 {discount.type === 'order' ? 'Descuento en Pedido' : 'Envío Gratis'}
               </div>
-              <div>
-                <span className="font-medium">Valor:</span>{' '}
-                {discount.value}{discount.discount_type === 'percentage' ? '%' : '$'}
-              </div>
+              {discount.type === 'order' && (
+                <div>
+                  <span className="font-medium">Valor:</span>{' '}
+                  {discount.value}{discount.discount_type === 'percentage' ? '%' : '$'}
+                </div>
+              )}
+              {discount.type === 'shipping' && (
+                <div>
+                  <span className="font-medium">Compra mínima:</span>{' '}
+                  ${discount.minimum_purchase_amount}
+                </div>
+              )}
               <div>
                 <span className="font-medium">Vigencia:</span>{' '}
                 {new Date(discount.valid_from).toLocaleDateString()} - {new Date(discount.valid_until).toLocaleDateString()}
               </div>
-              <div className="col-span-2">
+              <div>
                 <span className="font-medium">Estado:</span>
                 <select
                   className="ml-2 rounded-md border border-input bg-background px-2 py-1"
@@ -110,4 +117,3 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
     </div>
   );
 };
-
