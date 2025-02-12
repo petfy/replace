@@ -12,8 +12,8 @@ const Index = () => {
       <nav className="py-4 px-6 border-b">
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-2xl font-bold text-primary flex items-center gap-2">
-                <img src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/replace-logo.png" alt="Replace Logo" className="h-6 w-6 text-primary mr-2" />
-                <span className="text-2xl font-bold text-primary">RePlace</span>
+            <img src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/replace-logo.png" alt="Replace Logo" className="h-6 w-6 text-primary mr-2" />
+            <span className="text-2xl font-bold text-primary">RePlace</span>
           </div>
           <div>
             <Link to="/auth">
@@ -26,6 +26,18 @@ const Index = () => {
         <Hero />
         <Features />
         <PlatformsCarousel />
+        <div id="demo-video" className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl font-bold text-center mb-8 text-primary-800">
+                Ve cómo funciona RePlace
+              </h2>
+              <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg flex items-center justify-center">
+                <p className="text-gray-600">Video próximamente</p>
+              </div>
+            </div>
+          </div>
+        </div>
         <ExtensionsCarousel />
       </main>
       <footer className="bg-gray-50 py-12 mt-16">
