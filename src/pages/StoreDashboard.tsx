@@ -26,6 +26,7 @@ interface Discount {
   code: string;
   discount_type: 'percentage' | 'fixed';
   value: number;
+  minimum_purchase_amount: number;
   valid_from: string;
   valid_until: string;
   status: 'active' | 'inactive' | 'expired';
@@ -47,6 +48,7 @@ const DEFAULT_DISCOUNT: Discount = {
   code: '',
   discount_type: 'percentage',
   value: 0,
+  minimum_purchase_amount: 0,
   valid_from: '',
   valid_until: '',
   status: 'active',

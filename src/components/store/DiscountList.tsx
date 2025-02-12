@@ -64,6 +64,13 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
     }
   };
 
+  const getDiscountValue = (discount: Discount) => {
+    if (discount.type === 'shipping') {
+      return `Por compras superiores a $${discount.minimum_purchase_amount}`;
+    }
+    return `${discount.value}${discount.discount_type === 'percentage' ? '%' : '$'}`;
+  };
+
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h3 className="text-lg font-medium mb-4">Descuentos</h3>
@@ -79,18 +86,10 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
                 <span className="font-medium">Tipo:</span>{' '}
                 {discount.type === 'order' ? 'Descuento en Pedido' : 'Envío Gratis'}
               </div>
-              {discount.type === 'order' && (
-                <div>
-                  <span className="font-medium">Valor:</span>{' '}
-                  {discount.value}{discount.discount_type === 'percentage' ? '%' : '$'}
-                </div>
-              )}
-              {discount.type === 'shipping' && (
-                <div>
-                  <span className="font-medium">Compra mínima:</span>{' '}
-                  ${discount.minimum_purchase_amount}
-                </div>
-              )}
+              <div>
+                <span className="font-medium">Valor:</span>{' '}
+                {getDiscountValue(discount)}
+              </div>
               <div>
                 <span className="font-medium">Vigencia:</span>{' '}
                 {new Date(discount.valid_from).toLocaleDateString()} - {new Date(discount.valid_until).toLocaleDateString()}
