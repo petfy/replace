@@ -116,6 +116,8 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     try {
+      setLoading(true);
+      
       const isInChromeExtension = window.chrome?.runtime && chrome.runtime.id;
 
       if (isInChromeExtension) {
@@ -137,112 +139,22 @@ const Auth = () => {
             type: 'OPEN_AUTH_WINDOW', 
             url: data.url,
             flowType: 'google'
-          }, async (response) => {
-            if (response?.success) {
-              const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-              if (sessionError) throw sessionError;
-              
-              if (session) {
-                toast({
-                  title: "¡Bienvenido!",
-                  description: "Has iniciado sesión con Google exitosamente.",
-                });
-                navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-              }
-            } else {
-              throw new Error("Hubo un problema al iniciar sesión con Google.");
-            }
           });
         }
       } else {
+        // No popup flow - direct redirect in current window
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
+            redirectTo: window.location.origin + '/auth',
             queryParams: {
               access_type: 'offline',
               prompt: 'consent',
-            },
-            ...(isMobile ? {} : { skipBrowserRedirect: true })
+            }
           }
         });
 
         if (error) throw error;
-
-        if (data?.url) {
-          if (isMobile) {
-            window.location.href = data.url;
-          } else {
-            const width = 600;
-            const height = 800;
-            const left = window.screenX + (window.outerWidth - width) / 2;
-            const top = window.screenY + (window.outerHeight - height) / 2;
-
-            const popup = window.open(
-              data.url,
-              'Login with Google',
-              `width=${width},height=${height},left=${left},top=${top},popup=1`
-            );
-
-            if (popup) {
-              const messageListener = async (event: MessageEvent) => {
-                if (event.data?.type === 'SUPABASE_AUTH_CALLBACK') {
-                  window.removeEventListener('message', messageListener);
-                  popup.close();
-                  
-                  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                  if (sessionError) {
-                    toast({
-                      title: "Error",
-                      description: "Hubo un problema al iniciar sesión con Google.",
-                      variant: "destructive",
-                    });
-                    popup.close();
-                    return;
-                  }
-                  
-                  if (session) {
-                    toast({
-                      title: "¡Bienvenido!",
-                      description: "Has iniciado sesión con Google exitosamente.",
-                    });
-                    navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-                  }
-                }
-              };
-
-              window.addEventListener('message', messageListener);
-
-              const checkPopup = setInterval(() => {
-                if (popup.closed) {
-                  clearInterval(checkPopup);
-                  window.removeEventListener('message', messageListener);
-                  
-                  setTimeout(async () => {
-                    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                    if (sessionError) {
-                      toast({
-                        title: "Error",
-                        description: "Hubo un problema al iniciar sesión con Google.",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                    
-                    if (session) {
-                      toast({
-                        title: "¡Bienvenido!",
-                        description: "Has iniciado sesión con Google exitosamente.",
-                      });
-                      navigate(session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard");
-                    }
-                  }, 500);
-                }
-              }, 1000);
-            } else {
-              throw new Error("Por favor permite las ventanas emergentes para iniciar sesión con Google.");
-            }
-          }
-        }
       }
     } catch (error: any) {
       console.error('Google sign in error:', error);
@@ -251,8 +163,41 @@ const Auth = () => {
         description: error.message || "Hubo un problema al iniciar sesión con Google.",
         variant: "destructive",
       });
+      setLoading(false);
     }
   };
+
+  // Handle auth callback
+  useEffect(() => {
+    const handleAuthCallback = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Auth callback error:', error);
+        toast({
+          title: "Error",
+          description: "Hubo un problema al iniciar sesión con Google.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (session) {
+        toast({
+          title: "¡Bienvenido!",
+          description: "Has iniciado sesión con Google exitosamente.",
+        });
+        
+        const destination = session.user.user_metadata?.is_store ? "/store-dashboard" : "/dashboard";
+        navigate(destination);
+      }
+    };
+
+    // This detects if we're returning from an OAuth redirect
+    if (location.hash || location.search.includes('code=')) {
+      handleAuthCallback();
+    }
+  }, [location, navigate, toast]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -346,6 +291,7 @@ const Auth = () => {
                 onClick={handleGoogleSignIn}
                 className="w-full flex items-center justify-center gap-2"
                 variant="outline"
+                disabled={loading}
               >
                 <Chrome className="h-5 w-5" />
                 Google
