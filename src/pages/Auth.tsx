@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -118,44 +117,19 @@ const Auth = () => {
     try {
       setLoading(true);
       
-      const isInChromeExtension = window.chrome?.runtime && chrome.runtime.id;
-
-      if (isInChromeExtension) {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'consent',
-            },
-            skipBrowserRedirect: true
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/auth',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
           }
-        });
-
-        if (error) throw error;
-
-        if (data?.url) {
-          chrome.runtime.sendMessage({ 
-            type: 'OPEN_AUTH_WINDOW', 
-            url: data.url,
-            flowType: 'google'
-          });
         }
-      } else {
-        // No popup flow - direct redirect in current window
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin + '/auth',
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'consent',
-            }
-          }
-        });
+      });
 
-        if (error) throw error;
-      }
+      if (error) throw error;
+      
     } catch (error: any) {
       console.error('Google sign in error:', error);
       toast({
