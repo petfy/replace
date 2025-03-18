@@ -2,6 +2,7 @@
 import { Check, X, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 interface DiscountListProps {
   discounts: Discount[];
@@ -22,6 +23,49 @@ interface Discount {
 
 export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => {
   const { toast } = useToast();
+
+  // Check for expired discounts when component mounts or discounts change
+  useEffect(() => {
+    const checkExpiredDiscounts = async () => {
+      const now = new Date();
+      const expiredDiscounts = discounts.filter(
+        discount => discount.status !== 'expired' && new Date(discount.valid_until) < now
+      );
+
+      if (expiredDiscounts.length > 0) {
+        // Update expired discounts in the database
+        for (const discount of expiredDiscounts) {
+          await supabase
+            .from('store_discounts')
+            .update({ status: 'expired' })
+            .eq('id', discount.id);
+        }
+
+        // Update the local state
+        const updatedDiscounts = discounts.map(discount => 
+          new Date(discount.valid_until) < now 
+            ? { ...discount, status: 'expired' } 
+            : discount
+        );
+
+        setDiscounts(updatedDiscounts);
+
+        if (expiredDiscounts.length === 1) {
+          toast({
+            title: "Descuento vencido",
+            description: "Un descuento ha sido marcado como vencido automáticamente.",
+          });
+        } else {
+          toast({
+            title: "Descuentos vencidos",
+            description: `${expiredDiscounts.length} descuentos han sido marcados como vencidos automáticamente.`,
+          });
+        }
+      }
+    };
+
+    checkExpiredDiscounts();
+  }, [discounts, setDiscounts, toast]);
 
   const handleStatusChange = async (discountId: string, newStatus: 'active' | 'inactive' | 'expired') => {
     try {
@@ -71,6 +115,11 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
     return `${discount.value}${discount.discount_type === 'percentage' ? '%' : '$'}`;
   };
 
+  // Check if a discount is expired
+  const isExpired = (validUntil: string) => {
+    return new Date(validUntil) < new Date();
+  };
+
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h3 className="text-lg font-medium mb-4">Descuentos</h3>
@@ -93,18 +142,25 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
               <div>
                 <span className="font-medium">Vigencia:</span>{' '}
                 {new Date(discount.valid_from).toLocaleDateString()} - {new Date(discount.valid_until).toLocaleDateString()}
+                {isExpired(discount.valid_until) && discount.status !== 'expired' && (
+                  <span className="ml-2 text-red-500 text-sm">(Vencido)</span>
+                )}
               </div>
               <div>
                 <span className="font-medium">Estado:</span>
                 <select
                   className="ml-2 rounded-md border border-input bg-background px-2 py-1"
-                  value={discount.status}
+                  value={isExpired(discount.valid_until) ? 'expired' : discount.status}
                   onChange={(e) => handleStatusChange(discount.id, e.target.value as 'active' | 'inactive' | 'expired')}
+                  disabled={isExpired(discount.valid_until)}
                 >
-                  <option value="active">Activo</option>
-                  <option value="inactive">Inactivo</option>
+                  <option value="active" disabled={isExpired(discount.valid_until)}>Activo</option>
+                  <option value="inactive" disabled={isExpired(discount.valid_until)}>Inactivo</option>
                   <option value="expired">Vencido</option>
                 </select>
+                {isExpired(discount.valid_until) && discount.status !== 'expired' && (
+                  <span className="ml-2 text-sm text-amber-600">Estado actualizado automáticamente</span>
+                )}
               </div>
             </div>
           </div>
