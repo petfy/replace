@@ -4,15 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Globe, SearchIcon } from "lucide-react";
+import { ArrowLeft, Globe, SearchIcon, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface AvailableStoresProps {
   availableDiscountLinks: { domain: string; slug: string }[];
   currentBrowsingDomain: string | null;
+  chromeApiAvailable: boolean;
 }
 
-export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain }: AvailableStoresProps) => {
+export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain, chromeApiAvailable }: AvailableStoresProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [manualDomainInput, setManualDomainInput] = useState("");
@@ -80,6 +82,15 @@ export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain 
         />
         <h1 className="text-3xl font-bold text-primary-800">Descuentos de RePlace</h1>
         
+        {!chromeApiAvailable && (
+          <div className="flex items-center justify-center mt-3 gap-2 text-amber-600">
+            <AlertTriangle className="h-4 w-4" />
+            <span className="text-sm font-medium">Para detectar pestañas inactivas necesitas 
+              <Link to="/chrome" className="underline ml-1">instalar la extensión</Link>
+            </span>
+          </div>
+        )}
+        
         {currentBrowsingDomain && (
           <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
             <Globe className="h-4 w-4" />
@@ -87,22 +98,25 @@ export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain 
           </div>
         )}
         
-        {/* Manual domain entry form */}
-        <div className="mt-6 max-w-md mx-auto">
+        {/* Manual domain entry form - now more prominent */}
+        <div className="mt-6 max-w-md mx-auto bg-sky-50 p-4 rounded-md border border-sky-200">
           <p className="text-sm font-medium mb-2">Busca descuentos por tienda:</p>
           <form onSubmit={handleManualDomainSearch} className="flex gap-2">
             <Input
               type="text"
-              placeholder="tiendapetfy.cl"
+              placeholder="Ej: tiendapetfy.cl"
               value={manualDomainInput}
               onChange={(e) => setManualDomainInput(e.target.value)}
               className="flex-1"
             />
-            <Button type="submit" size="sm">
+            <Button type="submit">
               <SearchIcon className="h-4 w-4 mr-2" />
               Buscar
             </Button>
           </form>
+          <p className="text-xs text-sky-700 mt-2">
+            Ingresa el dominio de la tienda (ej: tiendapetfy.cl) o la URL completa
+          </p>
         </div>
       </div>
 

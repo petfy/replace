@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Map, Chrome as ChromeIcon, Check, ArrowRight, Info, AlertTriangle } from "lucide-react";
+import { Map, Chrome as ChromeIcon, Check, ArrowRight, Info, AlertTriangle, ExternalLink } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Chrome = () => {
@@ -28,12 +28,19 @@ const Chrome = () => {
             <h1 className="text-3xl font-bold text-gray-900">Configuración de RePlace en Chrome</h1>
           </div>
 
-          <Alert className="mb-6 border-amber-500">
+          <Alert className="mb-6 border-amber-500 bg-amber-50">
             <AlertTriangle className="h-4 w-4 text-amber-500" />
-            <AlertTitle>Importante</AlertTitle>
-            <AlertDescription>
-              La extensión debe estar instalada para detectar automáticamente las páginas de checkout. 
-              Si no tienes la extensión instalada, tendrás que buscar los descuentos manualmente.
+            <AlertTitle>¿Por qué necesitas la extensión?</AlertTitle>
+            <AlertDescription className="space-y-2">
+              <p>
+                Sin la extensión, RePlace no puede detectar las pestañas inactivas en Chrome.
+                Esto significa que no podrá:
+              </p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Ver automáticamente descuentos cuando estás en un checkout</li>
+                <li>Detectar páginas abiertas en otras pestañas</li>
+                <li>Mostrar cupones relevantes sin búsqueda manual</li>
+              </ul>
             </AlertDescription>
           </Alert>
 
@@ -112,12 +119,16 @@ const Chrome = () => {
               <div className="flex items-start gap-4">
                 <div className="flex-grow space-y-2">
                   <p className="text-gray-600">
-                    La extensión necesita permisos para leer las URLs de las páginas que visitas
+                    La extensión necesita permisos para leer las URLs de las pestañas que visitas
                     para poder detectar tiendas con descuentos disponibles.
                   </p>
-                  <p className="text-gray-600">
-                    Si no otorgas estos permisos, tendrás que buscar los descuentos manualmente.
-                  </p>
+                  <Alert className="mt-2">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Importante</AlertTitle>
+                    <AlertDescription>
+                      Sin estos permisos, la extensión no podrá detectar automáticamente las tiendas en pestañas inactivas.
+                    </AlertDescription>
+                  </Alert>
                 </div>
               </div>
             </div>
@@ -139,7 +150,40 @@ const Chrome = () => {
                     <Check className="h-4 w-4" />
                     <span className="text-sm">La extensión está lista para usar</span>
                   </div>
+                  
+                  <Alert className="mt-4 bg-blue-50 border-blue-200">
+                    <Info className="h-4 w-4 text-blue-500" />
+                    <AlertTitle>Prueba de acceso</AlertTitle>
+                    <AlertDescription className="space-y-2">
+                      <p>Para verificar que la extensión está funcionando correctamente:</p>
+                      <ol className="list-decimal pl-5 space-y-1">
+                        <li>Ve a <span className="font-medium">tiendapetfy.cl</span> en otra pestaña</li>
+                        <li>Luego regresa a RePlace y comprueba si detecta automáticamente la pestaña</li>
+                      </ol>
+                    </AlertDescription>
+                  </Alert>
                 </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border-2 border-dashed border-amber-300 p-6">
+              <h2 className="text-xl font-semibold mb-4 text-amber-700">Alternativa: Búsqueda manual</h2>
+              <p className="text-gray-600 mb-4">
+                Si no puedes instalar la extensión o prefieres no hacerlo, siempre puedes usar 
+                la búsqueda manual en la página de descuentos:
+              </p>
+              <ol className="list-decimal pl-5 space-y-2 mb-4">
+                <li className="text-gray-600">Ve a la página de <Link to="/discounts" className="text-primary underline">descuentos</Link></li>
+                <li className="text-gray-600">Usa el buscador para ingresar el dominio de la tienda (ej: tiendapetfy.cl)</li>
+                <li className="text-gray-600">Verás todos los descuentos disponibles para esa tienda</li>
+              </ol>
+              <div className="flex justify-center">
+                <Link to="/discounts">
+                  <Button variant="outline" className="flex items-center gap-2">
+                    Ir a la página de descuentos
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
 
