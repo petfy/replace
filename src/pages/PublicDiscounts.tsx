@@ -1,7 +1,6 @@
 
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Globe } from "lucide-react";
 import { useActiveBrowsing } from "@/hooks/use-active-browsing";
 import { useStoreDiscounts } from "@/hooks/use-store-discounts";
 import { LoadingState } from "@/components/public-discounts/LoadingState";
@@ -22,6 +21,14 @@ const PublicDiscounts = () => {
       navigate(redirectToDiscount);
     }
   }, [redirectToDiscount, navigate]);
+
+  useEffect(() => {
+    // Add special logging for debugging
+    console.log("🔄 PublicDiscounts: Component rendered");
+    console.log(`🔄 PublicDiscounts: urlSlug is ${urlSlug || 'not defined'}`);
+    console.log(`🔄 PublicDiscounts: currentBrowsingDomain is ${currentBrowsingDomain || 'not detected'}`);
+    console.log(`🔄 PublicDiscounts: Found ${availableDiscountLinks.length} available discount links`);
+  }, [urlSlug, currentBrowsingDomain, availableDiscountLinks]);
 
   if (loading) {
     return <LoadingState />;
