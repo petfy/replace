@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Globe } from "lucide-react";
 
 interface AvailableStoresProps {
   availableDiscountLinks: { domain: string; slug: string }[];
@@ -63,3 +63,4 @@ export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain 
     </div>
   );
 };
+
