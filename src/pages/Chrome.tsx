@@ -1,7 +1,8 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Map, Chrome as ChromeIcon, Check, ArrowRight, Info } from "lucide-react";
+import { Map, Chrome as ChromeIcon, Check, ArrowRight, Info, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Chrome = () => {
   return (
@@ -27,11 +28,46 @@ const Chrome = () => {
             <h1 className="text-3xl font-bold text-gray-900">Configuración de RePlace en Chrome</h1>
           </div>
 
+          <Alert className="mb-6 border-amber-500">
+            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <AlertTitle>Importante</AlertTitle>
+            <AlertDescription>
+              La extensión debe estar instalada para detectar automáticamente las páginas de checkout. 
+              Si no tienes la extensión instalada, tendrás que buscar los descuentos manualmente.
+            </AlertDescription>
+          </Alert>
+
           <div className="space-y-8">
             <div className="bg-white rounded-lg border p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-sm">
                   1
+                </span>
+                Descargar e instalar la extensión
+              </h2>
+              <div className="flex items-start gap-4">
+                <div className="flex-grow space-y-2">
+                  <p className="text-gray-600">
+                    Descarga la extensión desde la Chrome Web Store o instálala desde el archivo que proporcionamos.
+                  </p>
+                  <div className="flex items-center gap-2 text-primary">
+                    <Info className="h-4 w-4" />
+                    <span className="text-sm">Para instalar manualmente: Abre chrome://extensions, activa el modo desarrollador y arrastra el archivo .crx</span>
+                  </div>
+                  <div className="flex justify-start mt-2">
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <ChromeIcon className="h-4 w-4" />
+                      Descargar extensión
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-sm">
+                  2
                 </span>
                 Activar la extensión
               </h2>
@@ -52,7 +88,7 @@ const Chrome = () => {
             <div className="bg-white rounded-lg border p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-sm">
-                  2
+                  3
                 </span>
                 Iniciar sesión
               </h2>
@@ -69,7 +105,27 @@ const Chrome = () => {
             <div className="bg-white rounded-lg border p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-sm">
-                  3
+                  4
+                </span>
+                Otorga permisos necesarios
+              </h2>
+              <div className="flex items-start gap-4">
+                <div className="flex-grow space-y-2">
+                  <p className="text-gray-600">
+                    La extensión necesita permisos para leer las URLs de las páginas que visitas
+                    para poder detectar tiendas con descuentos disponibles.
+                  </p>
+                  <p className="text-gray-600">
+                    Si no otorgas estos permisos, tendrás que buscar los descuentos manualmente.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-sm">
+                  5
                 </span>
                 ¡Listo para usar!
               </h2>

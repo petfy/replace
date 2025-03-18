@@ -18,6 +18,7 @@ const PublicDiscounts = () => {
   // Effect to handle redirect when a matching domain is found
   useEffect(() => {
     if (redirectToDiscount) {
+      console.log(`🚀 PublicDiscounts: Redirecting to ${redirectToDiscount}`);
       navigate(redirectToDiscount);
     }
   }, [redirectToDiscount, navigate]);
@@ -28,6 +29,12 @@ const PublicDiscounts = () => {
     console.log(`🔄 PublicDiscounts: urlSlug is ${urlSlug || 'not defined'}`);
     console.log(`🔄 PublicDiscounts: currentBrowsingDomain is ${currentBrowsingDomain || 'not detected'}`);
     console.log(`🔄 PublicDiscounts: Found ${availableDiscountLinks.length} available discount links`);
+    
+    // Log the list of available domains for easier debugging
+    if (availableDiscountLinks.length > 0) {
+      console.log("🔄 PublicDiscounts: Available domains:", 
+        availableDiscountLinks.map(link => link.domain).join(', '));
+    }
   }, [urlSlug, currentBrowsingDomain, availableDiscountLinks]);
 
   if (loading) {

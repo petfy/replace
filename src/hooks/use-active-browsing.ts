@@ -13,6 +13,7 @@ export const useActiveBrowsing = (urlSlug?: string) => {
   const [availableDiscountLinks, setAvailableDiscountLinks] = useState<DiscountLink[]>([]);
   const [redirectToDiscount, setRedirectToDiscount] = useState<string | null>(null);
   const [chromeApiAvailable, setChromeApiAvailable] = useState<boolean>(false);
+  const [chromeApiTested, setChromeApiTested] = useState<boolean>(false);
 
   // Function to check if a domain has available discounts
   const checkDomainForDiscounts = async (domain: string) => {
@@ -63,24 +64,71 @@ export const useActiveBrowsing = (urlSlug?: string) => {
     }
   };
 
+  // Function to extract domain from URL
+  const extractDomain = (url: string): string => {
+    try {
+      // Try to create a URL from the input
+      const parsedUrl = url.startsWith('http') ? new URL(url) : new URL(`http://${url}`);
+      return parsedUrl.hostname.replace('www.', '');
+    } catch (error) {
+      // If URL creation fails, just clean the input
+      return url.replace('www.', '').split('/')[0];
+    }
+  };
+
+  // Function to check Chrome API availability with timeout
+  const testChromeApiAvailability = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      // Set a timeout in case the Chrome API doesn't respond
+      const timeoutId = setTimeout(() => {
+        console.log("⏱️ useActiveBrowsing: Chrome API test timed out");
+        resolve(false);
+      }, 1000);
+
+      // Test if Chrome API is available
+      if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          console.log("🧪 useActiveBrowsing: Testing Chrome API with ping message");
+          chrome.runtime.sendMessage({ type: "PING" }, (response) => {
+            clearTimeout(timeoutId);
+            
+            const apiAvailable = !!response;
+            console.log(`🧪 useActiveBrowsing: Chrome API test result: ${apiAvailable ? "Available" : "Not available"}`);
+            resolve(apiAvailable);
+          });
+        } catch (error) {
+          clearTimeout(timeoutId);
+          console.error("❌ useActiveBrowsing: Error testing Chrome API:", error);
+          resolve(false);
+        }
+      } else {
+        clearTimeout(timeoutId);
+        console.log("⚠️ useActiveBrowsing: Chrome API not detected in window object");
+        resolve(false);
+      }
+    });
+  };
+
   useEffect(() => {
     const checkForActiveTab = async () => {
       console.log("🔍 useActiveBrowsing: Starting active tab check");
       
-      // Check if Chrome API is available
-      const isChromeApiAvailable = !!(window.chrome && chrome.runtime && chrome.runtime.sendMessage);
-      setChromeApiAvailable(isChromeApiAvailable);
+      // Only test Chrome API availability once
+      if (!chromeApiTested) {
+        const apiAvailable = await testChromeApiAvailability();
+        setChromeApiAvailable(apiAvailable);
+        setChromeApiTested(true);
+        console.log(`🧩 useActiveBrowsing: Chrome API status set to: ${apiAvailable ? "Available" : "Not available"}`);
+      }
       
-      console.log(`🧩 useActiveBrowsing: Chrome API status: ${isChromeApiAvailable ? "Available" : "Not available"}`);
-      
-      if (isChromeApiAvailable) {
+      // Try to get the active tab URL directly if Chrome API is available
+      if (chromeApiAvailable) {
         try {
           console.log("🔌 useActiveBrowsing: Sending message to get active tab URL");
           chrome.runtime.sendMessage({ type: "GET_ACTIVE_TAB_URL" }, async (response) => {
             console.log("📨 useActiveBrowsing: Received response:", response);
             if (response && response.url) {
-              const url = new URL(response.url);
-              const domain = url.hostname.replace('www.', '');
+              const domain = extractDomain(response.url);
               console.log(`🌐 useActiveBrowsing: Detected domain: ${domain}`);
               setCurrentBrowsingDomain(domain);
               
@@ -93,13 +141,22 @@ export const useActiveBrowsing = (urlSlug?: string) => {
               }
             } else {
               console.log("⚠️ useActiveBrowsing: No URL in response or no response received");
+              
+              // As fallback, try alternative method to detect tabs
+              tryAlternativeTabDetection();
             }
           });
         } catch (error) {
           console.error("❌ useActiveBrowsing: Error checking active tab:", error);
+          
+          // Try alternative method if Chrome API fails
+          tryAlternativeTabDetection();
         }
       } else {
         console.log("⚠️ useActiveBrowsing: Chrome extension API not available");
+        
+        // Try to parse the current URL as fallback
+        tryUrlParsingFallback();
         
         // If Chrome API is not available and we have a manualDomain, use that instead
         if (manualDomain && !urlSlug) {
@@ -110,13 +167,63 @@ export const useActiveBrowsing = (urlSlug?: string) => {
       }
     };
 
+    // Try to detect active tab using alternative methods
+    const tryAlternativeTabDetection = () => {
+      console.log("🔄 useActiveBrowsing: Trying alternative tab detection");
+      
+      // This function listens for messages from the content script
+      const handleContentScriptMessage = (event: MessageEvent) => {
+        if (event.data && event.data.type === 'CURRENT_URL') {
+          console.log(`📨 useActiveBrowsing: Received URL from content script: ${event.data.url}`);
+          const domain = extractDomain(event.data.url);
+          setCurrentBrowsingDomain(domain);
+          
+          if (!urlSlug) {
+            checkDomainForDiscounts(domain);
+          }
+        }
+      };
+      
+      // Add a listener for messages from content scripts
+      window.addEventListener('message', handleContentScriptMessage);
+      
+      // Create a custom event to request URL from content script
+      const requestEvent = new CustomEvent('REQUEST_CURRENT_URL');
+      window.dispatchEvent(requestEvent);
+      document.dispatchEvent(requestEvent);
+      
+      // Clean up the listener
+      return () => {
+        window.removeEventListener('message', handleContentScriptMessage);
+      };
+    };
+    
+    // Try to parse the current URL as fallback
+    const tryUrlParsingFallback = () => {
+      try {
+        // Get referrer or current URL
+        const urlToCheck = document.referrer || window.location.href;
+        if (urlToCheck) {
+          const domain = extractDomain(urlToCheck);
+          console.log(`🔍 useActiveBrowsing: Parsed URL fallback - domain: ${domain}`);
+          setCurrentBrowsingDomain(domain);
+          
+          if (!urlSlug) {
+            checkDomainForDiscounts(domain);
+          }
+        }
+      } catch (error) {
+        console.error("❌ useActiveBrowsing: Error in URL parsing fallback:", error);
+      }
+    };
+
     checkForActiveTab();
     
     // Check periodically for new active tabs
     const interval = setInterval(checkForActiveTab, 5000);
     
     return () => clearInterval(interval);
-  }, [urlSlug, manualDomain]);
+  }, [urlSlug, manualDomain, chromeApiAvailable, chromeApiTested]);
 
   return {
     currentBrowsingDomain,
