@@ -41,10 +41,10 @@ export const DiscountList = ({ discounts, setDiscounts }: DiscountListProps) => 
             .eq('id', discount.id);
         }
 
-        // Update the local state
+        // Update the local state with explicit type casting to ensure type safety
         const updatedDiscounts = discounts.map(discount => 
           new Date(discount.valid_until) < now 
-            ? { ...discount, status: 'expired' } 
+            ? { ...discount, status: 'expired' as 'expired' } 
             : discount
         );
 
