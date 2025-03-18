@@ -27,11 +27,12 @@ export const DiscountsTab = () => {
   const [loading, setLoading] = useState(true);
   const [currentDomain, setCurrentDomain] = useState<string | null>(null);
   const [publicLinkSlug, setPublicLinkSlug] = useState<string | null>(null);
+  const [redirectToDiscount, setRedirectToDiscount] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Function to check for active checkouts in other windows/tabs
-    const checkForCheckouts = async () => {
+    // Function to check for active tabs and matching public discount links
+    const checkForMatchingDomains = async () => {
       if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
         try {
           chrome.runtime.sendMessage({ type: "GET_ACTIVE_TAB_URL" }, async (response) => {
@@ -40,7 +41,7 @@ export const DiscountsTab = () => {
               const domain = url.hostname.replace('www.', '');
               setCurrentDomain(domain);
 
-              // Fetch discounts for this domain
+              // Check if this domain has a matching public link
               const { data: linkData, error: linkError } = await supabase
                 .from('public_discount_links')
                 .select('store_id, url_slug')
@@ -55,6 +56,7 @@ export const DiscountsTab = () => {
 
               if (linkData) {
                 setPublicLinkSlug(linkData.url_slug);
+                setRedirectToDiscount(`/discounts/${linkData.url_slug}`);
                 
                 const now = new Date().toISOString();
                 const { data: discounts, error: discountsError } = await supabase
@@ -75,7 +77,7 @@ export const DiscountsTab = () => {
             }
           });
         } catch (error) {
-          console.error('Error checking for checkouts:', error);
+          console.error('Error checking for domains:', error);
         } finally {
           setLoading(false);
         }
@@ -84,12 +86,19 @@ export const DiscountsTab = () => {
       }
     };
 
-    checkForCheckouts();
-    // Check every 30 seconds for new checkouts
-    const interval = setInterval(checkForCheckouts, 30000);
+    checkForMatchingDomains();
+    // Check every 5 seconds for active tabs and domain changes
+    const interval = setInterval(checkForMatchingDomains, 5000);
 
     return () => clearInterval(interval);
   }, []);
+
+  // Effect to handle redirect when a matching domain is found
+  useEffect(() => {
+    if (redirectToDiscount) {
+      navigate(redirectToDiscount);
+    }
+  }, [redirectToDiscount, navigate]);
 
   const getDiscountValue = (discount: StoreDiscount) => {
     if (discount.type === 'shipping') {

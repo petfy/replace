@@ -21,6 +21,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
   useEffect(() => {
     const generateSlug = async () => {
       try {
+        setLoading(true);
         // Get store website
         const { data: storeData, error: storeError } = await supabase
           .from('stores')
@@ -35,6 +36,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
             description: "Por favor, primero configura el sitio web de tu tienda.",
             variant: "default",
           });
+          setLoading(false);
           return;
         }
 
@@ -55,6 +57,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
         if (existingLink) {
           setUrlSlug(existingLink.url_slug);
           setPublicUrl(`${BASE_URL}/discounts/${existingLink.url_slug}`);
+          setLoading(false);
           return;
         }
 
@@ -83,6 +86,8 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
           description: error.message,
           variant: "destructive",
         });
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -115,7 +120,9 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
     <div className="space-y-6 bg-white shadow rounded-lg p-6">
       <h3 className="text-lg font-medium">URL Pública de Descuentos</h3>
       
-      {publicUrl && (
+      {loading ? (
+        <div className="text-center py-4">Generando URL...</div>
+      ) : publicUrl ? (
         <div className="mt-4 p-4 bg-muted rounded-lg">
           <Label>URL Pública</Label>
           <div className="flex items-center gap-2 mt-2">
@@ -130,6 +137,14 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
           <p className="text-sm text-muted-foreground mt-2">
             Los clientes que visiten {urlSlug} verán automáticamente tus descuentos disponibles.
           </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            La extensión de Chrome de RePlace detectará automáticamente cuando los usuarios estén navegando en {urlSlug}
+            y les mostrará los descuentos disponibles.
+          </p>
+        </div>
+      ) : (
+        <div className="text-center py-4">
+          Configura el sitio web de tu tienda para generar una URL pública.
         </div>
       )}
     </div>

@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Truck, Globe } from "lucide-react";
+import { Truck, Globe, ArrowLeft } from "lucide-react";
 import confetti from 'canvas-confetti';
 
 interface Discount {
@@ -28,6 +28,7 @@ const PublicDiscounts = () => {
   const [error, setError] = useState<string | null>(null);
   const [redeemedDiscounts, setRedeemedDiscounts] = useState<string[]>([]);
   const [currentBrowsingDomain, setCurrentBrowsingDomain] = useState<string | null>(null);
+  const [availableDiscountLinks, setAvailableDiscountLinks] = useState<{domain: string, slug: string}[]>([]);
   const { toast } = useToast();
 
   // Check if we should redirect to a matching domain based on active tabs
@@ -35,7 +36,7 @@ const PublicDiscounts = () => {
     const checkForActiveTab = async () => {
       if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
         try {
-          chrome.runtime.sendMessage({ type: "GET_ACTIVE_TAB_URL" }, (response) => {
+          chrome.runtime.sendMessage({ type: "GET_ACTIVE_TAB_URL" }, async (response) => {
             if (response && response.url) {
               const url = new URL(response.url);
               const domain = url.hostname.replace('www.', '');
@@ -57,6 +58,23 @@ const PublicDiscounts = () => {
 
     const checkDomainForDiscounts = async (domain: string) => {
       try {
+        // Get all active discount links to show available options
+        const { data: allLinks, error: allLinksError } = await supabase
+          .from('public_discount_links')
+          .select('url_slug')
+          .eq('is_active', true);
+        
+        if (allLinksError) throw allLinksError;
+        
+        if (allLinks) {
+          const links = allLinks.map(link => ({
+            domain: link.url_slug,
+            slug: link.url_slug
+          }));
+          setAvailableDiscountLinks(links);
+        }
+
+        // Check for exact match
         const { data, error } = await supabase
           .from('public_discount_links')
           .select('url_slug')
@@ -77,7 +95,7 @@ const PublicDiscounts = () => {
 
     checkForActiveTab();
     // Check periodically for new active tabs
-    const interval = setInterval(checkForActiveTab, 10000);
+    const interval = setInterval(checkForActiveTab, 5000);
     
     return () => clearInterval(interval);
   }, [navigate, urlSlug]);
@@ -89,7 +107,8 @@ const PublicDiscounts = () => {
         setError(null);
 
         if (!urlSlug) {
-          setError('URL inválida');
+          // Don't set an error for the main page, we'll show available options
+          setLoading(false);
           return;
         }
 
@@ -176,6 +195,10 @@ const PublicDiscounts = () => {
     }
   };
 
+  const goToDashboard = () => {
+    navigate('/dashboard');
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
@@ -198,6 +221,60 @@ const PublicDiscounts = () => {
           className="h-16 mb-8"
         />
         <p className="text-lg text-red-600">{error}</p>
+        <Button variant="outline" className="mt-4" onClick={goToDashboard}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver al dashboard
+        </Button>
+      </div>
+    );
+  }
+
+  // Main discount page without a specific slug
+  if (!urlSlug) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="text-center mb-8">
+          <img 
+            src="/lovable-uploads/8135bb2c-9d94-4a47-8471-88383f309453.png"
+            alt="RePlace Logo"
+            className="h-16 mx-auto mb-4"
+          />
+          <h1 className="text-3xl font-bold text-primary-800">Descuentos de RePlace</h1>
+          
+          {currentBrowsingDomain && (
+            <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
+              <Globe className="h-4 w-4" />
+              <span>Estás navegando en: {currentBrowsingDomain}</span>
+            </div>
+          )}
+        </div>
+
+        {availableDiscountLinks.length > 0 ? (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-center">Tiendas con descuentos disponibles</h2>
+            <div className="grid gap-4 md:grid-cols-3">
+              {availableDiscountLinks.map((link) => (
+                <Card 
+                  key={link.slug} 
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/discounts/${link.slug}`)}
+                >
+                  <CardContent className="p-4 flex items-center justify-center h-24">
+                    <p className="text-lg font-medium">{link.domain}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-lg text-gray-600">No hay tiendas con descuentos disponibles en este momento.</p>
+            <Button variant="outline" className="mt-4" onClick={goToDashboard}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver al dashboard
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -210,7 +287,11 @@ const PublicDiscounts = () => {
           alt="RePlace Logo"
           className="h-16 mb-8"
         />
-        <p className="text-lg text-gray-600">No hay descuentos activos en este momento.</p>
+        <p className="text-lg text-gray-600">No hay descuentos activos en este momento para {urlSlug}.</p>
+        <Button variant="outline" className="mt-4" onClick={goToDashboard}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver al dashboard
+        </Button>
       </div>
     );
   }
@@ -228,7 +309,7 @@ const PublicDiscounts = () => {
         {currentBrowsingDomain && (
           <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
             <Globe className="h-4 w-4" />
-            <span>Descuentos para: {currentBrowsingDomain}</span>
+            <span>Descuentos para: {urlSlug}</span>
           </div>
         )}
       </div>
@@ -276,6 +357,13 @@ const PublicDiscounts = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="mt-8 text-center">
+        <Button variant="outline" onClick={goToDashboard}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver al dashboard
+        </Button>
       </div>
     </div>
   );
