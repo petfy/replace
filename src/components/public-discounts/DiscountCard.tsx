@@ -1,8 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Truck } from "lucide-react";
+import { Truck, Clock, Copy, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import confetti from 'canvas-confetti';
 
@@ -24,7 +24,31 @@ interface DiscountCardProps {
 
 export const DiscountCard = ({ discount }: DiscountCardProps) => {
   const [isRedeemed, setIsRedeemed] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(10 * 60); // 10 minutes in seconds
+  const [timerActive, setTimerActive] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!timerActive) return;
+    
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timerActive]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+  };
 
   const launchConfetti = () => {
     confetti({
@@ -39,6 +63,7 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
     try {
       await navigator.clipboard.writeText(code);
       setIsRedeemed(true);
+      setTimerActive(true);
       launchConfetti();
       
       toast({
@@ -79,18 +104,32 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
                 : `$${discount.value} de descuento`}
           </p>
           <div className="space-y-3">
-            <code className="block w-full bg-gray-100 px-4 py-2 rounded-md text-lg font-mono">
-              {discount.code}
-            </code>
             {isRedeemed ? (
-              <p className="text-green-600 font-medium">¡Descuento canjeado!</p>
+              <>
+                <div className="flex items-center justify-center gap-2">
+                  <code className="block w-full bg-gray-100 px-4 py-2 rounded-md text-lg font-mono">
+                    {discount.code}
+                  </code>
+                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                </div>
+                <div className="flex items-center justify-center gap-2 text-amber-600 font-medium">
+                  <Clock className="h-4 w-4" />
+                  <span>¡Úsalo en los próximos {formatTime(timeLeft)}!</span>
+                </div>
+              </>
             ) : (
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
-                onClick={() => handleRedeemDiscount(discount.code)}
-              >
-                CANJEAR DESCUENTO
-              </Button>
+              <>
+                <div className="bg-gray-100 px-4 py-2 rounded-md text-lg font-mono h-10 flex items-center justify-center">
+                  <span className="blur-sm select-none">••••••••••</span>
+                </div>
+                <Button
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
+                  onClick={() => handleRedeemDiscount(discount.code)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  CANJEAR DESCUENTO
+                </Button>
+              </>
             )}
           </div>
         </div>
