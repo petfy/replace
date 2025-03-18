@@ -1,9 +1,12 @@
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ExtensionsCarousel } from "@/components/ExtensionsCarousel";
+import { ExternalLink } from "lucide-react";
 
 interface StoreDiscount {
   id: string;
@@ -19,9 +22,11 @@ interface StoreDiscount {
 }
 
 export const DiscountsTab = () => {
+  const navigate = useNavigate();
   const [activeDiscounts, setActiveDiscounts] = useState<StoreDiscount[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDomain, setCurrentDomain] = useState<string | null>(null);
+  const [publicLinkSlug, setPublicLinkSlug] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,7 +43,7 @@ export const DiscountsTab = () => {
               // Fetch discounts for this domain
               const { data: linkData, error: linkError } = await supabase
                 .from('public_discount_links')
-                .select('store_id')
+                .select('store_id, url_slug')
                 .eq('url_slug', domain)
                 .eq('is_active', true)
                 .maybeSingle();
@@ -49,6 +54,8 @@ export const DiscountsTab = () => {
               }
 
               if (linkData) {
+                setPublicLinkSlug(linkData.url_slug);
+                
                 const now = new Date().toISOString();
                 const { data: discounts, error: discountsError } = await supabase
                   .from('store_discounts')
@@ -91,6 +98,12 @@ export const DiscountsTab = () => {
     return `${discount.value}${discount.discount_type === 'percentage' ? '%' : '$'} de descuento`;
   };
 
+  const openPublicDiscountsPage = () => {
+    if (publicLinkSlug) {
+      window.open(`https://re-place.site/discounts/${publicLinkSlug}`, '_blank');
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-4">Buscando descuentos disponibles...</div>;
   }
@@ -124,7 +137,20 @@ export const DiscountsTab = () => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Descuentos disponibles para {currentDomain}</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">Descuentos disponibles para {currentDomain}</h3>
+        {publicLinkSlug && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={openPublicDiscountsPage}
+          >
+            <span>Ver página de descuentos</span>
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         {activeDiscounts.map((discount) => (
           <Card key={discount.id} className="shadow-sm">

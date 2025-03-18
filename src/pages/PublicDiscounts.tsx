@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Truck } from "lucide-react";
+import { Truck, Globe } from "lucide-react";
 import confetti from 'canvas-confetti';
 
 interface Discount {
@@ -21,11 +22,65 @@ interface Discount {
 
 const PublicDiscounts = () => {
   const { urlSlug } = useParams();
+  const navigate = useNavigate();
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [redeemedDiscounts, setRedeemedDiscounts] = useState<string[]>([]);
+  const [currentBrowsingDomain, setCurrentBrowsingDomain] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Check if we should redirect to a matching domain based on active tabs
+  useEffect(() => {
+    const checkForActiveTab = async () => {
+      if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          chrome.runtime.sendMessage({ type: "GET_ACTIVE_TAB_URL" }, (response) => {
+            if (response && response.url) {
+              const url = new URL(response.url);
+              const domain = url.hostname.replace('www.', '');
+              setCurrentBrowsingDomain(domain);
+              
+              // If we're not on a specific discount page and browser is on a domain
+              // with available discounts, redirect to that domain's discount page
+              if (!urlSlug) {
+                // Check if this domain has a public link
+                checkDomainForDiscounts(domain);
+              }
+            }
+          });
+        } catch (error) {
+          console.error("Error checking active tab:", error);
+        }
+      }
+    };
+
+    const checkDomainForDiscounts = async (domain: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('public_discount_links')
+          .select('url_slug')
+          .eq('url_slug', domain)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (error) throw error;
+        
+        if (data?.url_slug) {
+          // We found a matching discount page - redirect to it
+          navigate(`/discounts/${data.url_slug}`);
+        }
+      } catch (error) {
+        console.error("Error checking domain for discounts:", error);
+      }
+    };
+
+    checkForActiveTab();
+    // Check periodically for new active tabs
+    const interval = setInterval(checkForActiveTab, 10000);
+    
+    return () => clearInterval(interval);
+  }, [navigate, urlSlug]);
 
   useEffect(() => {
     const fetchDiscounts = async () => {
@@ -106,8 +161,18 @@ const PublicDiscounts = () => {
       await navigator.clipboard.writeText(code);
       setRedeemedDiscounts(prev => [...prev, code]);
       launchConfetti();
+      
+      toast({
+        title: "¡Descuento copiado!",
+        description: "El código ha sido copiado al portapapeles.",
+      });
     } catch (err) {
       console.error('Error al copiar el código:', err);
+      toast({
+        title: "Error",
+        description: "No se pudo copiar el código. Por favor, inténtalo manualmente.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -159,6 +224,13 @@ const PublicDiscounts = () => {
           className="h-16 mx-auto mb-4"
         />
         <h1 className="text-3xl font-bold text-primary-800">Descuentos Disponibles</h1>
+        
+        {currentBrowsingDomain && (
+          <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
+            <Globe className="h-4 w-4" />
+            <span>Descuentos para: {currentBrowsingDomain}</span>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

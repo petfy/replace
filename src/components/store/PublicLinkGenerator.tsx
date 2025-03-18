@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Copy } from "lucide-react";
+import { Copy, ExternalLink } from "lucide-react";
 
 interface PublicLinkGeneratorProps {
   storeId: string;
@@ -14,6 +14,7 @@ interface PublicLinkGeneratorProps {
 export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
   const [loading, setLoading] = useState(false);
   const [publicUrl, setPublicUrl] = useState("");
+  const [urlSlug, setUrlSlug] = useState("");
   const { toast } = useToast();
   const BASE_URL = "https://re-place.site";
 
@@ -52,6 +53,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
         if (linkError) throw linkError;
 
         if (existingLink) {
+          setUrlSlug(existingLink.url_slug);
           setPublicUrl(`${BASE_URL}/discounts/${existingLink.url_slug}`);
           return;
         }
@@ -67,6 +69,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
 
         if (insertError) throw insertError;
 
+        setUrlSlug(domain);
         setPublicUrl(`${BASE_URL}/discounts/${domain}`);
         
         toast({
@@ -104,6 +107,10 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
     }
   };
 
+  const openPublicDiscountsPage = () => {
+    window.open(publicUrl, '_blank');
+  };
+
   return (
     <div className="space-y-6 bg-white shadow rounded-lg p-6">
       <h3 className="text-lg font-medium">URL Pública de Descuentos</h3>
@@ -113,10 +120,16 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
           <Label>URL Pública</Label>
           <div className="flex items-center gap-2 mt-2">
             <Input value={publicUrl} readOnly />
-            <Button variant="outline" onClick={copyToClipboard}>
+            <Button variant="outline" onClick={copyToClipboard} title="Copiar URL">
               <Copy className="h-4 w-4" />
             </Button>
+            <Button variant="outline" onClick={openPublicDiscountsPage} title="Abrir en nueva pestaña">
+              <ExternalLink className="h-4 w-4" />
+            </Button>
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Los clientes que visiten {urlSlug} verán automáticamente tus descuentos disponibles.
+          </p>
         </div>
       )}
     </div>
