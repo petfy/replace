@@ -33,12 +33,16 @@ export const DiscountsTab = () => {
   useEffect(() => {
     // Function to check for active tabs and matching public discount links
     const checkForMatchingDomains = async () => {
+      console.log("🔍 DiscountsTab: Checking for matching domains...");
       if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
         try {
+          console.log("🔌 DiscountsTab: Chrome API available, sending message to get active tab URL");
           chrome.runtime.sendMessage({ type: "GET_ACTIVE_TAB_URL" }, async (response) => {
+            console.log("📨 DiscountsTab: Received response from chrome extension:", response);
             if (response && response.url) {
               const url = new URL(response.url);
               const domain = url.hostname.replace('www.', '');
+              console.log(`🌐 DiscountsTab: Detected active domain: ${domain}`);
               setCurrentDomain(domain);
 
               // Check if this domain has a matching public link
@@ -50,11 +54,12 @@ export const DiscountsTab = () => {
                 .maybeSingle();
 
               if (linkError) {
-                console.error('Error fetching link:', linkError);
+                console.error('❌ DiscountsTab: Error fetching link:', linkError);
                 return;
               }
 
               if (linkData) {
+                console.log(`✅ DiscountsTab: Found matching public link for domain ${domain}:`, linkData);
                 setPublicLinkSlug(linkData.url_slug);
                 setRedirectToDiscount(`/discounts/${linkData.url_slug}`);
                 
@@ -68,20 +73,26 @@ export const DiscountsTab = () => {
                   .gte('valid_until', now);
 
                 if (discountsError) {
-                  console.error('Error fetching discounts:', discountsError);
+                  console.error('❌ DiscountsTab: Error fetching discounts:', discountsError);
                   return;
                 }
 
+                console.log(`📋 DiscountsTab: Found ${discounts?.length || 0} active discounts`);
                 setActiveDiscounts(discounts || []);
+              } else {
+                console.log(`ℹ️ DiscountsTab: No matching public link found for domain ${domain}`);
               }
+            } else {
+              console.log("⚠️ DiscountsTab: No active URL detected in response", response);
             }
           });
         } catch (error) {
-          console.error('Error checking for domains:', error);
+          console.error('❌ DiscountsTab: Error checking for domains:', error);
         } finally {
           setLoading(false);
         }
       } else {
+        console.log("⚠️ DiscountsTab: Chrome API not available");
         setLoading(false);
       }
     };
@@ -96,6 +107,7 @@ export const DiscountsTab = () => {
   // Effect to handle redirect when a matching domain is found
   useEffect(() => {
     if (redirectToDiscount) {
+      console.log(`🚀 DiscountsTab: Redirecting to ${redirectToDiscount}`);
       navigate(redirectToDiscount);
     }
   }, [redirectToDiscount, navigate]);
@@ -118,12 +130,16 @@ export const DiscountsTab = () => {
   }
 
   if (!currentDomain) {
+    console.log("🚫 DiscountsTab: No current domain detected, showing default message");
     return (
       <div className="space-y-8">
         <div className="text-center py-4">
           <p>No se detectó ninguna página de checkout activa.</p>
           <p className="text-sm text-gray-500 mt-2">
             Abre una página de checkout en otra pestaña para ver los descuentos disponibles.
+          </p>
+          <p className="text-sm font-medium text-blue-500 mt-2">
+            Estado de Chrome API: {window.chrome ? "Disponible" : "No disponible"}
           </p>
         </div>
         <div className="space-y-4">
@@ -180,3 +196,4 @@ export const DiscountsTab = () => {
     </div>
   );
 };
+
