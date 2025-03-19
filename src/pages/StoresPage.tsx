@@ -56,6 +56,7 @@ const StoresPage = () => {
         }
 
         if (data) {
+          console.log("Fetched stores:", data);
           // Transform data to match the StoreWithTags type
           const transformedStores: StoreWithTags[] = data.map(store => ({
             id: store.id,
