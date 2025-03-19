@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { categories } from "@/components/store/StoreCategories";
 import { Button } from "@/components/ui/button";
@@ -41,91 +42,94 @@ const StoresPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
   const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0); // Para forzar la recarga
 
-  useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        setLoading(true);
-        
-        console.log("Starting to fetch stores from Supabase in StoresPage.tsx...");
-        console.log("Current environment:", import.meta.env.MODE);
-        console.log("Supabase client initialized:", !!supabase);
-        
-        // Direct query without any transformations to debug
-        const response = await supabase
-          .from("stores")
-          .select("*");
-        
-        console.log("Complete Supabase response:", response);
-        
-        const { data, error } = response;
+  const fetchStores = async () => {
+    try {
+      setLoading(true);
+      
+      console.log("Starting to fetch stores from Supabase in StoresPage.tsx...");
+      console.log("Current environment:", import.meta.env.MODE);
+      console.log("Supabase client initialized:", !!supabase);
+      console.log("Refresh attempt:", refreshKey);
+      
+      // Direct query without any transformations to debug
+      const response = await supabase
+        .from("stores")
+        .select("*");
+      
+      console.log("Complete Supabase response:", response);
+      
+      const { data, error } = response;
 
-        if (error) {
-          console.error("Error fetching stores:", error);
-          toast({
-            title: "Error",
-            description: "No se pudieron cargar las tiendas: " + error.message,
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-
-        console.log("Fetched stores data:", data);
-        
-        if (!data || data.length === 0) {
-          console.log("No stores found in the database in StoresPage.tsx");
-          toast({
-            title: "Información",
-            description: "No hay tiendas registradas en la base de datos",
-          });
-          setStores([]);
-          setFilteredStores([]);
-          setLoading(false);
-          return;
-        }
-        
-        console.log(`Successfully fetched ${data.length} stores in StoresPage.tsx`);
-        
-        // Transform data to match the StoreWithTags type
-        const transformedStores: StoreWithTags[] = data.map((store: Store) => ({
-          id: store.id,
-          name: store.name,
-          description: "Sin descripción disponible",
-          logo_url: store.logo_url,
-          website: store.website,
-          category: store.category,
-          tags: store.keywords || []
-        }));
-
-        console.log("Transformed stores:", transformedStores);
-        
-        setStores(transformedStores);
-        setFilteredStores(transformedStores);
-
-        // Extract unique categories from the stores
-        const allCategories = data
-          .map(store => store.category)
-          .filter(Boolean) as string[];
-          
-        const uniqueCats = [...new Set(allCategories)];
-        console.log("Extracted categories:", uniqueCats);
-        
-        setUniqueCategories(uniqueCats);
-      } catch (err) {
-        console.error("Exception while loading stores:", err);
+      if (error) {
+        console.error("Error fetching stores:", error);
         toast({
           title: "Error",
-          description: "Ocurrió un error al cargar las tiendas",
+          description: "No se pudieron cargar las tiendas: " + error.message,
           variant: "destructive",
         });
-      } finally {
         setLoading(false);
+        return;
       }
-    };
 
+      console.log("Fetched stores data:", data);
+      console.log("Store IDs:", data?.map(store => store.id) || []);
+      
+      if (!data || data.length === 0) {
+        console.log("No stores found in the database in StoresPage.tsx");
+        toast({
+          title: "Información",
+          description: "No hay tiendas registradas en la base de datos",
+        });
+        setStores([]);
+        setFilteredStores([]);
+        setLoading(false);
+        return;
+      }
+      
+      console.log(`Successfully fetched ${data.length} stores in StoresPage.tsx`);
+      
+      // Transform data to match the StoreWithTags type
+      const transformedStores: StoreWithTags[] = data.map((store: Store) => ({
+        id: store.id,
+        name: store.name,
+        description: "Sin descripción disponible",
+        logo_url: store.logo_url,
+        website: store.website,
+        category: store.category,
+        tags: store.keywords || []
+      }));
+
+      console.log("Transformed stores:", transformedStores);
+      
+      setStores(transformedStores);
+      setFilteredStores(transformedStores);
+
+      // Extract unique categories from the stores
+      const allCategories = data
+        .map(store => store.category)
+        .filter(Boolean) as string[];
+        
+      const uniqueCats = [...new Set(allCategories)];
+      console.log("Extracted categories:", uniqueCats);
+      
+      setUniqueCategories(uniqueCats);
+    } catch (err) {
+      console.error("Exception while loading stores:", err);
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al cargar las tiendas",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStores();
-  }, [toast]);
+  }, [toast, refreshKey]);
 
   // Filter stores based on search query and selected category
   useEffect(() => {
@@ -153,6 +157,10 @@ const StoresPage = () => {
     const category = categories.find(cat => cat.value === categoryName);
     const Icon = category?.icon;
     return Icon ? <Icon className="h-4 w-4 mr-1" /> : null;
+  };
+
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -188,7 +196,7 @@ const StoresPage = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4 items-center">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative w-full md:w-1/3">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <Input
@@ -200,26 +208,38 @@ const StoresPage = () => {
               />
             </div>
             
-            <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex items-center gap-2">
               <Button
-                variant={selectedCategory === "all" ? "default" : "outline"}
-                onClick={() => setSelectedCategory("all")}
-                className="rounded-full text-sm"
+                onClick={handleRefresh}
+                variant="outline"
+                size="icon"
+                className="flex-shrink-0"
+                title="Actualizar listado"
               >
-                Todas
+                <RefreshCw className="h-4 w-4" />
               </Button>
               
-              {uniqueCategories.map((category) => (
+              <div className="flex flex-wrap gap-2 items-center">
                 <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category)}
-                  className="rounded-full text-sm flex items-center"
+                  variant={selectedCategory === "all" ? "default" : "outline"}
+                  onClick={() => setSelectedCategory("all")}
+                  className="rounded-full text-sm"
                 >
-                  {getCategoryIcon(category)}
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                  Todas
                 </Button>
-              ))}
+                
+                {uniqueCategories.map((category) => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category)}
+                    className="rounded-full text-sm flex items-center"
+                  >
+                    {getCategoryIcon(category)}
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -257,6 +277,7 @@ const StoresPage = () => {
                   )}
                 </div>
                 
+                <div className="text-xs text-gray-500 text-center mb-1">ID: {store.id.substring(0, 8)}...</div>
                 <h3 className="text-xl font-semibold text-center mb-2">{store.name}</h3>
                 
                 <p className="text-gray-600 text-sm mb-4 text-center flex-grow">
@@ -296,9 +317,13 @@ const StoresPage = () => {
         ) : (
           <div className="text-center py-12">
             <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron tiendas</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 mb-4">
               No hay tiendas que coincidan con tu búsqueda. Intenta con otros términos.
             </p>
+            <Button onClick={handleRefresh} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Actualizar listado
+            </Button>
           </div>
         )}
       </div>

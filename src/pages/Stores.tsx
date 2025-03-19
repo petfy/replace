@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Store, Tag, ShoppingBag } from "lucide-react";
+import { Search, Store, Tag, ShoppingBag, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -27,76 +27,79 @@ const Stores = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
   const [visibleStores, setVisibleStores] = useState(8);
+  const [refreshKey, setRefreshKey] = useState(0); // Para forzar la recarga
 
-  useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        setLoading(true);
-        console.log("Starting to fetch stores from Supabase in Stores.tsx...");
-        console.log("Current environment:", import.meta.env.MODE);
+  const fetchStores = async () => {
+    try {
+      setLoading(true);
+      console.log("Starting to fetch stores from Supabase in Stores.tsx...");
+      console.log("Current environment:", import.meta.env.MODE);
+      console.log("Refresh attempt:", refreshKey);
+      
+      const { data, error } = await supabase
+        .from("stores")
+        .select("*");
         
-        const { data, error } = await supabase
-          .from("stores")
-          .select("*");
-          
-        console.log("Raw Supabase response in Stores.tsx:", { data, error });
+      console.log("Raw Supabase response in Stores.tsx:", { data, error });
 
-        if (error) {
-          console.error("Error fetching stores:", error);
-          toast({
-            title: "Error",
-            description: "No se pudieron cargar las tiendas: " + error.message,
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-        
-        if (!data || data.length === 0) {
-          console.log("No stores found in the database in Stores.tsx");
-          toast({
-            title: "Información",
-            description: "No hay tiendas registradas en la base de datos",
-          });
-          setStores([]);
-          setFilteredStores([]);
-          setLoading(false);
-          return;
-        }
-        
-        console.log(`Successfully fetched ${data.length} stores in Stores.tsx`);
-        
-        const storesWithData = data.filter(
-          (store) => store.name && (store.category || store.keywords)
-        );
-        
-        console.log(`Filtered to ${storesWithData.length} valid stores`);
-        
-        setStores(storesWithData);
-        setFilteredStores(storesWithData);
-
-        // Extract unique categories
-        const categories = storesWithData
-          .map((store) => store.category)
-          .filter((category): category is string => Boolean(category));
-          
-        console.log("Extracted categories:", categories);
-        
-        setUniqueCategories([...new Set(categories)]);
-        setLoading(false);
-      } catch (error: any) {
-        console.error("Exception while loading stores:", error.message);
+      if (error) {
+        console.error("Error fetching stores:", error);
         toast({
           title: "Error",
-          description: "No se pudieron cargar las tiendas",
+          description: "No se pudieron cargar las tiendas: " + error.message,
           variant: "destructive",
         });
         setLoading(false);
+        return;
       }
-    };
+      
+      if (!data || data.length === 0) {
+        console.log("No stores found in the database in Stores.tsx");
+        toast({
+          title: "Información",
+          description: "No hay tiendas registradas en la base de datos",
+        });
+        setStores([]);
+        setFilteredStores([]);
+        setLoading(false);
+        return;
+      }
+      
+      console.log(`Successfully fetched ${data.length} stores in Stores.tsx`);
+      console.log("Store IDs:", data.map(store => store.id));
+      
+      const storesWithData = data.filter(
+        (store) => store.name && (store.category || store.keywords)
+      );
+      
+      console.log(`Filtered to ${storesWithData.length} valid stores`);
+      
+      setStores(storesWithData);
+      setFilteredStores(storesWithData);
 
+      // Extract unique categories
+      const categories = storesWithData
+        .map((store) => store.category)
+        .filter((category): category is string => Boolean(category));
+        
+      console.log("Extracted categories:", categories);
+      
+      setUniqueCategories([...new Set(categories)]);
+      setLoading(false);
+    } catch (error: any) {
+      console.error("Exception while loading stores:", error.message);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las tiendas",
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStores();
-  }, [toast]);
+  }, [toast, refreshKey]);
 
   useEffect(() => {
     let result = stores;
@@ -126,6 +129,10 @@ const Stores = () => {
 
   const loadMoreStores = () => {
     setVisibleStores((prev) => prev + 8);
+  };
+
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -193,28 +200,39 @@ const Stores = () => {
                   className="pl-10"
                 />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-2">
                 <Button
-                  variant={selectedCategory === null ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(null)}
-                  className="text-sm"
+                  onClick={handleRefresh}
+                  variant="outline"
+                  size="icon"
+                  className="flex-shrink-0"
+                  title="Actualizar listado"
                 >
-                  Todas
+                  <RefreshCw className="h-4 w-4" />
                 </Button>
-                {uniqueCategories.map((category) => {
-                  const CategoryIcon = getCategoryIcon(category);
-                  return (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
-                      onClick={() => setSelectedCategory(category)}
-                      className="text-sm"
-                    >
-                      <CategoryIcon className="h-4 w-4 mr-2" />
-                      {category}
-                    </Button>
-                  );
-                })}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={selectedCategory === null ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(null)}
+                    className="text-sm"
+                  >
+                    Todas
+                  </Button>
+                  {uniqueCategories.map((category) => {
+                    const CategoryIcon = getCategoryIcon(category);
+                    return (
+                      <Button
+                        key={category}
+                        variant={selectedCategory === category ? "default" : "outline"}
+                        onClick={() => setSelectedCategory(category)}
+                        className="text-sm"
+                      >
+                        <CategoryIcon className="h-4 w-4 mr-2" />
+                        {category}
+                      </Button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -226,8 +244,12 @@ const Stores = () => {
                 No se encontraron tiendas
               </h3>
               <p className="mt-1 text-sm text-gray-500">
-                Intenta con otra búsqueda o categoría.
+                Intenta con otra búsqueda o categoría, o actualiza la página.
               </p>
+              <Button onClick={handleRefresh} variant="outline" className="mt-4">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Actualizar listado
+              </Button>
             </div>
           ) : (
             <>
@@ -251,6 +273,7 @@ const Stores = () => {
                         )}
                       </div>
                       <div className="p-4 flex-grow">
+                        <div className="text-xs text-gray-500 mb-1">ID: {store.id.substring(0, 8)}...</div>
                         {store.category && (
                           <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-2">
                             <CategoryIcon className="h-3 w-3 mr-1" />
