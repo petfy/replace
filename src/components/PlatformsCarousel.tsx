@@ -31,7 +31,7 @@ const platforms = [{
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/tiendanube.svg"
 }, {
   name: "Jumpseller",
-  active: false,
+  active: true,
   compatible: true,
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/jumpseller.png"
 }, {
