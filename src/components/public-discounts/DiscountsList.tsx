@@ -64,7 +64,7 @@ export const DiscountsList = ({ discounts, urlSlug, currentBrowsingDomain }: Dis
         )}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className={`grid gap-6 ${discounts.length === 1 ? 'max-w-md mx-auto' : 'md:grid-cols-2'}`}>
         {discounts.map((discount) => (
           <DiscountCard key={discount.id} discount={discount} />
         ))}
