@@ -16,13 +16,13 @@ const platforms = [{
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/vtex.png"
 }, {
   name: "Wix",
-  active: false,
-  compatible: false,
+  active: true,
+  compatible: true,
   logo: "https://cdn.shopify.com/s/files/1/0603/2670/7396/files/wix.png?v=1739145766"
 }, {
   name: "Woocommerce",
-  active: false,
-  compatible: false,
+  active: true,
+  compatible: true,
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/woocommerce.webp"
 }, {
   name: "TiendaNube",
