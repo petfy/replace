@@ -9,7 +9,6 @@ import { StoreForm } from "@/components/store/StoreForm";
 import { DiscountForm } from "@/components/store/DiscountForm";
 import { DiscountList } from "@/components/store/DiscountList";
 import { PublicLinkGenerator } from "@/components/store/PublicLinkGenerator";
-import { StoresBanner } from "@/components/store/StoresBanner";
 
 interface StoreData {
   id?: string;
@@ -139,9 +138,6 @@ const StoreDashboard = () => {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          {/* Add the new banner before the tabs */}
-          <StoresBanner />
-          
           <Tabs defaultValue="store" className="space-y-6">
             <TabsList>
               <TabsTrigger value="store">Datos de la Tienda</TabsTrigger>

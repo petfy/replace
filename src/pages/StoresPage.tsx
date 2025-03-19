@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ const StoresPage = () => {
     const fetchStores = async () => {
       try {
         setLoading(true);
+        // Fetch all stores without any filters
         const { data, error } = await supabase
           .from("stores")
           .select("*");
@@ -54,7 +56,9 @@ const StoresPage = () => {
         }
 
         if (data) {
+          // Log the data to see what's being returned
           console.log("Fetched stores:", data);
+          
           // Transform data to match the StoreWithTags type
           const transformedStores: StoreWithTags[] = data.map((store: Store) => ({
             id: store.id,
