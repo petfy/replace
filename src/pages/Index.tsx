@@ -1,4 +1,3 @@
-
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { PlatformsCarousel } from "@/components/PlatformsCarousel";
@@ -12,7 +11,7 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <nav className="py-4 px-6 border-b">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="text-2xl font-bold text-primary flex items-center gap-2">
+          <div className="text-2xl font-bold text-primary flex items-center gap-2 sm:mx-0 mx-auto">
             <img src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/replace-logo.png" alt="Replace Logo" className="h-6 w-6 text-primary mr-2" />
             <span className="text-2xl font-bold text-primary">RePlace</span>
           </div>
