@@ -7,19 +7,36 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define the Store type to match the database structure
 type Store = {
   id: string;
   name: string;
+  description?: string | null;
+  logo_url: string | null;
+  website: string | null;
+  category: string | null;
+  keywords: string[] | null;
+  email: string | null;
+  platform: string | null;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+// Derived type for UI display
+type StoreWithTags = {
+  id: string;
+  name: string;
   description: string;
-  logo_url: string;
-  website: string;
-  category: string;
+  logo_url: string | null;
+  website: string | null;
+  category: string | null;
   tags: string[];
 };
 
 const StoresPage = () => {
-  const [stores, setStores] = useState<Store[]>([]);
-  const [filteredStores, setFilteredStores] = useState<Store[]>([]);
+  const [stores, setStores] = useState<StoreWithTags[]>([]);
+  const [filteredStores, setFilteredStores] = useState<StoreWithTags[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -40,12 +57,25 @@ const StoresPage = () => {
         }
 
         if (data) {
-          setStores(data);
-          setFilteredStores(data);
+          // Transform data to match the StoreWithTags type
+          const transformedStores: StoreWithTags[] = data.map(store => ({
+            id: store.id,
+            name: store.name,
+            description: store.description || "Sin descripción disponible",
+            logo_url: store.logo_url,
+            website: store.website,
+            category: store.category,
+            tags: store.keywords || []
+          }));
+
+          setStores(transformedStores);
+          setFilteredStores(transformedStores);
 
           // Extract unique categories from the stores
-          const allCategories = data.map(store => store.category);
-          const uniqueCats = [...new Set(allCategories)].filter(Boolean);
+          const allCategories = data
+            .map(store => store.category)
+            .filter(Boolean) as string[];
+          const uniqueCats = [...new Set(allCategories)];
           setUniqueCategories(uniqueCats);
         }
       } catch (err) {
