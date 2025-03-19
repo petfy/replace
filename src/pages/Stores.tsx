@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Store, ShoppingBag, RefreshCw } from "lucide-react";
@@ -16,7 +17,7 @@ interface StoreData {
   website: string | null;
   platform: string | null;
   logo_url: string | null;
-  description: string | null;
+  description?: string | null; // Made optional with ?
 }
 
 const Stores = () => {
@@ -69,9 +70,10 @@ const Stores = () => {
       console.log(`Successfully fetched ${data.length} stores in Stores.tsx`);
       console.log("Store IDs:", data.map(store => store.id));
       
+      // Filter stores with basic data
       const storesWithData = data.filter(
         (store) => store.name && (store.category || store.keywords)
-      );
+      ) as StoreData[];
       
       console.log(`Filtered to ${storesWithData.length} valid stores`);
       

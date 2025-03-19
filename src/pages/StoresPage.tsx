@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Search, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,7 @@ type Store = {
   user_id: string;
   created_at: string;
   updated_at: string;
-  description: string | null;
+  description?: string | null; // Made optional with ?
 };
 
 // Derived type for UI display
@@ -90,7 +91,7 @@ const StoresPage = () => {
       console.log("Store IDs:", data.map(store => store.id));
       
       // Transform data to match the StoreWithTags type
-      const transformedStores: StoreWithTags[] = data.map((store: Store) => ({
+      const transformedStores: StoreWithTags[] = data.map((store: any) => ({
         id: store.id,
         name: store.name,
         description: store.description || "Sin descripción disponible",
