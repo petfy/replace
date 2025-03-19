@@ -6,11 +6,10 @@ import {
   Store as StoreIcon,
   Plus,
   Search,
-  Tag,
   RefreshCw,
   ExternalLink
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -124,6 +123,24 @@ const StoresPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Header */}
+      <nav className="py-4 px-6 bg-white border-b">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="text-2xl font-bold text-primary flex items-center gap-2">
+            <img src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/replace-logo.png" alt="Replace Logo" className="h-6 w-6 text-primary mr-2" />
+            <span className="text-2xl font-bold text-primary">RePlace</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link to="/stores" className="text-gray-700 hover:text-primary">
+              Tiendas
+            </Link>
+            <Link to="/auth">
+              <Button>Iniciar sesión</Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <h1 className="text-2xl font-bold">Tiendas Asociadas</h1>
