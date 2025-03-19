@@ -169,8 +169,8 @@ const Stores = () => {
               <Button onClick={() => window.location.href = "/"} variant="ghost">
                 Inicio
               </Button>
-              <Button onClick={() => window.location.href = "/dashboard"} variant="ghost">
-                Mis Direcciones
+              <Button onClick={() => window.location.href = "/dashboard"} variant="ghost" className="hidden sm:flex">
+                Ver Tiendas
               </Button>
             </div>
           </div>

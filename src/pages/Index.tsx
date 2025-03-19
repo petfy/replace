@@ -17,8 +17,8 @@ const Index = () => {
             <span className="text-2xl font-bold text-primary">RePlace</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/stores" className="text-gray-700 hover:text-primary">
-              Tiendas
+            <Link to="/stores" className="text-gray-700 hover:text-primary hidden sm:block">
+              Ver Tiendas
             </Link>
             <Link to="/auth">
               <Button>Iniciar sesión</Button>
