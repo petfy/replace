@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import StoreDashboard from "./pages/StoreDashboard";
 import Stores from "./pages/Stores";
+import StoresPage from "./pages/StoresPage";
 import PublicDiscounts from "./pages/PublicDiscounts";
 import Privacy from "./pages/Privacy";
 import Chrome from "./pages/Chrome";
@@ -27,7 +28,8 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/store-dashboard" element={<StoreDashboard />} />
-          <Route path="/stores" element={<Stores />} />
+          <Route path="/stores" element={<StoresPage />} />
+          <Route path="/admin-stores" element={<Stores />} />
           <Route path="/discounts" element={<PublicDiscounts />} />
           <Route path="/discounts/:urlSlug" element={<PublicDiscounts />} />
           <Route path="/privacy" element={<Privacy />} />

@@ -3,6 +3,7 @@ import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { PlatformsCarousel } from "@/components/PlatformsCarousel";
 import { ExtensionsCarousel } from "@/components/ExtensionsCarousel";
+import { StoresBanner } from "@/components/store/StoresBanner";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -15,7 +16,10 @@ const Index = () => {
             <img src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/replace-logo.png" alt="Replace Logo" className="h-6 w-6 text-primary mr-2" />
             <span className="text-2xl font-bold text-primary">RePlace</span>
           </div>
-          <div>
+          <div className="flex items-center gap-4">
+            <Link to="/stores" className="text-gray-700 hover:text-primary">
+              Tiendas
+            </Link>
             <Link to="/auth">
               <Button>Iniciar sesión</Button>
             </Link>
@@ -25,6 +29,9 @@ const Index = () => {
       <main>
         <Hero />
         <Features />
+        <div className="container mx-auto px-4 py-8">
+          <StoresBanner />
+        </div>
         <PlatformsCarousel />
         <div id="demo-video" className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
