@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AddressForm } from "@/components/AddressForm";
 import { AddressList } from "@/components/AddressList";
-import { Plus, LogOut, MapPin, Home, Briefcase, User, Users, Building2, Tag } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DiscountsTab } from "@/components/address/DiscountsTab";
+import { Plus, LogOut, MapPin, Home, Briefcase, User, Users, Building2 } from "lucide-react";
 
 interface Address {
   id: string;
@@ -221,113 +219,88 @@ const Dashboard = () => {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 sm:px-0">
-          <Tabs defaultValue="addresses" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 max-w-[400px] mx-auto">
-              <TabsTrigger 
-                value="addresses"
-                className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-300 ease-in-out"
-              >
-                <MapPin className="w-4 h-4 mr-2 transition-transform duration-300 ease-in-out group-data-[state=active]:scale-110" />
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-semibold text-gray-900">
                 Mis Direcciones
-              </TabsTrigger>
-              <TabsTrigger 
-                value="discounts"
-                className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-300 ease-in-out"
-              >
-                <Tag className="w-4 h-4 mr-2 transition-transform duration-300 ease-in-out group-data-[state=active]:scale-110" />
-                Descuentos
-              </TabsTrigger>
-            </TabsList>
+              </h1>
+              {!showAddForm && (
+                <Button onClick={() => setShowAddForm(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nueva dirección
+                </Button>
+              )}
+            </div>
 
-            <TabsContent value="addresses">
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-2xl font-semibold text-gray-900">
-                    Mis Direcciones
-                  </h1>
-                  {!showAddForm && (
-                    <Button onClick={() => setShowAddForm(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Nueva dirección
-                    </Button>
-                  )}
+            {showAddForm ? (
+              <div className="mb-6">
+                <AddressForm
+                  onSuccess={handleAddSuccess}
+                  initialData={editingAddress || undefined}
+                />
+                <div className="mt-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setEditingAddress(null);
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  {categoryCounts.map(({ category, count }) => {
+                    const categoryInfo = categories.find(c => c.value === category);
+                    const Icon = categoryInfo?.icon || MapPin;
+                    return (
+                      <Button
+                        key={category}
+                        variant={selectedCategory === category ? "default" : "outline"}
+                        className="flex items-center justify-start space-x-2 p-4 h-12 w-full"
+                        onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span className="text-sm truncate">{categoryInfo?.label}</span>
+                        <span className="text-xs ml-auto">({count})</span>
+                      </Button>
+                    );
+                  })}
                 </div>
 
-                {showAddForm ? (
-                  <div className="mb-6">
-                    <AddressForm
-                      onSuccess={handleAddSuccess}
-                      initialData={editingAddress || undefined}
-                    />
-                    <div className="mt-4">
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          setShowAddForm(false);
-                          setEditingAddress(null);
-                        }}
-                      >
-                        Cancelar
+                {addresses.length === 0 ? (
+                  <div className="text-center py-8 bg-white rounded-lg shadow">
+                    <MapPin className="mx-auto h-12 w-12 text-primary/60" />
+                    <h3 className="mt-2 text-lg font-medium text-gray-900">¡Crea tu primer perfil de dirección!</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Comienza agregando una dirección para agilizar tus compras en línea
+                    </p>
+                    <div className="mt-6">
+                      <Button onClick={() => setShowAddForm(true)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Agregar dirección
                       </Button>
                     </div>
                   </div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      {categoryCounts.map(({ category, count }) => {
-                        const categoryInfo = categories.find(c => c.value === category);
-                        const Icon = categoryInfo?.icon || MapPin;
-                        return (
-                          <Button
-                            key={category}
-                            variant={selectedCategory === category ? "default" : "outline"}
-                            className="flex items-center justify-start space-x-2 p-4 h-12 w-full"
-                            onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-                          >
-                            <Icon className="w-4 h-4" />
-                            <span className="text-sm truncate">{categoryInfo?.label}</span>
-                            <span className="text-xs ml-auto">({count})</span>
-                          </Button>
-                        );
-                      })}
-                    </div>
-
-                    {addresses.length === 0 ? (
-                      <div className="text-center py-8 bg-white rounded-lg shadow">
-                        <MapPin className="mx-auto h-12 w-12 text-primary/60" />
-                        <h3 className="mt-2 text-lg font-medium text-gray-900">¡Crea tu primer perfil de dirección!</h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                          Comienza agregando una dirección para agilizar tus compras en línea
-                        </p>
-                        <div className="mt-6">
-                          <Button onClick={() => setShowAddForm(true)}>
-                            <Plus className="w-4 h-4 mr-2" />
-                            Agregar dirección
-                          </Button>
-                        </div>
-                      </div>
-                    ) : filteredAddresses.length > 0 && (
-                      <div>
-                        <h2 className="text-lg font-semibold mb-4">
-                          {selectedCategory 
-                            ? `Direcciones en categoría: ${categories.find(c => c.value === selectedCategory)?.label}`
-                            : "Dirección predeterminada"}
-                        </h2>
-                        <AddressList
-                          onEdit={handleEdit}
-                          addresses={filteredAddresses}
-                        />
-                      </div>
-                    )}
-                  </>
+                ) : filteredAddresses.length > 0 && (
+                  <div>
+                    <h2 className="text-lg font-semibold mb-4">
+                      {selectedCategory 
+                        ? `Direcciones en categoría: ${categories.find(c => c.value === selectedCategory)?.label}`
+                        : "Dirección predeterminada"}
+                    </h2>
+                    <AddressList
+                      onEdit={handleEdit}
+                      addresses={filteredAddresses}
+                    />
+                  </div>
                 )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="discounts">
-              <DiscountsTab />
-            </TabsContent>
-          </Tabs>
+              </>
+            )}
+          </div>
         </div>
       </main>
     </div>
