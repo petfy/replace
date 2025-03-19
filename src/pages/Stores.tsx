@@ -10,11 +10,11 @@ import { categories } from "@/components/store/StoreCategories";
 interface StoreData {
   id: string;
   name: string;
-  email: string;
-  category: string;
+  email: string | null;
+  category: string | null;
   keywords: string[] | null;
-  website: string;
-  platform: string;
+  website: string | null;
+  platform: string | null;
   logo_url: string | null;
 }
 
@@ -32,16 +32,63 @@ const Stores = () => {
     const fetchStores = async () => {
       try {
         setLoading(true);
+        console.log("Starting to fetch stores from Supabase in Stores.tsx...");
+        
+        // Debug: Log Supabase connection
+        console.log("Supabase client initialized:", !!supabase);
+        
         const { data, error } = await supabase
           .from("stores")
-          .select("*")
-          .order("name");
+          .select("*");
+          
+        console.log("Raw Supabase response in Stores.tsx:", { data, error });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching stores:", error);
+          toast({
+            title: "Error",
+            description: "No se pudieron cargar las tiendas: " + error.message,
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        
+        if (!data || data.length === 0) {
+          console.log("No stores found in the database in Stores.tsx");
+          // Insert a sample store for testing if in development
+          if (import.meta.env.DEV) {
+            console.log("Development mode: Adding sample store for testing");
+            const sampleStore: StoreData = {
+              id: "sample-id",
+              name: "Tienda de Prueba",
+              email: "test@example.com",
+              category: "moda",
+              keywords: ["ropa", "accesorios", "moda"],
+              website: "https://example.com",
+              platform: "shopify",
+              logo_url: "https://via.placeholder.com/150"
+            };
+            
+            setStores([sampleStore]);
+            setFilteredStores([sampleStore]);
+            setUniqueCategories(["moda"]);
+          } else {
+            setStores([]);
+            setFilteredStores([]);
+          }
+          setLoading(false);
+          return;
+        }
+        
+        console.log(`Successfully fetched ${data.length} stores in Stores.tsx`);
         
         const storesWithData = data.filter(
-          (store) => store.name && store.category
+          (store) => store.name && (store.category || store.keywords)
         );
+        
+        console.log(`Filtered to ${storesWithData.length} valid stores`);
+        
         setStores(storesWithData);
         setFilteredStores(storesWithData);
 
@@ -49,11 +96,13 @@ const Stores = () => {
         const categories = storesWithData
           .map((store) => store.category)
           .filter((category): category is string => Boolean(category));
+          
+        console.log("Extracted categories:", categories);
+        
         setUniqueCategories([...new Set(categories)]);
-
         setLoading(false);
       } catch (error: any) {
-        console.error("Error al cargar tiendas:", error.message);
+        console.error("Exception while loading stores:", error.message);
         toast({
           title: "Error",
           description: "No se pudieron cargar las tiendas",
