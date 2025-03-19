@@ -11,8 +11,8 @@ const platforms = [{
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/shopify.svg"
 }, {
   name: "Vtex",
-  active: false,
-  compatible: false,
+  active: true,
+  compatible: true,
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/vtex.png"
 }, {
   name: "Wix",
@@ -26,8 +26,8 @@ const platforms = [{
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/woocommerce.webp"
 }, {
   name: "TiendaNube",
-  active: false,
-  compatible: false,
+  active: true,
+  compatible: true,
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/tiendanube.svg"
 }, {
   name: "Jumpseller",
