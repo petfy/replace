@@ -50,18 +50,21 @@ const StoresPage = () => {
         
         console.log("Starting to fetch stores from Supabase...");
         
-        // Simple fetch without any filters or authentication requirements
+        // Simplified query - making sure no filters are applied
         const { data, error } = await supabase
           .from("stores")
           .select("*");
+
+        console.log("Raw Supabase response:", { data, error });
 
         if (error) {
           console.error("Error fetching stores:", error);
           toast({
             title: "Error",
-            description: "No se pudieron cargar las tiendas",
+            description: "No se pudieron cargar las tiendas: " + error.message,
             variant: "destructive",
           });
+          setLoading(false);
           return;
         }
 
