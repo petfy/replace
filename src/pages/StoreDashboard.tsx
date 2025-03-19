@@ -9,6 +9,7 @@ import { StoreForm } from "@/components/store/StoreForm";
 import { DiscountForm } from "@/components/store/DiscountForm";
 import { DiscountList } from "@/components/store/DiscountList";
 import { PublicLinkGenerator } from "@/components/store/PublicLinkGenerator";
+import { ExternalLink } from "lucide-react";
 
 interface StoreData {
   id?: string;
@@ -135,6 +136,38 @@ const StoreDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <StoreNav />
+      
+      {/* JonyTips.com Promotional Banner */}
+      <div className="bg-primary-700 text-white py-3 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center">
+            <img 
+              src="https://jonytips.com/cdn/shop/files/jonytips_logo.png" 
+              alt="JonyTips.com" 
+              className="h-8 sm:h-10 mr-3" 
+            />
+            <div className="hidden sm:block">
+              <img 
+                src="https://jonytips.com/cdn/shop/files/Nuevo_proyecto_6.png" 
+                alt="Shopify Expert" 
+                className="h-6" 
+              />
+            </div>
+          </div>
+          <p className="text-sm sm:text-base text-center sm:text-left">
+            ¿Necesitas hacer mejoras en tu ecommerce? Visita{" "}
+            <a 
+              href="https://www.jonytips.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="font-bold underline hover:text-primary-200 inline-flex items-center"
+            >
+              www.jonytips.com <ExternalLink className="h-3 w-3 ml-1" />
+            </a>{" "}
+            y obtén soluciones listas y asesorías para mejorar tus ventas.
+          </p>
+        </div>
+      </div>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
