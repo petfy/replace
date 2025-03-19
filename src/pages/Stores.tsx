@@ -17,7 +17,7 @@ interface StoreData {
   website: string | null;
   platform: string | null;
   logo_url: string | null;
-  description?: string | null; // Made optional with ?
+  description: string | null;
 }
 
 const Stores = () => {
