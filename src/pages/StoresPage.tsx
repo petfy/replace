@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -49,10 +48,13 @@ const StoresPage = () => {
         setLoading(true);
         
         console.log("Starting to fetch stores from Supabase in StoresPage.tsx...");
+        console.log("Current environment:", import.meta.env.MODE);
         console.log("Supabase client initialized:", !!supabase);
         
         // Direct query without any transformations to debug
-        const response = await supabase.from("stores").select("*");
+        const response = await supabase
+          .from("stores")
+          .select("*");
         
         console.log("Complete Supabase response:", response);
         
@@ -73,31 +75,12 @@ const StoresPage = () => {
         
         if (!data || data.length === 0) {
           console.log("No stores found in the database in StoresPage.tsx");
-          
-          // Insert a sample store for testing if in development
-          if (import.meta.env.DEV) {
-            console.log("Development mode: Adding sample store for testing");
-            const sampleStore: StoreWithTags = {
-              id: "sample-id",
-              name: "Tienda de Prueba",
-              description: "Tienda de ejemplo para pruebas",
-              logo_url: "https://via.placeholder.com/150",
-              website: "https://example.com",
-              category: "moda",
-              tags: ["ropa", "accesorios", "moda"]
-            };
-            
-            setStores([sampleStore]);
-            setFilteredStores([sampleStore]);
-            setUniqueCategories(["moda"]);
-          } else {
-            toast({
-              title: "Información",
-              description: "No hay tiendas registradas en la base de datos",
-            });
-            setStores([]);
-            setFilteredStores([]);
-          }
+          toast({
+            title: "Información",
+            description: "No hay tiendas registradas en la base de datos",
+          });
+          setStores([]);
+          setFilteredStores([]);
           setLoading(false);
           return;
         }

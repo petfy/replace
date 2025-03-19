@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Store, Tag, ShoppingBag } from "lucide-react";
@@ -32,6 +33,7 @@ const Stores = () => {
       try {
         setLoading(true);
         console.log("Starting to fetch stores from Supabase in Stores.tsx...");
+        console.log("Current environment:", import.meta.env.MODE);
         
         const { data, error } = await supabase
           .from("stores")
