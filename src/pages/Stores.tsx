@@ -253,7 +253,7 @@ const Stores = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filteredStores.slice(0, visibleStores).map((store) => {
                   const CategoryIcon = store.category ? getCategoryIcon(store.category) : Store;
                   return (
@@ -262,7 +262,7 @@ const Stores = () => {
                       className="bg-white rounded-lg shadow overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 flex flex-col animate-fadeIn"
                     >
                       <div className="h-40 bg-gray-100 flex items-center justify-center p-4">
-                        <AspectRatio ratio={1 / 1} className="h-32 w-32 bg-gray-100 overflow-hidden">
+                        <AspectRatio ratio={1 / 1} className="h-32 w-32 bg-gray-100 overflow-hidden rounded-lg">
                           {store.logo_url ? (
                             <img
                               src={store.logo_url}

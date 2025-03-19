@@ -246,7 +246,7 @@ const StoresPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((_, index) => (
               <div key={index} className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-                <div className="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                <div className="w-24 h-24 bg-gray-200 rounded-lg mx-auto mb-4"></div>
                 <div className="h-6 bg-gray-200 rounded mb-3 w-3/4 mx-auto"></div>
                 <div className="h-4 bg-gray-200 rounded mb-2 w-full"></div>
                 <div className="h-4 bg-gray-200 rounded mb-2 w-5/6"></div>
@@ -258,11 +258,11 @@ const StoresPage = () => {
             ))}
           </div>
         ) : filteredStores.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStores.map((store) => (
               <div key={store.id} className="bg-white rounded-lg shadow-md p-6 flex flex-col transition-transform hover:scale-105">
                 <div className="mb-4 flex justify-center">
-                  <div className="w-24 h-24 overflow-hidden rounded-full border">
+                  <div className="w-24 h-24 overflow-hidden rounded-lg border">
                     <AspectRatio ratio={1 / 1} className="bg-gray-100">
                       {store.logo_url ? (
                         <img
