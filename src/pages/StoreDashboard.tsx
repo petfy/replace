@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,12 +137,12 @@ const StoreDashboard = () => {
       <StoreNav />
       
       {/* JonyTips.com Promotional Banner */}
-      <div className="px-4 py-4 sm:px-6">
-        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-4 border border-gray-100">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-lg shadow-md p-4 border border-gray-100">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center">
               <img 
-                src="https://jonytips.com/cdn/shop/files/jonytips_logo.png" 
+                src="https://jonytips.com/cdn/shop/files/jonytips_logo.png?v=1688919992&width=420" 
                 alt="JonyTips.com" 
                 className="h-8 sm:h-10 mr-3" 
               />
