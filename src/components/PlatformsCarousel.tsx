@@ -36,8 +36,8 @@ const platforms = [{
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/jumpseller.png"
 }, {
   name: "Prestashop",
-  active: false,
-  compatible: false,
+  active: true,
+  compatible: true,
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/prestashop.png"
 }];
 
