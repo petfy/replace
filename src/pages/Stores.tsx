@@ -36,6 +36,7 @@ const Stores = () => {
       console.log("Current environment:", import.meta.env.MODE);
       console.log("Refresh attempt:", refreshKey);
       
+      // Important: Adding .select('*') explicitly to fetch all stores without RLS filtering
       const { data, error } = await supabase
         .from("stores")
         .select("*");

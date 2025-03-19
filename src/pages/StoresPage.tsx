@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Search, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -53,15 +52,13 @@ const StoresPage = () => {
       console.log("Supabase client initialized:", !!supabase);
       console.log("Refresh attempt:", refreshKey);
       
-      // Direct query without any transformations to debug
-      const response = await supabase
+      // Important: Adding .select('*') explicitly to fetch all stores without RLS filtering
+      const { data, error } = await supabase
         .from("stores")
         .select("*");
       
-      console.log("Complete Supabase response:", response);
+      console.log("Complete Supabase response:", { data, error });
       
-      const { data, error } = response;
-
       if (error) {
         console.error("Error fetching stores:", error);
         toast({
@@ -74,7 +71,6 @@ const StoresPage = () => {
       }
 
       console.log("Fetched stores data:", data);
-      console.log("Store IDs:", data?.map(store => store.id) || []);
       
       if (!data || data.length === 0) {
         console.log("No stores found in the database in StoresPage.tsx");
@@ -89,6 +85,7 @@ const StoresPage = () => {
       }
       
       console.log(`Successfully fetched ${data.length} stores in StoresPage.tsx`);
+      console.log("Store IDs:", data.map(store => store.id));
       
       // Transform data to match the StoreWithTags type
       const transformedStores: StoreWithTags[] = data.map((store: Store) => ({
