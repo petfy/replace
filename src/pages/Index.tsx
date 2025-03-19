@@ -20,7 +20,7 @@ const Index = () => {
             <Link to="/stores" className="text-gray-700 hover:text-primary hidden sm:block">
               Ver Tiendas
             </Link>
-            <Link to="/auth">
+            <Link to="/auth" className="hidden sm:block">
               <Button>Iniciar sesión</Button>
             </Link>
           </div>
