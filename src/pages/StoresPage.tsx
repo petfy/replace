@@ -6,7 +6,8 @@ import {
   Plus,
   Search,
   Tag,
-  RefreshCw
+  RefreshCw,
+  ExternalLink
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -103,7 +104,7 @@ const StoresPage = () => {
   return (
     <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <h1 className="text-2xl font-bold">Mis Tiendas</h1>
+        <h1 className="text-2xl font-bold">Tiendas Asociadas</h1>
         <Button onClick={() => navigate('/auth')} className="mt-2 sm:mt-0">
           <Plus className="mr-2 h-4 w-4" /> Ingresar / Crear cuenta
         </Button>
@@ -174,10 +175,10 @@ const StoresPage = () => {
               <div className="mt-auto flex justify-center">
                 <Button
                   variant="outline"
-                  onClick={() => navigate(`/auth`)}
+                  onClick={() => window.open(store.website || '#', '_blank')}
                   className="w-full"
                 >
-                  Gestionar Tienda
+                  <ExternalLink className="mr-2 h-4 w-4" /> Ver Tienda
                 </Button>
               </div>
             </div>
@@ -187,10 +188,10 @@ const StoresPage = () => {
         <Card className="text-center py-12">
           <CardContent>
             <StoreIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-lg font-medium text-gray-900">No hay tiendas registradas</h3>
-            <p className="mt-1 text-sm text-gray-500">Inicia sesión para crear tu primera tienda.</p>
-            <Button onClick={() => navigate('/auth')} className="mt-4">
-              <Plus className="mr-2 h-4 w-4" /> Ingresar / Crear cuenta
+            <h3 className="mt-2 text-lg font-medium text-gray-900">No hay tiendas disponibles</h3>
+            <p className="mt-1 text-sm text-gray-500">No se encontraron tiendas que coincidan con tu búsqueda.</p>
+            <Button onClick={handleRefresh} className="mt-4">
+              <RefreshCw className="mr-2 h-4 w-4" /> Refrescar
             </Button>
           </CardContent>
         </Card>
