@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Store, Tag, ShoppingBag } from "lucide-react";
@@ -34,9 +33,6 @@ const Stores = () => {
         setLoading(true);
         console.log("Starting to fetch stores from Supabase in Stores.tsx...");
         
-        // Debug: Log Supabase connection
-        console.log("Supabase client initialized:", !!supabase);
-        
         const { data, error } = await supabase
           .from("stores")
           .select("*");
@@ -56,27 +52,12 @@ const Stores = () => {
         
         if (!data || data.length === 0) {
           console.log("No stores found in the database in Stores.tsx");
-          // Insert a sample store for testing if in development
-          if (import.meta.env.DEV) {
-            console.log("Development mode: Adding sample store for testing");
-            const sampleStore: StoreData = {
-              id: "sample-id",
-              name: "Tienda de Prueba",
-              email: "test@example.com",
-              category: "moda",
-              keywords: ["ropa", "accesorios", "moda"],
-              website: "https://example.com",
-              platform: "shopify",
-              logo_url: "https://via.placeholder.com/150"
-            };
-            
-            setStores([sampleStore]);
-            setFilteredStores([sampleStore]);
-            setUniqueCategories(["moda"]);
-          } else {
-            setStores([]);
-            setFilteredStores([]);
-          }
+          toast({
+            title: "Información",
+            description: "No hay tiendas registradas en la base de datos",
+          });
+          setStores([]);
+          setFilteredStores([]);
           setLoading(false);
           return;
         }
@@ -250,7 +231,7 @@ const Stores = () => {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filteredStores.slice(0, visibleStores).map((store) => {
-                  const CategoryIcon = getCategoryIcon(store.category);
+                  const CategoryIcon = store.category ? getCategoryIcon(store.category) : Store;
                   return (
                     <div
                       key={store.id}
@@ -268,10 +249,12 @@ const Stores = () => {
                         )}
                       </div>
                       <div className="p-4 flex-grow">
-                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-2">
-                          <CategoryIcon className="h-3 w-3 mr-1" />
-                          {store.category}
-                        </div>
+                        {store.category && (
+                          <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-2">
+                            <CategoryIcon className="h-3 w-3 mr-1" />
+                            {store.category}
+                          </div>
+                        )}
                         <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
                           {store.name}
                         </h3>
