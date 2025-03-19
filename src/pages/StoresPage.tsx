@@ -6,6 +6,7 @@ import { categories } from "@/components/store/StoreCategories";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 // Define the Store type to match the database structure
 type Store = {
@@ -34,6 +35,7 @@ type StoreWithTags = {
 };
 
 const StoresPage = () => {
+  const { toast } = useToast();
   const [stores, setStores] = useState<StoreWithTags[]>([]);
   const [filteredStores, setFilteredStores] = useState<StoreWithTags[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,13 +47,19 @@ const StoresPage = () => {
     const fetchStores = async () => {
       try {
         setLoading(true);
-        // Fetch all stores without any filters
+        
+        // Fetch all stores without filters and don't use authentication
         const { data, error } = await supabase
           .from("stores")
           .select("*");
 
         if (error) {
           console.error("Error fetching stores:", error);
+          toast({
+            title: "Error",
+            description: "No se pudieron cargar las tiendas",
+            variant: "destructive",
+          });
           return;
         }
 
@@ -82,13 +90,18 @@ const StoresPage = () => {
         }
       } catch (err) {
         console.error("Error:", err);
+        toast({
+          title: "Error",
+          description: "Ocurrió un error al cargar las tiendas",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchStores();
-  }, []);
+  }, [toast]);
 
   // Filter stores based on search query and selected category
   useEffect(() => {
