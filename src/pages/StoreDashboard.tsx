@@ -138,34 +138,29 @@ const StoreDashboard = () => {
       <StoreNav />
       
       {/* JonyTips.com Promotional Banner */}
-      <div className="bg-primary-700 text-white py-3 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center">
-            <img 
-              src="https://jonytips.com/cdn/shop/files/jonytips_logo.png" 
-              alt="JonyTips.com" 
-              className="h-8 sm:h-10 mr-3" 
-            />
-            <div className="hidden sm:block">
+      <div className="px-4 py-4 sm:px-6">
+        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-4 border border-gray-100">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center">
               <img 
-                src="https://jonytips.com/cdn/shop/files/Nuevo_proyecto_6.png" 
-                alt="Shopify Expert" 
-                className="h-6" 
+                src="https://jonytips.com/cdn/shop/files/jonytips_logo.png" 
+                alt="JonyTips.com" 
+                className="h-8 sm:h-10 mr-3" 
               />
             </div>
+            <p className="text-sm sm:text-base text-center sm:text-left text-gray-700">
+              ¿Necesitas hacer mejoras en tu ecommerce? Visita{" "}
+              <a 
+                href="https://www.jonytips.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="font-bold underline text-primary hover:text-primary-600 inline-flex items-center"
+              >
+                www.jonytips.com <ExternalLink className="h-3 w-3 ml-1" />
+              </a>{" "}
+              y obtén soluciones listas y asesorías para mejorar tus ventas.
+            </p>
           </div>
-          <p className="text-sm sm:text-base text-center sm:text-left">
-            ¿Necesitas hacer mejoras en tu ecommerce? Visita{" "}
-            <a 
-              href="https://www.jonytips.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="font-bold underline hover:text-primary-200 inline-flex items-center"
-            >
-              www.jonytips.com <ExternalLink className="h-3 w-3 ml-1" />
-            </a>{" "}
-            y obtén soluciones listas y asesorías para mejorar tus ventas.
-          </p>
         </div>
       </div>
 
