@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Store, Tag, ShoppingBag, RefreshCw } from "lucide-react";
+import { Search, Store, ShoppingBag, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { categories } from "@/components/store/StoreCategories";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface StoreData {
   id: string;
@@ -16,6 +16,7 @@ interface StoreData {
   website: string | null;
   platform: string | null;
   logo_url: string | null;
+  description: string | null;
 }
 
 const Stores = () => {
@@ -36,7 +37,6 @@ const Stores = () => {
       console.log("Current environment:", import.meta.env.MODE);
       console.log("Refresh attempt:", refreshKey);
       
-      // Important: Adding .select('*') explicitly to fetch all stores without RLS filtering
       const { data, error } = await supabase
         .from("stores")
         .select("*");
@@ -78,7 +78,6 @@ const Stores = () => {
       setStores(storesWithData);
       setFilteredStores(storesWithData);
 
-      // Extract unique categories
       const categories = storesWithData
         .map((store) => store.category)
         .filter((category): category is string => Boolean(category));
@@ -105,7 +104,6 @@ const Stores = () => {
   useEffect(() => {
     let result = stores;
 
-    // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(
@@ -118,7 +116,6 @@ const Stores = () => {
       );
     }
 
-    // Filter by category
     if (selectedCategory) {
       result = result.filter(
         (store) => store.category === selectedCategory
@@ -263,38 +260,31 @@ const Stores = () => {
                       className="bg-white rounded-lg shadow overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 flex flex-col animate-fadeIn"
                     >
                       <div className="h-40 bg-gray-100 flex items-center justify-center p-4">
-                        {store.logo_url ? (
-                          <img
-                            src={store.logo_url}
-                            alt={`${store.name} logo`}
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        ) : (
-                          <Store className="h-16 w-16 text-gray-400" />
-                        )}
+                        <AspectRatio ratio={1 / 1} className="h-32 w-32 bg-gray-100 overflow-hidden">
+                          {store.logo_url ? (
+                            <img
+                              src={store.logo_url}
+                              alt={`${store.name} logo`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center">
+                              <Store className="h-16 w-16 text-gray-400" />
+                            </div>
+                          )}
+                        </AspectRatio>
                       </div>
                       <div className="p-4 flex-grow">
-                        <div className="text-xs text-gray-500 mb-1">ID: {store.id.substring(0, 8)}...</div>
-                        {store.category && (
-                          <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-2">
-                            <CategoryIcon className="h-3 w-3 mr-1" />
-                            {store.category}
-                          </div>
-                        )}
+                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-2">
+                          <CategoryIcon className="h-3 w-3 mr-1" />
+                          {store.category}
+                        </div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
                           {store.name}
                         </h3>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {store.keywords?.slice(0, 3).map((keyword, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
-                            >
-                              <Tag className="h-3 w-3 mr-1" />
-                              {keyword}
-                            </span>
-                          ))}
-                        </div>
+                        <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+                          {store.description || "Sin descripción disponible"}
+                        </p>
                       </div>
                       <div className="p-4 bg-gray-50 border-t">
                         <a

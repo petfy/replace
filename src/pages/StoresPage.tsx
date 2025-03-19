@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 // Define the Store type to match the database structure
 type Store = {
@@ -20,13 +21,14 @@ type Store = {
   user_id: string;
   created_at: string;
   updated_at: string;
+  description: string | null;
 };
 
 // Derived type for UI display
 type StoreWithTags = {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   logo_url: string | null;
   website: string | null;
   category: string | null;
@@ -91,7 +93,7 @@ const StoresPage = () => {
       const transformedStores: StoreWithTags[] = data.map((store: Store) => ({
         id: store.id,
         name: store.name,
-        description: "Sin descripción disponible",
+        description: store.description || "Sin descripción disponible",
         logo_url: store.logo_url,
         website: store.website,
         category: store.category,
@@ -128,7 +130,6 @@ const StoresPage = () => {
     fetchStores();
   }, [toast, refreshKey]);
 
-  // Filter stores based on search query and selected category
   useEffect(() => {
     let filtered = stores;
 
@@ -149,7 +150,6 @@ const StoresPage = () => {
     setFilteredStores(filtered);
   }, [searchQuery, selectedCategory, stores]);
 
-  // Find the category icon
   const getCategoryIcon = (categoryName: string) => {
     const category = categories.find(cat => cat.value === categoryName);
     const Icon = category?.icon;
@@ -261,39 +261,36 @@ const StoresPage = () => {
             {filteredStores.map((store) => (
               <div key={store.id} className="bg-white rounded-lg shadow-md p-6 flex flex-col transition-transform hover:scale-105">
                 <div className="mb-4 flex justify-center">
-                  {store.logo_url ? (
-                    <img
-                      src={store.logo_url}
-                      alt={`${store.name} logo`}
-                      className="w-24 h-24 object-contain rounded-full border p-2"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
-                      <span className="text-xl font-bold text-gray-500">{store.name.charAt(0)}</span>
-                    </div>
-                  )}
+                  <div className="w-24 h-24 overflow-hidden rounded-full border">
+                    <AspectRatio ratio={1 / 1} className="bg-gray-100">
+                      {store.logo_url ? (
+                        <img
+                          src={store.logo_url}
+                          alt={`${store.name} logo`}
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-xl font-bold text-gray-500">{store.name.charAt(0)}</span>
+                        </div>
+                      )}
+                    </AspectRatio>
+                  </div>
                 </div>
                 
-                <div className="text-xs text-gray-500 text-center mb-1">ID: {store.id.substring(0, 8)}...</div>
                 <h3 className="text-xl font-semibold text-center mb-2">{store.name}</h3>
                 
                 <p className="text-gray-600 text-sm mb-4 text-center flex-grow">
-                  {store.description || "Sin descripción disponible"}
+                  {store.description}
                 </p>
                 
-                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                <div className="flex justify-center mb-4">
                   {store.category && (
                     <Badge className="bg-purple-100 text-purple-800 border-purple-200 flex items-center">
                       {getCategoryIcon(store.category)}
                       {store.category}
                     </Badge>
                   )}
-                  
-                  {store.tags && store.tags.slice(0, 3).map((tag, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
                 </div>
                 
                 <div className="mt-auto">

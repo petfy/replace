@@ -4,6 +4,7 @@ import { Store, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,6 +24,7 @@ interface StoreData {
   website: string;
   platform: 'shopify' | 'woocommerce' | 'wix' | 'tiendanube' | 'jumpseller' | 'vtex' | 'magento' | 'otro';
   logo_url?: string;
+  description?: string;
 }
 
 export const StoreForm = ({ storeData, setStoreData, loading, setLoading }: StoreFormProps) => {
@@ -172,6 +174,18 @@ export const StoreForm = ({ storeData, setStoreData, loading, setLoading }: Stor
             <option value="tiendanube">TiendaNube</option>
             <option value="otro">Otro</option>
           </select>
+        </div>
+
+        <div className="md:col-span-2">
+          <Label htmlFor="description">Descripción de la Tienda</Label>
+          <Textarea
+            id="description"
+            value={storeData?.description || ''}
+            onChange={(e) => setStoreData({ ...storeData, description: e.target.value })}
+            placeholder="Breve descripción de tu tienda y productos que ofreces..."
+            rows={3}
+            className="resize-none"
+          />
         </div>
 
         <div className="md:col-span-2">
