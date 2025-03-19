@@ -131,8 +131,8 @@ const StoresPage = () => {
             <span className="text-2xl font-bold text-primary">RePlace</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/stores" className="text-gray-700 hover:text-primary">
-              Tiendas
+            <Link to="/stores" className="text-gray-700 hover:text-primary hidden sm:block">
+              Ver Tiendas
             </Link>
             <Link to="/auth">
               <Button>Iniciar sesión</Button>
@@ -194,7 +194,7 @@ const StoresPage = () => {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
             {[1, 2, 3, 4, 5, 6].map((_, index) => (
               <div key={index} className="bg-white rounded-lg shadow-md p-6 animate-pulse">
                 <div className="w-24 h-24 bg-gray-200 rounded-lg mx-auto mb-4"></div>
@@ -209,7 +209,7 @@ const StoresPage = () => {
             ))}
           </div>
         ) : filteredStores.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
             {filteredStores.map((store) => (
               <div key={store.id} className="bg-white rounded-lg shadow-md p-6 flex flex-col transition-transform hover:scale-105">
                 <div className="mb-4 flex justify-center">
