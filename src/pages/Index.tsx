@@ -1,3 +1,4 @@
+
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { PlatformsCarousel } from "@/components/PlatformsCarousel";
@@ -5,6 +6,8 @@ import { ExtensionsCarousel } from "@/components/ExtensionsCarousel";
 import { StoresBanner } from "@/components/store/StoresBanner";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 const Index = () => {
   return <div className="min-h-screen bg-white">
       <nav className="py-4 px-6 border-b">
@@ -34,11 +37,62 @@ const Index = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-center mb-8 text-primary-800">
-                Ve cómo funciona RePlace
+                Ve cómo funciona RePlace en diferentes plataformas
               </h2>
-              <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg flex items-center justify-center">
-                <p className="text-gray-600">Video próximamente</p>
-              </div>
+              <Tabs defaultValue="shopify" className="w-full">
+                <TabsList className="w-full flex justify-center mb-6">
+                  <TabsTrigger value="shopify">Shopify</TabsTrigger>
+                  <TabsTrigger value="woocommerce">Woocommerce</TabsTrigger>
+                  <TabsTrigger value="wix">Wix</TabsTrigger>
+                  <TabsTrigger value="jumpseller">Jumpseller</TabsTrigger>
+                  <TabsTrigger value="tiendanube">TiendaNube</TabsTrigger>
+                  <TabsTrigger value="vtex">VTEX</TabsTrigger>
+                </TabsList>
+                <TabsContent value="shopify" className="flex justify-center">
+                  <div className="w-full overflow-hidden rounded-lg shadow-lg">
+                    <img 
+                      src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos//chrome-capture-2025-3-19.gif" 
+                      alt="RePlace en Shopify" 
+                      className="w-full h-auto"
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="woocommerce" className="flex justify-center">
+                  <div className="w-full overflow-hidden rounded-lg shadow-lg">
+                    <div className="bg-gray-100 aspect-video flex items-center justify-center p-6 text-center">
+                      <p className="text-gray-600">Demo de WooCommerce próximamente</p>
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="wix" className="flex justify-center">
+                  <div className="w-full overflow-hidden rounded-lg shadow-lg">
+                    <div className="bg-gray-100 aspect-video flex items-center justify-center p-6 text-center">
+                      <p className="text-gray-600">Demo de Wix próximamente</p>
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="jumpseller" className="flex justify-center">
+                  <div className="w-full overflow-hidden rounded-lg shadow-lg">
+                    <div className="bg-gray-100 aspect-video flex items-center justify-center p-6 text-center">
+                      <p className="text-gray-600">Demo de Jumpseller próximamente</p>
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="tiendanube" className="flex justify-center">
+                  <div className="w-full overflow-hidden rounded-lg shadow-lg">
+                    <div className="bg-gray-100 aspect-video flex items-center justify-center p-6 text-center">
+                      <p className="text-gray-600">Demo de TiendaNube próximamente</p>
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="vtex" className="flex justify-center">
+                  <div className="w-full overflow-hidden rounded-lg shadow-lg">
+                    <div className="bg-gray-100 aspect-video flex items-center justify-center p-6 text-center">
+                      <p className="text-gray-600">Demo de VTEX próximamente</p>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </div>
