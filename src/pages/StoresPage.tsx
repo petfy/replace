@@ -1,6 +1,4 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -10,6 +8,7 @@ import {
   Tag,
   RefreshCw
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -40,24 +39,16 @@ const StoresPage = () => {
     const fetchStores = async () => {
       try {
         setLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) {
-          navigate('/auth');
-          return;
-        }
-
+        
         const { data, error } = await supabase
           .from('stores')
-          .select('*')
-          .eq('user_id', user.id);
+          .select('*');
 
         if (error) {
           throw error;
         }
 
         if (data) {
-          // Type assertion to transform the data to Store type
           const typedStores = data.map(store => ({
             id: store.id,
             name: store.name,
@@ -84,10 +75,9 @@ const StoresPage = () => {
     };
 
     fetchStores();
-  }, [navigate, toast, refreshKey]);
+  }, [toast, refreshKey]);
 
   useEffect(() => {
-    // Filter stores when search term changes
     if (searchTerm.trim() === '') {
       setFilteredStores(stores);
     } else {
@@ -114,8 +104,8 @@ const StoresPage = () => {
     <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h1 className="text-2xl font-bold">Mis Tiendas</h1>
-        <Button onClick={() => navigate('/store/new')} className="mt-2 sm:mt-0">
-          <Plus className="mr-2 h-4 w-4" /> Nueva Tienda
+        <Button onClick={() => navigate('/auth')} className="mt-2 sm:mt-0">
+          <Plus className="mr-2 h-4 w-4" /> Ingresar / Crear cuenta
         </Button>
       </div>
 
@@ -184,7 +174,7 @@ const StoresPage = () => {
               <div className="mt-auto flex justify-center">
                 <Button
                   variant="outline"
-                  onClick={() => navigate(`/store/${store.id}`)}
+                  onClick={() => navigate(`/auth`)}
                   className="w-full"
                 >
                   Gestionar Tienda
@@ -197,10 +187,10 @@ const StoresPage = () => {
         <Card className="text-center py-12">
           <CardContent>
             <StoreIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-lg font-medium text-gray-900">No tienes tiendas registradas</h3>
-            <p className="mt-1 text-sm text-gray-500">Comienza creando tu primera tienda.</p>
-            <Button onClick={() => navigate('/store/new')} className="mt-4">
-              <Plus className="mr-2 h-4 w-4" /> Nueva Tienda
+            <h3 className="mt-2 text-lg font-medium text-gray-900">No hay tiendas registradas</h3>
+            <p className="mt-1 text-sm text-gray-500">Inicia sesión para crear tu primera tienda.</p>
+            <Button onClick={() => navigate('/auth')} className="mt-4">
+              <Plus className="mr-2 h-4 w-4" /> Ingresar / Crear cuenta
             </Button>
           </CardContent>
         </Card>
