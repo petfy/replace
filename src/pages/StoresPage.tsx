@@ -48,8 +48,7 @@ const StoresPage = () => {
         setLoading(true);
         const { data, error } = await supabase
           .from("stores")
-          .select("*")
-          .eq("status", "active");
+          .select("*");
 
         if (error) {
           console.error("Error fetching stores:", error);
