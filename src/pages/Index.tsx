@@ -5,10 +5,8 @@ import { ExtensionsCarousel } from "@/components/ExtensionsCarousel";
 import { StoresBanner } from "@/components/store/StoresBanner";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       <nav className="py-4 px-6 border-b">
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-2xl font-bold text-primary flex items-center gap-2 sm:mx-0 mx-auto">
@@ -28,7 +26,7 @@ const Index = () => {
       <main>
         <Hero />
         <Features />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto py-8 px-[4px]">
           <StoresBanner />
         </div>
         <PlatformsCarousel />
@@ -76,8 +74,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
