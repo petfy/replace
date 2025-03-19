@@ -48,7 +48,10 @@ const StoresPage = () => {
       try {
         setLoading(true);
         
-        // Fetch all stores without filters and don't use authentication
+        // Explicitly log the start of fetching
+        console.log("Starting to fetch stores from Supabase...");
+        
+        // Fetch all stores with explicit public access
         const { data, error } = await supabase
           .from("stores")
           .select("*");
@@ -63,33 +66,50 @@ const StoresPage = () => {
           return;
         }
 
-        if (data) {
-          // Log the data to see what's being returned
-          console.log("Fetched stores:", data);
-          
-          // Transform data to match the StoreWithTags type
-          const transformedStores: StoreWithTags[] = data.map((store: Store) => ({
-            id: store.id,
-            name: store.name,
-            description: "Sin descripción disponible",
-            logo_url: store.logo_url,
-            website: store.website,
-            category: store.category,
-            tags: store.keywords || []
-          }));
+        // Log the raw data for debugging
+        console.log("Fetched stores data:", data);
+        
+        if (data && Array.isArray(data)) {
+          if (data.length === 0) {
+            console.log("No stores found in the database");
+            toast({
+              title: "Información",
+              description: "No hay tiendas registradas en la base de datos",
+            });
+          } else {
+            console.log(`Successfully fetched ${data.length} stores`);
+            
+            // Transform data to match the StoreWithTags type
+            const transformedStores: StoreWithTags[] = data.map((store: Store) => ({
+              id: store.id,
+              name: store.name,
+              description: "Sin descripción disponible",
+              logo_url: store.logo_url,
+              website: store.website,
+              category: store.category,
+              tags: store.keywords || []
+            }));
 
-          setStores(transformedStores);
-          setFilteredStores(transformedStores);
+            setStores(transformedStores);
+            setFilteredStores(transformedStores);
 
-          // Extract unique categories from the stores
-          const allCategories = data
-            .map(store => store.category)
-            .filter(Boolean) as string[];
-          const uniqueCats = [...new Set(allCategories)];
-          setUniqueCategories(uniqueCats);
+            // Extract unique categories from the stores
+            const allCategories = data
+              .map(store => store.category)
+              .filter(Boolean) as string[];
+            const uniqueCats = [...new Set(allCategories)];
+            setUniqueCategories(uniqueCats);
+          }
+        } else {
+          console.error("Unexpected data format:", data);
+          toast({
+            title: "Error",
+            description: "El formato de datos recibido es inesperado",
+            variant: "destructive",
+          });
         }
       } catch (err) {
-        console.error("Error:", err);
+        console.error("Error fetching stores:", err);
         toast({
           title: "Error",
           description: "Ocurrió un error al cargar las tiendas",
