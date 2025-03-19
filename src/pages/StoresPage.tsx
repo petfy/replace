@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -11,12 +10,11 @@ import { supabase } from "@/integrations/supabase/client";
 type Store = {
   id: string;
   name: string;
-  description?: string | null;
-  logo_url: string | null;
+  email: string | null;
   website: string | null;
+  logo_url: string | null;
   category: string | null;
   keywords: string[] | null;
-  email: string | null;
   platform: string | null;
   user_id: string;
   created_at: string;
@@ -58,10 +56,10 @@ const StoresPage = () => {
         if (data) {
           console.log("Fetched stores:", data);
           // Transform data to match the StoreWithTags type
-          const transformedStores: StoreWithTags[] = data.map(store => ({
+          const transformedStores: StoreWithTags[] = data.map((store: Store) => ({
             id: store.id,
             name: store.name,
-            description: store.description || "Sin descripción disponible",
+            description: "Sin descripción disponible",
             logo_url: store.logo_url,
             website: store.website,
             category: store.category,
