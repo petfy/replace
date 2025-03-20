@@ -95,7 +95,9 @@ const StoresPage = () => {
         const storeId = urlParams.get('replace_store');
         
         if (storeId) {
-          // Track specific store view and click
+          console.log('Tracking directory view for store ID:', storeId);
+          
+          // Track specific store view
           await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -103,6 +105,13 @@ const StoresPage = () => {
               store_id: storeId,
               event_type: "view"
             })
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Store view tracking response:', data);
+          })
+          .catch(error => {
+            console.error('Error in store view tracking response:', error);
           });
           
           // If discount parameter is present, track usage
@@ -114,6 +123,13 @@ const StoresPage = () => {
                 store_id: storeId,
                 event_type: "discount_usage"
               })
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Discount usage tracking response:', data);
+            })
+            .catch(error => {
+              console.error('Error in discount usage tracking response:', error);
             });
           }
         }
@@ -159,6 +175,8 @@ const StoresPage = () => {
 
   const handleStoreClick = async (storeId: string) => {
     try {
+      console.log('Tracking click for store ID:', storeId);
+      
       // Track click event
       await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
         method: "POST",
@@ -167,6 +185,13 @@ const StoresPage = () => {
           store_id: storeId,
           event_type: "click"
         })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Click tracking response:', data);
+      })
+      .catch(error => {
+        console.error('Error in click tracking response:', error);
       });
     } catch (error) {
       console.error("Error tracking click:", error);

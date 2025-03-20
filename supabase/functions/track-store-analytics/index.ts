@@ -85,17 +85,63 @@ serve(async (req) => {
           break;
       }
 
-      // Update overall analytics
-      const { error: analyticsError } = await supabase
+      // Check if store analytics record exists
+      const { data: analyticsData, error: analyticsCheckError } = await supabase
         .from("store_analytics")
-        .update({
-          [updateField]: supabase.sql`${updateField} + 1`,
-          last_updated: new Date().toISOString(),
-        })
-        .eq("store_id", store_id);
+        .select("id")
+        .eq("store_id", store_id)
+        .single();
 
-      if (analyticsError) {
-        console.error("Error updating analytics:", analyticsError);
+      if (analyticsCheckError && analyticsCheckError.code !== "PGRST116") {
+        console.error("Error checking analytics:", analyticsCheckError);
+      }
+
+      if (analyticsData) {
+        // Update existing analytics
+        console.log(`Updating ${updateField} for store ${store_id}`);
+        const { error: analyticsError } = await supabase
+          .from("store_analytics")
+          .update({
+            [updateField]: supabase.sql`${updateField} + 1`,
+            last_updated: new Date().toISOString(),
+          })
+          .eq("store_id", store_id);
+
+        if (analyticsError) {
+          console.error("Error updating analytics:", analyticsError);
+          return new Response(
+            JSON.stringify({ success: false, error: "Error updating analytics" }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 500,
+            }
+          );
+        }
+      } else {
+        // Create new analytics record
+        console.log(`Creating new analytics record for store ${store_id}`);
+        const newAnalytics = {
+          store_id: store_id,
+          view_count: event_type === "view" ? 1 : 0,
+          click_count: event_type === "click" ? 1 : 0,
+          discount_usage_count: event_type === "discount_usage" ? 1 : 0,
+          last_updated: new Date().toISOString(),
+        };
+
+        const { error: insertAnalyticsError } = await supabase
+          .from("store_analytics")
+          .insert([newAnalytics]);
+
+        if (insertAnalyticsError) {
+          console.error("Error inserting analytics:", insertAnalyticsError);
+          return new Response(
+            JSON.stringify({ success: false, error: "Error creating analytics record" }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 500,
+            }
+          );
+        }
       }
 
       // Try to get existing daily stat for this date
@@ -112,6 +158,7 @@ serve(async (req) => {
 
       if (existingStat) {
         // Update existing daily stat
+        console.log(`Updating daily stat for store ${store_id} on ${currentDate}`);
         const { error: updateStatError } = await supabase
           .from("store_daily_stats")
           .update({
@@ -121,9 +168,17 @@ serve(async (req) => {
 
         if (updateStatError) {
           console.error("Error updating daily stat:", updateStatError);
+          return new Response(
+            JSON.stringify({ success: false, error: "Error updating daily stat" }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 500,
+            }
+          );
         }
       } else {
         // Create new daily stat
+        console.log(`Creating new daily stat for store ${store_id} on ${currentDate}`);
         const newStat = {
           store_id: store_id,
           date: currentDate,
@@ -138,6 +193,13 @@ serve(async (req) => {
 
         if (insertStatError) {
           console.error("Error inserting daily stat:", insertStatError);
+          return new Response(
+            JSON.stringify({ success: false, error: "Error creating daily stat" }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 500,
+            }
+          );
         }
       }
 
@@ -160,7 +222,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Unexpected error:", error);
     return new Response(
-      JSON.stringify({ success: false, error: "Internal server error" }),
+      JSON.stringify({ success: false, error: "Internal server error", details: error.message }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

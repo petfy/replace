@@ -68,14 +68,12 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
       
       // Track discount usage event
       try {
-        // Get store ID from the URL
-        const urlPath = window.location.pathname;
-        const urlSlug = urlPath.split('/').pop();
-        
-        // Find store_id from URL params or data attributes
+        // Get store ID from data attribute
         const storeId = document.querySelector('[data-store-id]')?.getAttribute('data-store-id');
         
         if (storeId) {
+          console.log('Tracking discount usage for store:', storeId);
+          
           await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -84,6 +82,8 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
               event_type: "discount_usage"
             })
           });
+        } else {
+          console.error('No store ID found for tracking');
         }
       } catch (trackError) {
         console.error("Error tracking discount usage:", trackError);

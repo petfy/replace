@@ -41,6 +41,10 @@ export const StoreTrackingScript = ({ storeId }: StoreTrackingScriptProps) => {
                 <span>Uso de códigos de descuento mediante el botón "CANJEAR DESCUENTO"</span>
               </li>
             </ul>
+            
+            <div className="mt-4 text-sm text-blue-600">
+              <p>Los datos de analítica se actualizan en tiempo real y puedes verlos en la sección "Analítica" de tu panel de control.</p>
+            </div>
           </div>
         </CardContent>
       </Card>

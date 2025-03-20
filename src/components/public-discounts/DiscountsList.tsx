@@ -2,7 +2,6 @@
 import { useEffect } from "react";
 import { DiscountCard } from "./DiscountCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 import { ShoppingBag, Store } from "lucide-react";
 
 interface DiscountsListProps {
@@ -19,6 +18,7 @@ export const DiscountsList = ({ discounts, urlSlug, currentBrowsingDomain }: Dis
         // Get store ID from discounts data
         if (discounts.length > 0) {
           const storeId = discounts[0].store_id;
+          console.log('Tracking store view for store ID:', storeId);
           
           await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
             method: "POST",
@@ -27,10 +27,19 @@ export const DiscountsList = ({ discounts, urlSlug, currentBrowsingDomain }: Dis
               store_id: storeId,
               event_type: "view"
             })
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('View tracking response:', data);
+          })
+          .catch(error => {
+            console.error('Error in view tracking response:', error);
           });
           
           // Add store ID to a data attribute on the body for later use
           document.body.setAttribute('data-store-id', storeId);
+        } else {
+          console.log('No discounts found, skipping view tracking');
         }
       } catch (error) {
         console.error("Error tracking store view:", error);
