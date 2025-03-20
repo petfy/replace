@@ -25,9 +25,6 @@ export const DiscountsList = ({ urlSlug }: DisountsListProps) => {
         title: "¡Código copiado!",
         description: "El código ha sido copiado al portapapeles.",
       });
-
-      // Track the discount usage event
-      trackDiscountUsage(storeId);
     } catch (err) {
       console.error("No se pudo copiar el código:", err);
       toast({
@@ -35,37 +32,6 @@ export const DiscountsList = ({ urlSlug }: DisountsListProps) => {
         description: "No se pudo copiar el código. Intenta copiarlo manualmente.",
         variant: "destructive",
       });
-    }
-  };
-
-  const trackDiscountUsage = async (storeId: string) => {
-    try {
-      console.log(`Tracking discount usage for store: ${storeId}`);
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-store-analytics`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            store_id: storeId,
-            event_type: "discount_usage",
-          }),
-        }
-      );
-
-      const result = await response.json();
-      console.log("Discount usage tracking result:", result);
-
-      if (!result.success) {
-        console.error("Error tracking discount usage:", result.error);
-      }
-    } catch (error: any) {
-      console.error("Error tracking discount usage:", error.message);
-      // Don't show an error toast here as it's not critical to the user experience
     }
   };
 

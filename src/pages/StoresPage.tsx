@@ -48,89 +48,6 @@ const StoresPage = () => {
     fetchStores();
   }, [toast]);
 
-  const handleStoreClick = async (storeId: string) => {
-    try {
-      console.log(`Tracking click for store: ${storeId}`);
-      
-      // Track the click event
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-store-analytics`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            store_id: storeId,
-            event_type: "click",
-          }),
-        }
-      );
-
-      const result = await response.json();
-      console.log("Click tracking result:", result);
-
-      if (!result.success) {
-        console.error("Error tracking click:", result.error);
-      }
-    } catch (error: any) {
-      console.error("Error tracking store click:", error.message);
-      // We don't show an error to the user here as it's not critical to their experience
-    }
-  };
-
-  useEffect(() => {
-    const trackStoreViews = async () => {
-      if (stores.length === 0) return;
-
-      try {
-        console.log("Tracking views for all stores in directory");
-
-        const viewPromises = stores.map(async (store) => {
-          try {
-            const response = await fetch(
-              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-store-analytics`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-                },
-                body: JSON.stringify({
-                  store_id: store.id,
-                  event_type: "view",
-                }),
-              }
-            );
-
-            const result = await response.json();
-            console.log(`View tracking result for ${store.name}:`, result);
-
-            if (!result.success) {
-              console.error(`Error tracking view for ${store.name}:`, result.error);
-            }
-
-            return result;
-          } catch (error: any) {
-            console.error(`Error tracking view for ${store.name}:`, error.message);
-            return { success: false, error: error.message };
-          }
-        });
-
-        await Promise.all(viewPromises);
-        console.log("Tracked views for all stores");
-      } catch (error: any) {
-        console.error("Error tracking store views:", error.message);
-        // We don't show an error to the user here as it's not critical to their experience
-      }
-    };
-
-    if (!loading && stores.length > 0) {
-      trackStoreViews();
-    }
-  }, [stores, loading]);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -200,7 +117,6 @@ const StoresPage = () => {
                         asChild
                         size="sm"
                         className="bg-primary"
-                        onClick={() => handleStoreClick(store.id)}
                       >
                         <a
                           href={store.website}
