@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { DiscountCard } from "./DiscountCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingBag, Store } from "lucide-react";
-import { toast } from "sonner";
 
 interface DiscountsListProps {
   discounts: any[];
@@ -12,47 +11,6 @@ interface DiscountsListProps {
 }
 
 export const DiscountsList = ({ discounts, urlSlug, currentBrowsingDomain }: DiscountsListProps) => {
-  useEffect(() => {
-    // Track view for this store's discount page
-    const trackStoreView = async () => {
-      try {
-        // Get store ID from discounts data
-        if (discounts.length > 0) {
-          const storeId = discounts[0].store_id;
-          console.log('Tracking store view for store ID:', storeId);
-          
-          const response = await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              store_id: storeId,
-              event_type: "view"
-            })
-          });
-          
-          const data = await response.json();
-          console.log('View tracking response:', data);
-          
-          if (!data.success) {
-            console.error('Error tracking view:', data.error);
-          }
-          
-          // Add store ID to a data attribute on the body for later use
-          document.body.setAttribute('data-store-id', storeId);
-        } else {
-          console.log('No discounts found, skipping view tracking');
-        }
-      } catch (error) {
-        console.error("Error tracking store view:", error);
-        toast.error("Error al registrar la visita a la tienda");
-      }
-    };
-    
-    if (discounts.length > 0) {
-      trackStoreView();
-    }
-  }, [discounts]);
-  
   // Don't render if no discounts
   if (!discounts || discounts.length === 0) {
     return (
@@ -73,47 +31,24 @@ export const DiscountsList = ({ discounts, urlSlug, currentBrowsingDomain }: Dis
   const orderDiscounts = discounts.filter(d => d.type === 'order');
   const shippingDiscounts = discounts.filter(d => d.type === 'shipping');
   
-  // Get store details from the first discount
-  const storeId = discounts[0].store_id;
-  
   return (
-    <div className="max-w-4xl mx-auto p-6" data-store-id={storeId}>
+    <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">Descuentos para {urlSlug}</h1>
-        <p className="text-gray-600">
-          {currentBrowsingDomain === urlSlug 
-            ? "¡Genial! Estás navegando en el sitio correcto para usar estos descuentos." 
-            : "Copia estos códigos y úsalos en tu compra."}
-        </p>
+        <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h1 className="text-3xl font-bold mb-2 text-primary">Descuentos Disponibles</h1>
+        <div className="flex items-center justify-center text-gray-600 mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Descuentos para: {urlSlug}
+        </div>
       </div>
 
-      {orderDiscounts.length > 0 && (
-        <section className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <ShoppingBag className="h-5 w-5 text-blue-600" />
-            <h2 className="text-xl font-semibold">Descuentos en pedidos</h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {orderDiscounts.map((discount) => (
-              <DiscountCard key={discount.id} discount={discount} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {shippingDiscounts.length > 0 && (
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <Store className="h-5 w-5 text-green-600" />
-            <h2 className="text-xl font-semibold">Envío gratis</h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {shippingDiscounts.map((discount) => (
-              <DiscountCard key={discount.id} discount={discount} />
-            ))}
-          </div>
-        </section>
-      )}
+      <div className="grid gap-4 md:grid-cols-2">
+        {discounts.map((discount) => (
+          <DiscountCard key={discount.id} discount={discount} />
+        ))}
+      </div>
     </div>
   );
 };
