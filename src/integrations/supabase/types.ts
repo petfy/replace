@@ -354,13 +354,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      increment_counter: {
-        Args: {
-          row_id: string
-          field_name: string
-        }
-        Returns: number
-      }
+      [_ in never]: never
     }
     Enums: {
       address_category:
