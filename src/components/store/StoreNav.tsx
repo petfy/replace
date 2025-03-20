@@ -1,20 +1,19 @@
+
 import { Store, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
 export const StoreNav = () => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  
   const handleLogout = async () => {
     try {
-      const {
-        error
-      } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      navigate("/auth");
+      navigate("/"); // Changed from "/auth" to "/"
     } catch (error: any) {
       toast({
         title: "Error",
@@ -23,6 +22,7 @@ export const StoreNav = () => {
       });
     }
   };
+  
   return <nav className="bg-white shadow">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
