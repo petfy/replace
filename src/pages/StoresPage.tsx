@@ -134,7 +134,7 @@ const StoresPage = () => {
             <Link to="/stores" className="text-gray-700 hover:text-primary hidden sm:block">
               Ver Tiendas
             </Link>
-            <Link to="/auth">
+            <Link to="/auth" className="hidden sm:block">
               <Button>Iniciar sesión</Button>
             </Link>
           </div>
@@ -145,7 +145,7 @@ const StoresPage = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <h1 className="text-2xl font-bold">Tiendas Asociadas</h1>
           <Button onClick={() => navigate('/auth')} className="mt-2 sm:mt-0">
-            <Plus className="mr-2 h-4 w-4" /> Ingresar / Crear cuenta
+            <Plus className="mr-2 h-4 w-4" /> ¿Tienes un Ecommerce? Registrate aquí
           </Button>
         </div>
 
