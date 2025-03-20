@@ -7,8 +7,11 @@ import { StoresBanner } from "@/components/store/StoresBanner";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
+  const isMobile = useIsMobile();
+  
   return <div className="min-h-screen bg-white">
       <nav className="py-4 px-6 border-b">
         <div className="container mx-auto flex justify-between items-center">
@@ -40,14 +43,16 @@ const Index = () => {
                 Ve cómo funciona RePlace en diferentes plataformas
               </h2>
               <Tabs defaultValue="shopify" className="w-full">
-                <TabsList className="w-full flex justify-center mb-6">
-                  <TabsTrigger value="shopify">Shopify</TabsTrigger>
-                  <TabsTrigger value="woocommerce">Woocommerce</TabsTrigger>
-                  <TabsTrigger value="wix">Wix</TabsTrigger>
-                  <TabsTrigger value="jumpseller">Jumpseller</TabsTrigger>
-                  <TabsTrigger value="tiendanube">TiendaNube</TabsTrigger>
-                  <TabsTrigger value="vtex">VTEX</TabsTrigger>
-                </TabsList>
+                <div className="w-full overflow-x-auto pb-2">
+                  <TabsList className={`${isMobile ? 'w-max' : 'w-full'} flex justify-center mb-6`}>
+                    <TabsTrigger value="shopify">Shopify</TabsTrigger>
+                    <TabsTrigger value="woocommerce">Woocommerce</TabsTrigger>
+                    <TabsTrigger value="wix">Wix</TabsTrigger>
+                    <TabsTrigger value="jumpseller">Jumpseller</TabsTrigger>
+                    <TabsTrigger value="tiendanube">TiendaNube</TabsTrigger>
+                    <TabsTrigger value="vtex">VTEX</TabsTrigger>
+                  </TabsList>
+                </div>
                 <TabsContent value="shopify" className="flex justify-center">
                   <div className="w-full overflow-hidden rounded-lg shadow-lg">
                     <img 
@@ -59,23 +64,29 @@ const Index = () => {
                 </TabsContent>
                 <TabsContent value="woocommerce" className="flex justify-center">
                   <div className="w-full overflow-hidden rounded-lg shadow-lg">
-                    <div className="bg-gray-100 aspect-video flex items-center justify-center p-6 text-center">
-                      <p className="text-gray-600">Demo de WooCommerce próximamente</p>
-                    </div>
+                    <img 
+                      src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos//woocommerce.gif" 
+                      alt="RePlace en WooCommerce" 
+                      className="w-full h-auto"
+                    />
                   </div>
                 </TabsContent>
                 <TabsContent value="wix" className="flex justify-center">
                   <div className="w-full overflow-hidden rounded-lg shadow-lg">
-                    <div className="bg-gray-100 aspect-video flex items-center justify-center p-6 text-center">
-                      <p className="text-gray-600">Demo de Wix próximamente</p>
-                    </div>
+                    <img 
+                      src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos//wix.gif" 
+                      alt="RePlace en Wix" 
+                      className="w-full h-auto"
+                    />
                   </div>
                 </TabsContent>
                 <TabsContent value="jumpseller" className="flex justify-center">
                   <div className="w-full overflow-hidden rounded-lg shadow-lg">
-                    <div className="bg-gray-100 aspect-video flex items-center justify-center p-6 text-center">
-                      <p className="text-gray-600">Demo de Jumpseller próximamente</p>
-                    </div>
+                    <img 
+                      src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos//jumpseller.gif" 
+                      alt="RePlace en Jumpseller" 
+                      className="w-full h-auto"
+                    />
                   </div>
                 </TabsContent>
                 <TabsContent value="tiendanube" className="flex justify-center">
@@ -87,9 +98,11 @@ const Index = () => {
                 </TabsContent>
                 <TabsContent value="vtex" className="flex justify-center">
                   <div className="w-full overflow-hidden rounded-lg shadow-lg">
-                    <div className="bg-gray-100 aspect-video flex items-center justify-center p-6 text-center">
-                      <p className="text-gray-600">Demo de VTEX próximamente</p>
-                    </div>
+                    <img 
+                      src="https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos//vtex.gif" 
+                      alt="RePlace en VTEX" 
+                      className="w-full h-auto"
+                    />
                   </div>
                 </TabsContent>
               </Tabs>
