@@ -105,13 +105,13 @@ serve(async (req) => {
         // Update existing analytics
         console.log(`Updating existing analytics for store ${store_id}`);
         
-        const { data: updateResult, error: analyticsError } = await supabase
+        const { error: analyticsError } = await supabase
           .from("store_analytics")
           .update({
-            [updateField]: supabase.rpc('increment_counter', { row_id: analyticsData[0].id, field_name: updateField }),
+            [updateField]: analyticsData[0][updateField] + 1,
             last_updated: new Date().toISOString(),
           })
-          .eq("store_id", store_id);
+          .eq("id", analyticsData[0].id);
 
         if (analyticsError) {
           console.error("Error updating analytics:", analyticsError);
@@ -123,8 +123,6 @@ serve(async (req) => {
             }
           );
         }
-        
-        console.log("Analytics update result:", updateResult);
       } else {
         // Create new analytics record
         console.log(`Creating new analytics record for store ${store_id}`);
@@ -152,30 +150,30 @@ serve(async (req) => {
         }
       }
 
-      // Try to get existing daily stat for this date
-      const { data: existingStat, error: statCheckError } = await supabase
+      // Handle daily stats - First check if a record exists for today
+      const { data: existingDailyStats, error: dailyStatsError } = await supabase
         .from("store_daily_stats")
         .select("*")
         .eq("store_id", store_id)
         .eq("date", currentDate);
 
-      if (statCheckError) {
-        console.error("Error checking daily stats:", statCheckError);
+      if (dailyStatsError) {
+        console.error("Error checking daily stats:", dailyStatsError);
       }
 
-      if (existingStat && existingStat.length > 0) {
-        // Update existing daily stat
+      if (existingDailyStats && existingDailyStats.length > 0) {
+        // Update existing daily stat for today
         console.log(`Updating daily stat for store ${store_id} on ${currentDate}`);
         
-        const { data: updateStatResult, error: updateStatError } = await supabase
+        const { error: updateDailyStatError } = await supabase
           .from("store_daily_stats")
           .update({
-            [updateField]: supabase.rpc('increment_counter', { row_id: existingStat[0].id, field_name: updateField }),
+            [updateField]: existingDailyStats[0][updateField] + 1,
           })
-          .eq("id", existingStat[0].id);
+          .eq("id", existingDailyStats[0].id);
 
-        if (updateStatError) {
-          console.error("Error updating daily stat:", updateStatError);
+        if (updateDailyStatError) {
+          console.error("Error updating daily stat:", updateDailyStatError);
           return new Response(
             JSON.stringify({ success: false, error: "Error updating daily stat" }),
             {
@@ -184,12 +182,10 @@ serve(async (req) => {
             }
           );
         }
-        
-        console.log("Daily stat update result:", updateStatResult);
       } else {
         // Create new daily stat
         console.log(`Creating new daily stat for store ${store_id} on ${currentDate}`);
-        const newStat = {
+        const newDailyStat = {
           store_id: store_id,
           date: currentDate,
           view_count: event_type === "view" ? 1 : 0,
@@ -197,12 +193,12 @@ serve(async (req) => {
           discount_usage_count: event_type === "discount_usage" ? 1 : 0,
         };
 
-        const { error: insertStatError } = await supabase
+        const { error: insertDailyStatError } = await supabase
           .from("store_daily_stats")
-          .insert([newStat]);
+          .insert([newDailyStat]);
 
-        if (insertStatError) {
-          console.error("Error inserting daily stat:", insertStatError);
+        if (insertDailyStatError) {
+          console.error("Error inserting daily stat:", insertDailyStatError);
           return new Response(
             JSON.stringify({ success: false, error: "Error creating daily stat" }),
             {
