@@ -8,6 +8,7 @@ import { format, parseISO, differenceInSeconds } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
+import { supabase } from "@/integrations/supabase/client";
 
 interface DiscountCardProps {
   discount: any;
@@ -107,6 +108,30 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
     });
   };
   
+  const trackDiscountUsage = async () => {
+    if (!discount.store_id) return;
+    
+    try {
+      const response = await fetch(`https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpY2xpcnF2YXhxbHZiaGZzb3doIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg3ODI5NTIsImV4cCI6MjA1NDM1ODk1Mn0.P_BvOs4aqEI33sOI0OxofqtjiKVBn9sq_j0PF_23Kyo'}`
+        },
+        body: JSON.stringify({
+          store_id: discount.store_id,
+          event_type: 'discount_usage'
+        })
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to track discount usage:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error tracking discount usage:', error);
+    }
+  };
+  
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(discount.code);
@@ -115,6 +140,9 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
       setTimeout(() => setCopied(false), 2000);
       setRevealed(true);
       triggerConfetti();
+      
+      // Track discount usage when code is copied
+      await trackDiscountUsage();
     } catch (error) {
       console.error('Error copying to clipboard:', error);
       toast.error('Error al copiar el código');
