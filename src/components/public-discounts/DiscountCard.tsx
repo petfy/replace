@@ -66,6 +66,29 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
       setTimerActive(true);
       launchConfetti();
       
+      // Track discount usage event
+      try {
+        // Get store ID from the URL
+        const urlPath = window.location.pathname;
+        const urlSlug = urlPath.split('/').pop();
+        
+        // Find store_id from URL params or data attributes
+        const storeId = document.querySelector('[data-store-id]')?.getAttribute('data-store-id');
+        
+        if (storeId) {
+          await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              store_id: storeId,
+              event_type: "discount_usage"
+            })
+          });
+        }
+      } catch (trackError) {
+        console.error("Error tracking discount usage:", trackError);
+      }
+      
       toast({
         title: "¡Descuento copiado!",
         description: "El código ha sido copiado al portapapeles.",

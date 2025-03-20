@@ -1,81 +1,108 @@
 
+import { useEffect } from "react";
 import { DiscountCard } from "./DiscountCard";
-import { ArrowLeft, Globe } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-
-interface Discount {
-  id: string;
-  type: 'order' | 'shipping';
-  code: string;
-  discount_type: 'percentage' | 'fixed';
-  value: number;
-  minimum_purchase_amount: number;
-  valid_from: string;
-  valid_until: string;
-  status: 'active' | 'inactive' | 'expired';
-}
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { ShoppingBag, Store } from "lucide-react";
 
 interface DiscountsListProps {
-  discounts: Discount[];
-  urlSlug: string | undefined;
-  currentBrowsingDomain: string | null;
+  discounts: any[];
+  urlSlug: string;
+  currentBrowsingDomain?: string | null;
 }
 
 export const DiscountsList = ({ discounts, urlSlug, currentBrowsingDomain }: DiscountsListProps) => {
-  const navigate = useNavigate();
-
-  const goToDashboard = () => {
-    navigate('/dashboard');
-  };
-
-  if (discounts.length === 0) {
+  useEffect(() => {
+    // Track view for this store's discount page
+    const trackStoreView = async () => {
+      try {
+        // Get store ID from discounts data
+        if (discounts.length > 0) {
+          const storeId = discounts[0].store_id;
+          
+          await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              store_id: storeId,
+              event_type: "view"
+            })
+          });
+          
+          // Add store ID to a data attribute on the body for later use
+          document.body.setAttribute('data-store-id', storeId);
+        }
+      } catch (error) {
+        console.error("Error tracking store view:", error);
+      }
+    };
+    
+    if (discounts.length > 0) {
+      trackStoreView();
+    }
+  }, [discounts]);
+  
+  // Don't render if no discounts
+  if (!discounts || discounts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <img 
-          src="/lovable-uploads/8135bb2c-9d94-4a47-8471-88383f309453.png"
-          alt="RePlace Logo"
-          className="h-16 mb-8"
-        />
-        <p className="text-lg text-gray-600">No hay descuentos activos en este momento para {urlSlug}.</p>
-        <Button variant="outline" className="mt-4" onClick={goToDashboard}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver al dashboard
-        </Button>
+      <div className="max-w-4xl mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center">No hay descuentos disponibles</CardTitle>
+            <CardDescription className="text-center">
+              No se encontraron descuentos activos para {urlSlug}
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
 
+  // Group discounts by type
+  const orderDiscounts = discounts.filter(d => d.type === 'order');
+  const shippingDiscounts = discounts.filter(d => d.type === 'shipping');
+  
+  // Get store details from the first discount
+  const storeId = discounts[0].store_id;
+  
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-8">
-        <img 
-          src="/lovable-uploads/8135bb2c-9d94-4a47-8471-88383f309453.png"
-          alt="RePlace Logo"
-          className="h-16 mx-auto mb-4"
-        />
-        <h1 className="text-3xl font-bold text-primary-800">Descuentos Disponibles</h1>
-        
-        {currentBrowsingDomain && (
-          <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
-            <Globe className="h-4 w-4" />
-            <span>Descuentos para: {urlSlug}</span>
+    <div className="max-w-4xl mx-auto p-6" data-store-id={storeId}>
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold mb-2">Descuentos para {urlSlug}</h1>
+        <p className="text-gray-600">
+          {currentBrowsingDomain === urlSlug 
+            ? "¡Genial! Estás navegando en el sitio correcto para usar estos descuentos." 
+            : "Copia estos códigos y úsalos en tu compra."}
+        </p>
+      </div>
+
+      {orderDiscounts.length > 0 && (
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <ShoppingBag className="h-5 w-5 text-blue-600" />
+            <h2 className="text-xl font-semibold">Descuentos en pedidos</h2>
           </div>
-        )}
-      </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {orderDiscounts.map((discount) => (
+              <DiscountCard key={discount.id} discount={discount} />
+            ))}
+          </div>
+        </section>
+      )}
 
-      <div className={`grid gap-6 ${discounts.length === 1 ? 'max-w-md mx-auto' : 'md:grid-cols-2'}`}>
-        {discounts.map((discount) => (
-          <DiscountCard key={discount.id} discount={discount} />
-        ))}
-      </div>
-
-      <div className="mt-8 text-center">
-        <Button variant="outline" onClick={goToDashboard}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver al dashboard
-        </Button>
-      </div>
+      {shippingDiscounts.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <Store className="h-5 w-5 text-green-600" />
+            <h2 className="text-xl font-semibold">Envío gratis</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {shippingDiscounts.map((discount) => (
+              <DiscountCard key={discount.id} discount={discount} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };
