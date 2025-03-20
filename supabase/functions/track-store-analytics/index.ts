@@ -60,9 +60,9 @@ serve(async (req) => {
         .from("stores")
         .select("id")
         .eq("id", store_id)
-        .single();
+        .maybeSingle();
 
-      if (storeError || !storeData) {
+      if (storeError) {
         console.error("Store not found:", store_id, storeError);
         return new Response(
           JSON.stringify({ success: false, error: "Store not found" }),
