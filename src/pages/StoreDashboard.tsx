@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +9,8 @@ import { StoreForm } from "@/components/store/StoreForm";
 import { DiscountForm } from "@/components/store/DiscountForm";
 import { DiscountList } from "@/components/store/DiscountList";
 import { PublicLinkGenerator } from "@/components/store/PublicLinkGenerator";
+import { StoreAnalytics } from "@/components/store/StoreAnalytics";
+import { StoreTrackingScript } from "@/components/store/StoreTrackingScript";
 import { ExternalLink } from "lucide-react";
 
 interface StoreData {
@@ -165,12 +168,18 @@ const StoreDashboard = () => {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <Tabs defaultValue="store" className="space-y-6">
-            <TabsList>
+          <Tabs defaultValue="analytics" className="space-y-6">
+            <TabsList className="w-full flex flex-wrap justify-start mb-2">
+              <TabsTrigger value="analytics">Analítica</TabsTrigger>
               <TabsTrigger value="store">Datos de la Tienda</TabsTrigger>
               <TabsTrigger value="discounts">Descuentos</TabsTrigger>
+              <TabsTrigger value="tracking">Seguimiento</TabsTrigger>
               <TabsTrigger value="public-link">URL Pública</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="analytics" className="space-y-6">
+              {storeData.id && <StoreAnalytics storeId={storeData.id} />}
+            </TabsContent>
 
             <TabsContent value="store" className="space-y-6">
               <StoreForm
@@ -194,6 +203,10 @@ const StoreDashboard = () => {
                 discounts={discounts}
                 setDiscounts={setDiscounts}
               />
+            </TabsContent>
+
+            <TabsContent value="tracking" className="space-y-6">
+              {storeData.id && <StoreTrackingScript storeId={storeData.id} />}
             </TabsContent>
 
             <TabsContent value="public-link" className="space-y-6">

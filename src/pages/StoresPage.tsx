@@ -87,6 +87,43 @@ const StoresPage = () => {
     };
 
     fetchStores();
+    
+    // Track view event for directory page
+    const trackPageView = async () => {
+      try {
+        // Get store ID from URL if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const storeId = urlParams.get('replace_store');
+        
+        if (storeId) {
+          // Track specific store view and click
+          await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              store_id: storeId,
+              event_type: "view"
+            })
+          });
+          
+          // If discount parameter is present, track usage
+          if (urlParams.has('replace_discount')) {
+            await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                store_id: storeId,
+                event_type: "discount_usage"
+              })
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error tracking page view:", error);
+      }
+    };
+
+    trackPageView();
   }, [toast, refreshKey]);
 
   useEffect(() => {
@@ -119,6 +156,22 @@ const StoresPage = () => {
   const getCategoryIcon = (categoryName: string) => {
     const category = categories.find(c => c.value === categoryName);
     return category?.icon || StoreIcon;
+  };
+
+  const handleStoreClick = async (storeId: string) => {
+    try {
+      // Track click event
+      await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          store_id: storeId,
+          event_type: "click"
+        })
+      });
+    } catch (error) {
+      console.error("Error tracking click:", error);
+    }
   };
 
   return (
@@ -241,8 +294,12 @@ const StoresPage = () => {
                 <div className="mt-auto flex justify-center">
                   <Button
                     variant="outline"
-                    onClick={() => window.open(store.website || '#', '_blank')}
+                    onClick={() => {
+                      handleStoreClick(store.id);
+                      window.open(store.website || '#', '_blank');
+                    }}
                     className="w-full"
+                    data-replace-track
                   >
                     <ExternalLink className="mr-2 h-4 w-4" /> Ver Tienda
                   </Button>

@@ -169,6 +169,88 @@ export type Database = {
           },
         ]
       }
+      store_analytics: {
+        Row: {
+          click_count: number
+          created_at: string
+          discount_usage_count: number
+          id: string
+          last_updated: string
+          store_id: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          click_count?: number
+          created_at?: string
+          discount_usage_count?: number
+          id?: string
+          last_updated?: string
+          store_id: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          click_count?: number
+          created_at?: string
+          discount_usage_count?: number
+          id?: string
+          last_updated?: string
+          store_id?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_analytics_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_daily_stats: {
+        Row: {
+          click_count: number
+          created_at: string
+          date: string
+          discount_usage_count: number
+          id: string
+          store_id: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          click_count?: number
+          created_at?: string
+          date: string
+          discount_usage_count?: number
+          id?: string
+          store_id: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          click_count?: number
+          created_at?: string
+          date?: string
+          discount_usage_count?: number
+          id?: string
+          store_id?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_daily_stats_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_discounts: {
         Row: {
           code: string
