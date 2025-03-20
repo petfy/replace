@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,11 +18,7 @@ export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain,
   const navigate = useNavigate();
   const { toast } = useToast();
   const [manualDomainInput, setManualDomainInput] = useState("");
-  const location = useLocation();
   
-  // Check if we're on the root /discounts route (without a slug)
-  const isRootDiscountsRoute = location.pathname === "/discounts";
-
   const goToDashboard = () => {
     navigate('/dashboard');
   };
@@ -102,32 +98,30 @@ export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain,
           </div>
         )}
         
-        {/* Manual domain entry form - hidden on root /discounts route */}
-        {!isRootDiscountsRoute && (
-          <div className="mt-6 max-w-md mx-auto bg-sky-50 p-4 rounded-md border border-sky-200">
-            <p className="text-sm font-medium mb-2">Busca descuentos por tienda:</p>
-            <form onSubmit={handleManualDomainSearch} className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Ej: tiendapetfy.cl"
-                value={manualDomainInput}
-                onChange={(e) => setManualDomainInput(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="submit">
-                <SearchIcon className="h-4 w-4 mr-2" />
-                Buscar
-              </Button>
-            </form>
-            <p className="text-xs text-sky-700 mt-2">
-              Ingresa el dominio de la tienda (ej: tiendapetfy.cl) o la URL completa
-            </p>
-          </div>
-        )}
+        {/* Manual domain entry form */}
+        <div className="mt-6 max-w-md mx-auto bg-sky-50 p-4 rounded-md border border-sky-200">
+          <p className="text-sm font-medium mb-2">Busca descuentos por tienda:</p>
+          <form onSubmit={handleManualDomainSearch} className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Ej: tiendapetfy.cl"
+              value={manualDomainInput}
+              onChange={(e) => setManualDomainInput(e.target.value)}
+              className="flex-1"
+            />
+            <Button type="submit">
+              <SearchIcon className="h-4 w-4 mr-2" />
+              Buscar
+            </Button>
+          </form>
+          <p className="text-xs text-sky-700 mt-2">
+            Ingresa el dominio de la tienda (ej: tiendapetfy.cl) o la URL completa
+          </p>
+        </div>
       </div>
 
-      {/* Available stores list - hidden on root /discounts route */}
-      {!isRootDiscountsRoute && availableDiscountLinks.length > 0 ? (
+      {/* Available stores list */}
+      {availableDiscountLinks.length > 0 ? (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-center">Tiendas con descuentos disponibles</h2>
           <div className="grid gap-4 md:grid-cols-3">
@@ -144,7 +138,7 @@ export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain,
             ))}
           </div>
         </div>
-      ) : !isRootDiscountsRoute && availableDiscountLinks.length === 0 ? (
+      ) : availableDiscountLinks.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-lg text-gray-600">No hay tiendas con descuentos disponibles en este momento.</p>
           <Button variant="outline" className="mt-4" onClick={goToDashboard}>
