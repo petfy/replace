@@ -7,6 +7,7 @@ import { CalendarIcon, Copy, Info, ShoppingCart, Tag, Timer } from "lucide-react
 import { format, parseISO, differenceInSeconds } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 
 interface DiscountCardProps {
   discount: any;
@@ -78,7 +79,7 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
     if (discount.type === 'shipping') {
       return 'Envío Gratis';
     } else {
-      return getDiscountLabel();
+      return 'Descuento en tu compra';
     }
   };
   
@@ -90,6 +91,21 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
     }
     return getDiscountLabel();
   };
+
+  const getRequirementsInfo = () => {
+    if (discount.minimum_purchase_amount > 0) {
+      return `Compra mínima: ${formatCurrency(discount.minimum_purchase_amount)}`;
+    }
+    return null;
+  };
+  
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
   
   const copyToClipboard = async () => {
     try {
@@ -98,6 +114,7 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
       toast.success('¡Código copiado al portapapeles!');
       setTimeout(() => setCopied(false), 2000);
       setRevealed(true);
+      triggerConfetti();
     } catch (error) {
       console.error('Error copying to clipboard:', error);
       toast.error('Error al copiar el código');
@@ -106,13 +123,6 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
   
   return (
     <Card className="h-full flex flex-col overflow-hidden relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI4IiBjeT0iOCIgcj0iMiIgZmlsbD0icmdiYSgxMDIsMTI0LDIzNSwwLjIpIi8+PC9zdmc+Cg==')]"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTIiIGhlaWdodD0iNTIiIHZpZXdCb3g9IjAgMCA1MiA1MiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyNiIgY3k9IjI2IiByPSI0IiBmaWxsPSJyZ2JhKDMwLDY0LDE3NSwwLjEpIi8+PC9zdmc+Cg==')]"></div>
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
-      </div>
-      
       <CardContent className="pt-6 flex-1 z-10">
         <div className="flex items-center mb-3">
           {discount.type === 'shipping' ? (
@@ -143,6 +153,13 @@ export const DiscountCard = ({ discount }: DiscountCardProps) => {
           <div className="text-amber-600 text-center mt-3 flex items-center justify-center gap-1 font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             ¡Úsalo en los próximos {timeLeft}!
+          </div>
+        )}
+        
+        {getRequirementsInfo() && (
+          <div className="text-gray-600 text-center mt-3 text-sm flex items-center justify-center gap-1">
+            <Info className="h-4 w-4" />
+            {getRequirementsInfo()}
           </div>
         )}
       </CardContent>
