@@ -520,7 +520,11 @@ export const StoreAnalytics = ({ storeId }: AnalyticsProps) => {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis 
                           dataKey="date" 
-                          tick={{ fontSize: 12, angle: -45, textAnchor: 'end' }}
+                          tick={{
+                            fontSize: 12,
+                            textAnchor: 'end',
+                            transform: 'rotate(-45)'
+                          }}
                         />
                         <YAxis tick={{ fontSize: 12 }} />
                         <ChartTooltip
