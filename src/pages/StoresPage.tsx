@@ -74,6 +74,13 @@ const StoresPage = () => {
             ) as string[];
           
           setUniqueCategories(categories);
+          
+          // Track view event for all loaded stores
+          typedStores.forEach(store => {
+            trackStoreEvent(store.id, "view").catch(err => {
+              console.error(`Error tracking view for store ${store.id}:`, err);
+            });
+          });
         }
       } catch (error: any) {
         toast({
@@ -88,6 +95,32 @@ const StoresPage = () => {
 
     fetchStores();
   }, [toast, refreshKey]);
+
+  // Function to track store events
+  const trackStoreEvent = async (storeId: string, eventType: "view" | "click" | "discount_usage") => {
+    try {
+      console.log(`Tracking ${eventType} event for store ${storeId}`);
+      const response = await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpY2xpcnF2YXhxbHZiaGZzb3doIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg3ODI5NTIsImV4cCI6MjA1NDM1ODk1Mn0.P_BvOs4aqEI33sOI0OxofqtjiKVBn9sq_j0PF_23Kyo"}`
+        },
+        body: JSON.stringify({
+          store_id: storeId,
+          event_type: eventType
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to track ${eventType}: ${response.statusText}`);
+      }
+      
+      console.log(`Successfully tracked ${eventType} for store ${storeId}`);
+    } catch (error) {
+      console.error(`Error tracking ${eventType}:`, error);
+    }
+  };
 
   useEffect(() => {
     let filtered = stores;
@@ -123,6 +156,9 @@ const StoresPage = () => {
 
   const handleStoreClick = async (storeId: string, website: string) => {
     try {
+      // Track click event before opening website
+      await trackStoreEvent(storeId, "click");
+      
       // Open store website in new tab
       window.open(website || '#', '_blank');
     } catch (error) {
@@ -298,4 +334,3 @@ const StoresPage = () => {
 };
 
 export default StoresPage;
-

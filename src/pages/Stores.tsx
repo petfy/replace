@@ -31,6 +31,32 @@ const Stores = () => {
   const [visibleStores, setVisibleStores] = useState(8);
   const [refreshKey, setRefreshKey] = useState(0); // Para forzar la recarga
 
+  // Function to track store events
+  const trackStoreEvent = async (storeId: string, eventType: "view" | "click" | "discount_usage") => {
+    try {
+      console.log(`Tracking ${eventType} event for store ${storeId}`);
+      const response = await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpY2xpcnF2YXhxbHZiaGZzb3doIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg3ODI5NTIsImV4cCI6MjA1NDM1ODk1Mn0.P_BvOs4aqEI33sOI0OxofqtjiKVBn9sq_j0PF_23Kyo"}`
+        },
+        body: JSON.stringify({
+          store_id: storeId,
+          event_type: eventType
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to track ${eventType}: ${response.statusText}`);
+      }
+      
+      console.log(`Successfully tracked ${eventType} for store ${storeId}`);
+    } catch (error) {
+      console.error(`Error tracking ${eventType}:`, error);
+    }
+  };
+
   const fetchStores = async () => {
     try {
       setLoading(true);
@@ -87,6 +113,14 @@ const Stores = () => {
       console.log("Extracted categories:", categories);
       
       setUniqueCategories([...new Set(categories)]);
+      
+      // Track view event for all loaded stores
+      storesWithData.forEach(store => {
+        trackStoreEvent(store.id, "view").catch(err => {
+          console.error(`Error tracking view for store ${store.id}:`, err);
+        });
+      });
+      
       setLoading(false);
     } catch (error: any) {
       console.error("Exception while loading stores:", error.message);
@@ -140,6 +174,17 @@ const Stores = () => {
       (cat) => cat.value.toLowerCase() === category.toLowerCase()
     );
     return foundCategory?.icon || Store;
+  };
+
+  // Handle click on store discount button - track click event
+  const handleStoreClick = (storeId: string, website: string | null) => {
+    // Track click event
+    trackStoreEvent(storeId, "click");
+    
+    // Open website in new tab
+    if (website) {
+      window.open(website, '_blank');
+    }
   };
 
   if (loading) {
@@ -290,6 +335,7 @@ const Stores = () => {
                       </div>
                       <div className="p-4 bg-gray-50 border-t">
                         <a
+                          onClick={() => handleStoreClick(store.id, store.website)}
                           href={store.website || "#"}
                           target="_blank"
                           rel="noopener noreferrer"

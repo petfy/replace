@@ -94,7 +94,7 @@ serve(async (req) => {
       // Check if store analytics record exists
       const { data: analyticsData, error: analyticsCheckError } = await supabase
         .from("store_analytics")
-        .select("id")
+        .select("*")
         .eq("store_id", store_id);
 
       if (analyticsCheckError) {
