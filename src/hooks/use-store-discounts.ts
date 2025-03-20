@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface Discount {
   id: string;
+  store_id: string; // Added the missing store_id property
   type: 'order' | 'shipping';
   code: string;
   discount_type: 'percentage' | 'fixed';
