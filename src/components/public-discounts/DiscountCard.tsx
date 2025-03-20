@@ -1,162 +1,141 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Truck, Clock, Copy, CheckCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import confetti from 'canvas-confetti';
-
-interface Discount {
-  id: string;
-  type: 'order' | 'shipping';
-  code: string;
-  discount_type: 'percentage' | 'fixed';
-  value: number;
-  minimum_purchase_amount: number;
-  valid_from: string;
-  valid_until: string;
-  status: 'active' | 'inactive' | 'expired';
-}
+import { Badge } from "@/components/ui/badge";
+import { CalendarIcon, Copy, Info, ShoppingCart, Tag } from "lucide-react";
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 interface DiscountCardProps {
-  discount: Discount;
+  discount: any;
 }
 
 export const DiscountCard = ({ discount }: DiscountCardProps) => {
-  const [isRedeemed, setIsRedeemed] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10 * 60); // 10 minutes in seconds
-  const [timerActive, setTimerActive] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (!timerActive) return;
-    
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timerActive]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+  const [copied, setCopied] = useState(false);
+  
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP'
+    }).format(value);
   };
-
-  const launchConfetti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#FFB6C1', '#87CEEB', '#98FB98', '#DDA0DD', '#F0E68C']
-    });
-  };
-
-  const handleRedeemDiscount = async (code: string) => {
+  
+  const formatDate = (dateString: string) => {
     try {
-      await navigator.clipboard.writeText(code);
-      setIsRedeemed(true);
-      setTimerActive(true);
-      launchConfetti();
-      
-      // Track discount usage event
-      try {
-        // Get store ID from data attribute
-        const storeId = document.querySelector('[data-store-id]')?.getAttribute('data-store-id');
-        
-        if (storeId) {
-          console.log('Tracking discount usage for store:', storeId);
-          
-          await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              store_id: storeId,
-              event_type: "discount_usage"
-            })
-          });
-        } else {
-          console.error('No store ID found for tracking');
-        }
-      } catch (trackError) {
-        console.error("Error tracking discount usage:", trackError);
-      }
-      
-      toast({
-        title: "¡Descuento copiado!",
-        description: "El código ha sido copiado al portapapeles.",
-      });
-    } catch (err) {
-      console.error('Error al copiar el código:', err);
-      toast({
-        title: "Error",
-        description: "No se pudo copiar el código. Por favor, inténtalo manualmente.",
-        variant: "destructive",
-      });
+      const date = parseISO(dateString);
+      return format(date, 'dd MMMM yyyy', { locale: es });
+    } catch (error) {
+      console.error('Error parsing date:', dateString, error);
+      return 'Fecha inválida';
     }
   };
-
+  
+  const getDiscountLabel = () => {
+    if (discount.discount_type === 'percentage') {
+      return `${discount.value}% de descuento`;
+    } else if (discount.discount_type === 'fixed_amount') {
+      return `${formatCurrency(discount.value)} de descuento`;
+    } else if (discount.type === 'shipping' && discount.value === 0) {
+      return 'Envío Gratis';
+    }
+    return 'Descuento';
+  };
+  
+  const getBadgeColor = () => {
+    if (discount.type === 'shipping') {
+      return 'bg-green-100 text-green-800 hover:bg-green-200';
+    } else {
+      return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+    }
+  };
+  
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(discount.code);
+      setCopied(true);
+      toast.success('¡Código copiado al portapapeles!');
+      setTimeout(() => setCopied(false), 2000);
+      
+      // Track discount usage
+      trackDiscountUsage();
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      toast.error('Error al copiar el código');
+    }
+  };
+  
+  const trackDiscountUsage = async () => {
+    try {
+      const storeId = discount.store_id;
+      console.log('Tracking discount usage for store ID:', storeId);
+      
+      const response = await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          store_id: storeId,
+          event_type: "discount_usage"
+        })
+      });
+      
+      const data = await response.json();
+      console.log('Discount usage tracking response:', data);
+      
+      if (!data.success) {
+        console.error('Error tracking discount usage:', data.error);
+      }
+    } catch (error) {
+      console.error("Error tracking discount usage:", error);
+    }
+  };
+  
   return (
-    <Card className="w-full mx-auto bg-white shadow-lg hover:shadow-xl transition-shadow">
-      <CardHeader>
-        <CardTitle className="text-xl flex items-center justify-center gap-2">
-          {discount.type === 'shipping' ? (
-            <>
-              <Truck className="h-6 w-6 text-primary-600" />
-              <span>Envío Gratis</span>
-            </>
-          ) : (
-            'Descuento en el Pedido'
+    <Card className="h-full flex flex-col">
+      <CardContent className="pt-6 flex-1">
+        <div className="flex justify-between items-start mb-3">
+          <Badge className={getBadgeColor()} variant="secondary">
+            <Tag className="h-3 w-3 mr-1" />
+            {getDiscountLabel()}
+          </Badge>
+          {discount.minimum_purchase_amount > 0 && (
+            <div className="ml-2 flex items-center text-xs text-gray-500" title={`Mínimo de compra: ${formatCurrency(discount.minimum_purchase_amount)}`}>
+              <Info className="h-3 w-3 mr-1" />
+              <span>Min. {formatCurrency(discount.minimum_purchase_amount)}</span>
+            </div>
           )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4 text-center">
-          <p className="text-2xl font-bold text-primary-700">
-            {discount.type === 'shipping' 
-              ? `Envío Gratis en compras mayores a $${discount.minimum_purchase_amount}`
-              : discount.discount_type === 'percentage' 
-                ? `${discount.value}% de descuento`
-                : `$${discount.value} de descuento`}
-          </p>
-          <div className="space-y-3">
-            {isRedeemed ? (
-              <>
-                <div className="flex items-center justify-center gap-2">
-                  <code className="block w-full bg-gray-100 px-4 py-2 rounded-md text-lg font-mono">
-                    {discount.code}
-                  </code>
-                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                </div>
-                <div className="flex items-center justify-center gap-2 text-amber-600 font-medium">
-                  <Clock className="h-4 w-4" />
-                  <span>¡Úsalo en los próximos {formatTime(timeLeft)}!</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="bg-gray-100 px-4 py-2 rounded-md text-lg font-mono h-10 flex items-center justify-center">
-                  <span className="blur-sm select-none">••••••••••</span>
-                </div>
-                <Button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
-                  onClick={() => handleRedeemDiscount(discount.code)}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  CANJEAR DESCUENTO
-                </Button>
-              </>
-            )}
+        </div>
+        
+        <div className="mb-1">
+          <div className="font-mono text-lg font-bold text-center p-2 bg-gray-100 rounded-md">
+            {discount.code}
+          </div>
+        </div>
+        
+        <div className="text-sm text-gray-500 mt-3">
+          <div className="flex items-center">
+            <CalendarIcon className="h-3 w-3 mr-1" />
+            <span>Válido hasta: {formatDate(discount.valid_until)}</span>
           </div>
         </div>
       </CardContent>
+      
+      <CardFooter>
+        <Button 
+          variant="default" 
+          className="w-full" 
+          onClick={copyToClipboard}
+        >
+          {copied ? (
+            <span>¡Copiado!</span>
+          ) : (
+            <>
+              <Copy className="mr-2 h-4 w-4" /> CANJEAR DESCUENTO
+            </>
+          )}
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

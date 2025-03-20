@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { DiscountCard } from "./DiscountCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingBag, Store } from "lucide-react";
+import { toast } from "sonner";
 
 interface DiscountsListProps {
   discounts: any[];
@@ -20,21 +21,21 @@ export const DiscountsList = ({ discounts, urlSlug, currentBrowsingDomain }: Dis
           const storeId = discounts[0].store_id;
           console.log('Tracking store view for store ID:', storeId);
           
-          await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+          const response = await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               store_id: storeId,
               event_type: "view"
             })
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log('View tracking response:', data);
-          })
-          .catch(error => {
-            console.error('Error in view tracking response:', error);
           });
+          
+          const data = await response.json();
+          console.log('View tracking response:', data);
+          
+          if (!data.success) {
+            console.error('Error tracking view:', data.error);
+          }
           
           // Add store ID to a data attribute on the body for later use
           document.body.setAttribute('data-store-id', storeId);
@@ -43,6 +44,7 @@ export const DiscountsList = ({ discounts, urlSlug, currentBrowsingDomain }: Dis
         }
       } catch (error) {
         console.error("Error tracking store view:", error);
+        toast.error("Error al registrar la visita a la tienda");
       }
     };
     

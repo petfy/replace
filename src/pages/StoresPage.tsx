@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent } from "@/components/ui/card";
 import { categories } from "@/components/store/StoreCategories";
+import { toast } from "sonner";
 
 interface Store {
   id: string;
@@ -98,39 +100,39 @@ const StoresPage = () => {
           console.log('Tracking directory view for store ID:', storeId);
           
           // Track specific store view
-          await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+          const viewResponse = await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               store_id: storeId,
               event_type: "view"
             })
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log('Store view tracking response:', data);
-          })
-          .catch(error => {
-            console.error('Error in store view tracking response:', error);
           });
+          
+          const viewData = await viewResponse.json();
+          console.log('Store view tracking response:', viewData);
+          
+          if (!viewData.success) {
+            console.error('Error tracking store view:', viewData.error);
+          }
           
           // If discount parameter is present, track usage
           if (urlParams.has('replace_discount')) {
-            await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+            const discountResponse = await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 store_id: storeId,
                 event_type: "discount_usage"
               })
-            })
-            .then(response => response.json())
-            .then(data => {
-              console.log('Discount usage tracking response:', data);
-            })
-            .catch(error => {
-              console.error('Error in discount usage tracking response:', error);
             });
+            
+            const discountData = await discountResponse.json();
+            console.log('Discount usage tracking response:', discountData);
+            
+            if (!discountData.success) {
+              console.error('Error tracking discount usage:', discountData.error);
+            }
           }
         }
       } catch (error) {
@@ -173,28 +175,34 @@ const StoresPage = () => {
     return category?.icon || StoreIcon;
   };
 
-  const handleStoreClick = async (storeId: string) => {
+  const handleStoreClick = async (storeId: string, website: string) => {
     try {
       console.log('Tracking click for store ID:', storeId);
       
       // Track click event
-      await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
+      const response = await fetch("https://riclirqvaxqlvbhfsowh.supabase.co/functions/v1/track-store-analytics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           store_id: storeId,
           event_type: "click"
         })
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Click tracking response:', data);
-      })
-      .catch(error => {
-        console.error('Error in click tracking response:', error);
       });
+      
+      const data = await response.json();
+      console.log('Click tracking response:', data);
+      
+      if (!data.success) {
+        console.error('Error tracking click:', data.error);
+      }
+      
+      // Open store website in new tab
+      window.open(website || '#', '_blank');
     } catch (error) {
       console.error("Error tracking click:", error);
+      toast.error("Error al registrar click");
+      // Still open the website even if tracking fails
+      window.open(website || '#', '_blank');
     }
   };
 
@@ -318,10 +326,7 @@ const StoresPage = () => {
                 <div className="mt-auto flex justify-center">
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      handleStoreClick(store.id);
-                      window.open(store.website || '#', '_blank');
-                    }}
+                    onClick={() => handleStoreClick(store.id, store.website)}
                     className="w-full"
                     data-replace-track
                   >

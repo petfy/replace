@@ -16,6 +16,8 @@ const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 serve(async (req) => {
+  console.log("Track store analytics function called");
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -30,6 +32,7 @@ serve(async (req) => {
       console.log(`Received tracking event: ${event_type} for store: ${store_id}`);
 
       if (!store_id || !event_type) {
+        console.error("Missing parameters:", { store_id, event_type });
         return new Response(
           JSON.stringify({ success: false, error: "Missing required parameters" }),
           {
@@ -42,6 +45,7 @@ serve(async (req) => {
       // Validate event type
       const validEventTypes = ["view", "click", "discount_usage"];
       if (!validEventTypes.includes(event_type)) {
+        console.error("Invalid event type:", event_type);
         return new Response(
           JSON.stringify({ success: false, error: "Invalid event type" }),
           {
@@ -85,24 +89,26 @@ serve(async (req) => {
           break;
       }
 
+      console.log(`Updating ${updateField} for store ${store_id}`);
+
       // Check if store analytics record exists
       const { data: analyticsData, error: analyticsCheckError } = await supabase
         .from("store_analytics")
         .select("id")
-        .eq("store_id", store_id)
-        .single();
+        .eq("store_id", store_id);
 
-      if (analyticsCheckError && analyticsCheckError.code !== "PGRST116") {
+      if (analyticsCheckError) {
         console.error("Error checking analytics:", analyticsCheckError);
       }
 
-      if (analyticsData) {
+      if (analyticsData && analyticsData.length > 0) {
         // Update existing analytics
-        console.log(`Updating ${updateField} for store ${store_id}`);
-        const { error: analyticsError } = await supabase
+        console.log(`Updating existing analytics for store ${store_id}`);
+        
+        const { data: updateResult, error: analyticsError } = await supabase
           .from("store_analytics")
           .update({
-            [updateField]: supabase.sql`${updateField} + 1`,
+            [updateField]: supabase.rpc('increment_counter', { row_id: analyticsData[0].id, field_name: updateField }),
             last_updated: new Date().toISOString(),
           })
           .eq("store_id", store_id);
@@ -117,6 +123,8 @@ serve(async (req) => {
             }
           );
         }
+        
+        console.log("Analytics update result:", updateResult);
       } else {
         // Create new analytics record
         console.log(`Creating new analytics record for store ${store_id}`);
@@ -149,22 +157,22 @@ serve(async (req) => {
         .from("store_daily_stats")
         .select("*")
         .eq("store_id", store_id)
-        .eq("date", currentDate)
-        .single();
+        .eq("date", currentDate);
 
-      if (statCheckError && statCheckError.code !== "PGRST116") {
+      if (statCheckError) {
         console.error("Error checking daily stats:", statCheckError);
       }
 
-      if (existingStat) {
+      if (existingStat && existingStat.length > 0) {
         // Update existing daily stat
         console.log(`Updating daily stat for store ${store_id} on ${currentDate}`);
-        const { error: updateStatError } = await supabase
+        
+        const { data: updateStatResult, error: updateStatError } = await supabase
           .from("store_daily_stats")
           .update({
-            [updateField]: supabase.sql`${updateField} + 1`,
+            [updateField]: supabase.rpc('increment_counter', { row_id: existingStat[0].id, field_name: updateField }),
           })
-          .eq("id", existingStat.id);
+          .eq("id", existingStat[0].id);
 
         if (updateStatError) {
           console.error("Error updating daily stat:", updateStatError);
@@ -176,6 +184,8 @@ serve(async (req) => {
             }
           );
         }
+        
+        console.log("Daily stat update result:", updateStatResult);
       } else {
         // Create new daily stat
         console.log(`Creating new daily stat for store ${store_id} on ${currentDate}`);
