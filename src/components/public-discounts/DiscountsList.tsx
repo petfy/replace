@@ -74,7 +74,7 @@ export const DiscountsList = ({ urlSlug }: DisountsListProps) => {
   }
 
   if (error) {
-    return <ErrorState message={error} />;
+    return <ErrorState error={error} />;
   }
 
   return (

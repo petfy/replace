@@ -2,7 +2,6 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useActiveBrowsing } from "@/hooks/use-active-browsing";
-import { useStoreDiscounts } from "@/hooks/use-store-discounts";
 import { LoadingState } from "@/components/public-discounts/LoadingState";
 import { ErrorState } from "@/components/public-discounts/ErrorState";
 import { AvailableStores } from "@/components/public-discounts/AvailableStores";
@@ -15,7 +14,6 @@ const PublicDiscounts = () => {
   const navigate = useNavigate();
   
   const { currentBrowsingDomain, availableDiscountLinks, redirectToDiscount, chromeApiAvailable } = useActiveBrowsing(urlSlug);
-  const { discounts, loading, error } = useStoreDiscounts(urlSlug);
 
   // Effect to handle redirect when a matching domain is found
   useEffect(() => {
@@ -39,14 +37,6 @@ const PublicDiscounts = () => {
         availableDiscountLinks.map(link => link.domain).join(', '));
     }
   }, [urlSlug, currentBrowsingDomain, availableDiscountLinks, chromeApiAvailable]);
-
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
-    return <ErrorState error={error} />;
-  }
 
   // Main discount page without a specific slug
   if (!urlSlug) {
@@ -72,13 +62,7 @@ const PublicDiscounts = () => {
     );
   }
 
-  return (
-    <DiscountsList 
-      discounts={discounts}
-      urlSlug={urlSlug}
-      currentBrowsingDomain={currentBrowsingDomain}
-    />
-  );
+  return <DiscountsList urlSlug={urlSlug} />;
 };
 
 export default PublicDiscounts;
