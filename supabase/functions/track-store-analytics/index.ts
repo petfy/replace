@@ -102,21 +102,32 @@ serve(async (req) => {
       }
 
       if (analyticsData && analyticsData.length > 0) {
-        // Update existing analytics
+        // Fix: Make sure we're using the correct field values and never sending null
+        const existingRecord = analyticsData[0];
+        const viewCount = existingRecord.view_count !== null ? existingRecord.view_count : 0;
+        const clickCount = existingRecord.click_count !== null ? existingRecord.click_count : 0;
+        const discountUsageCount = existingRecord.discount_usage_count !== null ? existingRecord.discount_usage_count : 0;
+        
+        // Update existing analytics with proper values
         console.log(`Updating existing analytics for store ${store_id}`);
+        
+        // Create update payload with all required fields to avoid null issues
+        const updatePayload = {
+          view_count: updateField === "view_count" ? viewCount + 1 : viewCount,
+          click_count: updateField === "click_count" ? clickCount + 1 : clickCount,
+          discount_usage_count: updateField === "discount_usage_count" ? discountUsageCount + 1 : discountUsageCount,
+          last_updated: new Date().toISOString(),
+        };
         
         const { error: analyticsError } = await supabase
           .from("store_analytics")
-          .update({
-            [updateField]: analyticsData[0][updateField] + 1,
-            last_updated: new Date().toISOString(),
-          })
-          .eq("id", analyticsData[0].id);
+          .update(updatePayload)
+          .eq("id", existingRecord.id);
 
         if (analyticsError) {
           console.error("Error updating analytics:", analyticsError);
           return new Response(
-            JSON.stringify({ success: false, error: "Error updating analytics" }),
+            JSON.stringify({ success: false, error: "Error updating analytics", details: analyticsError }),
             {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
               status: 500,
@@ -141,7 +152,7 @@ serve(async (req) => {
         if (insertAnalyticsError) {
           console.error("Error inserting analytics:", insertAnalyticsError);
           return new Response(
-            JSON.stringify({ success: false, error: "Error creating analytics record" }),
+            JSON.stringify({ success: false, error: "Error creating analytics record", details: insertAnalyticsError }),
             {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
               status: 500,
@@ -162,20 +173,30 @@ serve(async (req) => {
       }
 
       if (existingDailyStats && existingDailyStats.length > 0) {
+        // Get current values from existing record to handle potential null values
+        const existingRecord = existingDailyStats[0];
+        const viewCount = existingRecord.view_count !== null ? existingRecord.view_count : 0;
+        const clickCount = existingRecord.click_count !== null ? existingRecord.click_count : 0;
+        const discountUsageCount = existingRecord.discount_usage_count !== null ? existingRecord.discount_usage_count : 0;
+        
         // Update existing daily stat for today
         console.log(`Updating daily stat for store ${store_id} on ${currentDate}`);
         
+        const updatePayload = {
+          view_count: updateField === "view_count" ? viewCount + 1 : viewCount,
+          click_count: updateField === "click_count" ? clickCount + 1 : clickCount,
+          discount_usage_count: updateField === "discount_usage_count" ? discountUsageCount + 1 : discountUsageCount,
+        };
+        
         const { error: updateDailyStatError } = await supabase
           .from("store_daily_stats")
-          .update({
-            [updateField]: existingDailyStats[0][updateField] + 1,
-          })
-          .eq("id", existingDailyStats[0].id);
+          .update(updatePayload)
+          .eq("id", existingRecord.id);
 
         if (updateDailyStatError) {
           console.error("Error updating daily stat:", updateDailyStatError);
           return new Response(
-            JSON.stringify({ success: false, error: "Error updating daily stat" }),
+            JSON.stringify({ success: false, error: "Error updating daily stat", details: updateDailyStatError }),
             {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
               status: 500,
@@ -200,7 +221,7 @@ serve(async (req) => {
         if (insertDailyStatError) {
           console.error("Error inserting daily stat:", insertDailyStatError);
           return new Response(
-            JSON.stringify({ success: false, error: "Error creating daily stat" }),
+            JSON.stringify({ success: false, error: "Error creating daily stat", details: insertDailyStatError }),
             {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
               status: 500,
