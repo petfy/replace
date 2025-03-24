@@ -90,8 +90,8 @@ const Contact = () => {
               <Input
                 id="name"
                 placeholder="Tu nombre"
+                className={errors.name ? "border-red-500" : ""}
                 {...register("name", { required: "El nombre es requerido" })}
-                error={errors.name ? true : false}
               />
               {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
             </div>
@@ -102,6 +102,7 @@ const Contact = () => {
                 id="email"
                 type="email"
                 placeholder="tu@email.com"
+                className={errors.email ? "border-red-500" : ""}
                 {...register("email", { 
                   required: "El correo electrónico es requerido",
                   pattern: {
@@ -109,7 +110,6 @@ const Contact = () => {
                     message: "Correo electrónico inválido"
                   } 
                 })}
-                error={errors.email ? true : false}
               />
               {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
             </div>
@@ -119,8 +119,8 @@ const Contact = () => {
               <Input
                 id="subject"
                 placeholder="¿Sobre qué quieres contactarnos?"
+                className={errors.subject ? "border-red-500" : ""}
                 {...register("subject", { required: "El asunto es requerido" })}
-                error={errors.subject ? true : false}
               />
               {errors.subject && <p className="text-sm text-red-500">{errors.subject.message}</p>}
             </div>
@@ -131,8 +131,8 @@ const Contact = () => {
                 id="message"
                 placeholder="Escribe tu mensaje aquí..."
                 rows={6}
-                {...register("message", { required: "El mensaje es requerido" })}
                 className={errors.message ? "border-red-500" : ""}
+                {...register("message", { required: "El mensaje es requerido" })}
               />
               {errors.message && <p className="text-sm text-red-500">{errors.message.message}</p>}
             </div>
