@@ -136,6 +136,9 @@ const Index = () => {
                 <Link to="/privacy" className="text-gray-600 hover:text-primary transition-colors">
                   Política de Privacidad
                 </Link>
+                <Link to="/contact" className="text-gray-600 hover:text-primary transition-colors">
+                  Contacto
+                </Link>
               </div>
             </div>
           </div>

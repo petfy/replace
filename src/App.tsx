@@ -13,6 +13,7 @@ import StoresPage from "./pages/StoresPage";
 import PublicDiscounts from "./pages/PublicDiscounts";
 import Privacy from "./pages/Privacy";
 import Chrome from "./pages/Chrome";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/discounts" element={<PublicDiscounts />} />
           <Route path="/discounts/:urlSlug" element={<PublicDiscounts />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/chrome" element={<Chrome />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
