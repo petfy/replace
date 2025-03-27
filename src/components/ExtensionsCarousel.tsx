@@ -8,7 +8,7 @@ const extensions = [{
   name: "Chrome",
   active: true,
   logo: "https://riclirqvaxqlvbhfsowh.supabase.co/storage/v1/object/public/logos/chrome.svg",
-  link: "https://chromewebstore.google.com/detail/replace/plaafngekhmbngpcjjpflanpgce"
+  link: "https://chromewebstore.google.com/detail/plaafngekhmbngpcjjpflanpgcefbacl?utm_source=item-share-cb"
 }, {
   name: "Firefox",
   active: false,
