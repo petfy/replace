@@ -55,17 +55,15 @@ const Chrome = () => {
               <div className="flex items-start gap-4">
                 <div className="flex-grow space-y-2">
                   <p className="text-gray-600">
-                    Descarga la extensión desde la Chrome Web Store o instálala desde el archivo que proporcionamos.
+                    Descarga la extensión oficial de RePlace desde la Chrome Web Store.
                   </p>
-                  <div className="flex items-center gap-2 text-primary">
-                    <Info className="h-4 w-4" />
-                    <span className="text-sm">Para instalar manualmente: Abre chrome://extensions, activa el modo desarrollador y arrastra el archivo .crx</span>
-                  </div>
                   <div className="flex justify-start mt-2">
-                    <Button variant="outline" className="flex items-center gap-2">
-                      <ChromeIcon className="h-4 w-4" />
-                      Descargar extensión
-                    </Button>
+                    <a href="https://chromewebstore.google.com/detail/replace/plaafngekhmbngpcjjpflanpgce" target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <ChromeIcon className="h-4 w-4" />
+                        Instalar desde Chrome Web Store
+                      </Button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -114,30 +112,6 @@ const Chrome = () => {
                 <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-sm">
                   4
                 </span>
-                Otorga permisos necesarios
-              </h2>
-              <div className="flex items-start gap-4">
-                <div className="flex-grow space-y-2">
-                  <p className="text-gray-600">
-                    La extensión necesita permisos para leer las URLs de las pestañas que visitas
-                    para poder detectar tiendas con descuentos disponibles.
-                  </p>
-                  <Alert className="mt-2">
-                    <Info className="h-4 w-4" />
-                    <AlertTitle>Importante</AlertTitle>
-                    <AlertDescription>
-                      Sin estos permisos, la extensión no podrá detectar automáticamente las tiendas en pestañas inactivas.
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg border p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-sm">
-                  5
-                </span>
                 ¡Listo para usar!
               </h2>
               <div className="flex items-start gap-4">
@@ -163,27 +137,6 @@ const Chrome = () => {
                     </AlertDescription>
                   </Alert>
                 </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg border-2 border-dashed border-amber-300 p-6">
-              <h2 className="text-xl font-semibold mb-4 text-amber-700">Alternativa: Búsqueda manual</h2>
-              <p className="text-gray-600 mb-4">
-                Si no puedes instalar la extensión o prefieres no hacerlo, siempre puedes usar 
-                la búsqueda manual en la página de descuentos:
-              </p>
-              <ol className="list-decimal pl-5 space-y-2 mb-4">
-                <li className="text-gray-600">Ve a la página de <Link to="/discounts" className="text-primary underline">descuentos</Link></li>
-                <li className="text-gray-600">Usa el buscador para ingresar el dominio de la tienda (ej: tiendapetfy.cl)</li>
-                <li className="text-gray-600">Verás todos los descuentos disponibles para esa tienda</li>
-              </ol>
-              <div className="flex justify-center">
-                <Link to="/discounts">
-                  <Button variant="outline" className="flex items-center gap-2">
-                    Ir a la página de descuentos
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </Link>
               </div>
             </div>
 
