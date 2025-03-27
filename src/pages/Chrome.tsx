@@ -58,7 +58,7 @@ const Chrome = () => {
                     Descarga la extensión oficial de RePlace desde la Chrome Web Store.
                   </p>
                   <div className="flex justify-start mt-2">
-                    <a href="https://chromewebstore.google.com/detail/replace/plaafngekhmbngpcjjpflanpgce" target="_blank" rel="noopener noreferrer">
+                    <a href="https://chromewebstore.google.com/detail/plaafngekhmbngpcjjpflanpgcefbacl?utm_source=item-share-cb" target="_blank" rel="noopener noreferrer">
                       <Button variant="outline" className="flex items-center gap-2">
                         <ChromeIcon className="h-4 w-4" />
                         Instalar desde Chrome Web Store
