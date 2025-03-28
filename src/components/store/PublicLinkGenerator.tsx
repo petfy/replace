@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,8 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
   const [publicUrl, setPublicUrl] = useState("");
   const [urlSlug, setUrlSlug] = useState("");
   const { toast } = useToast();
+  
+  // Hardcode the production URL to ensure it works in all environments
   const BASE_URL = "https://re-place.site";
 
   useEffect(() => {
@@ -89,7 +92,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
     if (storeId) {
       generateSlug();
     }
-  }, [storeId, toast, BASE_URL]);
+  }, [storeId, toast]);
 
   const copyToClipboard = async () => {
     try {
@@ -108,6 +111,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
   };
 
   const openPublicDiscountsPage = () => {
+    // Use the actual production URL, not window.location.origin
     window.open(publicUrl, '_blank');
   };
 

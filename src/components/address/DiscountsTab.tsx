@@ -143,6 +143,7 @@ export const DiscountsTab = () => {
 
   const openPublicDiscountsPage = () => {
     if (publicLinkSlug) {
+      // Use hardcoded production URL
       window.open(`https://re-place.site/discounts/${publicLinkSlug}`, '_blank');
     }
   };
