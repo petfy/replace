@@ -16,7 +16,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
   const [publicUrl, setPublicUrl] = useState("");
   const [urlSlug, setUrlSlug] = useState("");
   const { toast } = useToast();
-  const BASE_URL = "https://re-place.site";
+  const BASE_URL = window.location.origin; // Use dynamic origin instead of hardcoded URL
 
   useEffect(() => {
     const generateSlug = async () => {
@@ -94,7 +94,7 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
     if (storeId) {
       generateSlug();
     }
-  }, [storeId, toast]);
+  }, [storeId, toast, BASE_URL]);
 
   const copyToClipboard = async () => {
     try {
