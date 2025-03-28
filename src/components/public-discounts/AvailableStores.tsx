@@ -90,7 +90,14 @@ export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain,
           <div className="flex items-center justify-center mt-3 gap-2 text-amber-600">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-sm font-medium">Para detectar pestañas inactivas necesitas 
-              <Link to="/chrome" className="underline ml-1">instalar la extensión</Link>
+              <a 
+                href="https://chromewebstore.google.com/detail/replace/plaafngekhmbngpcjjpflanpgcefbacl" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="underline ml-1"
+              >
+                instalar la extensión
+              </a>
             </span>
           </div>
         )}
@@ -153,8 +160,15 @@ export const AvailableStores = ({ availableDiscountLinks, currentBrowsingDomain,
       ) : (
         <div className="text-center py-8">
           <p className="text-lg text-gray-600">Instala nuestra extensión de Chrome para detectar automáticamente pestañas abiertas con descuentos.</p>
-          <Button className="mt-4" onClick={() => navigate('/chrome')}>
-            Instalar extensión de Chrome
+          <Button className="mt-4">
+            <a 
+              href="https://chromewebstore.google.com/detail/replace/plaafngekhmbngpcjjpflanpgcefbacl" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center"
+            >
+              Instalar extensión de Chrome
+            </a>
           </Button>
         </div>
       )}
