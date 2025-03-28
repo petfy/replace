@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +15,12 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
   const [publicUrl, setPublicUrl] = useState("");
   const [urlSlug, setUrlSlug] = useState("");
   const { toast } = useToast();
-  const BASE_URL = window.location.origin; // Use dynamic origin instead of hardcoded URL
+  const BASE_URL = "https://re-place.site";
 
   useEffect(() => {
     const generateSlug = async () => {
       try {
         setLoading(true);
-        // Get store website
         const { data: storeData, error: storeError } = await supabase
           .from('stores')
           .select('website')
@@ -40,11 +38,9 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
           return;
         }
 
-        // Extract domain from website URL
         const url = new URL(storeData.website.startsWith('http') ? storeData.website : `https://${storeData.website}`);
         const domain = url.hostname.replace('www.', '');
         
-        // Check if a link already exists
         const { data: existingLink, error: linkError } = await supabase
           .from('public_discount_links')
           .select('url_slug')
@@ -61,7 +57,6 @@ export const PublicLinkGenerator = ({ storeId }: PublicLinkGeneratorProps) => {
           return;
         }
 
-        // Create new link with domain as slug
         const { error: insertError } = await supabase
           .from('public_discount_links')
           .insert({
